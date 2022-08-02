@@ -1,11 +1,11 @@
-const OgpasAdmin = require("../models/admin");
+const Ogpadet = require("../models/ogpadet");
 const Ogpas = require("../models/ogpa");
 
 exports.getOgpa = async (req, res) => {
   const ogpaId = "62e881f29d4bfbb9acd1d260";
 
   try {
-    const ogpa = await OgpasAdmin.findOne({ _id: ogpaId });
+    const ogpa = await Ogpadet.findOne({ _id: ogpaId });
     if (ogpa) {
       res.json(ogpa);
     } else {
