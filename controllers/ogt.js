@@ -19,7 +19,7 @@ exports.createOrUpdateUser = async (req, res) => {
   const email = req.body.email;
 
   try {
-    const user = await Ogts.findOne({ email });
+    const user = await Ogts.findOne({ email }).exec();
     if (user) {
       res.json(user);
     } else {
