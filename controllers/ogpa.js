@@ -16,6 +16,19 @@ exports.getOgpa = async (req, res) => {
   }
 };
 
+exports.existOgpa = async (req, res) => {
+  try {
+    const user = await Ogpas.findOne({ email: req.params.email });
+    if (user) {
+      res.json(user);
+    } else {
+      res.json({err: "No OGPA user exist"});
+    }
+  } catch (error) {
+    res.status(400).send("Adding user failed.");
+  }
+};
+
 exports.newOgpa = async (req, res) => {
   try {
     const user = await Ogpas.findOneAndUpdate({ email: req.body.email }, req.body).exec();
