@@ -12,7 +12,7 @@ exports.create = async (req, res) => {
     req.body.category = ObjectId(req.body.category);
     req.body.subcats = req.body.subcats.map(subcat => ObjectId(subcat));
     req.body.parent = ObjectId(req.body.parent);
-    req.body.variants = req.body.variants.map(variant => {return {...variant, _id: ObjectId()}});
+    req.body.variants = req.body.variants.map(variant => { return { ...variant, _id: ObjectId() } });
     req.body.sold = 0;
     req.body.noAvail = [];
     req.body.activate = true;
@@ -145,7 +145,7 @@ exports.random = async (req, res) => {
 
   try {
     let products = await Product(estoreid).aggregate([
-      { $match: { activate: true}},
+      { $match: { activate: true } },
       { $sample: { size: parseInt(maxItem) } },
       {
         $match: {
@@ -244,7 +244,7 @@ exports.productStar = async (req, res) => {
       { new: true }
     ).exec();
   }
-  
+
   product = await populateProduct([product], estoreid);
 
   console.log(product)
@@ -288,7 +288,7 @@ const handleSearchQuery = async (req, res, querySearch, address) => {
     addiv1 = {},
     addiv2 = {},
     addiv3 = {},
-  } = req.body.address;
+  } = address;
   querySearch = {
     ...querySearch,
     activate: true,
@@ -350,6 +350,8 @@ const handleSearchQuery = async (req, res, querySearch, address) => {
       .exec();
 
     product = await populateProduct(product, estoreid);
+
+    console.log(product)
 
     res.json(product);
   } catch (error) {
@@ -459,17 +461,65 @@ exports.searchFilters = async (req, res) => {
     };
   }
   if (category && category.length > 0) {
-    querySearch = { ...querySearch, category };
+    querySearch = { ...querySearch, category: { $in: category } };
   }
   if (subcategory && subcategory.length > 0) {
-    querySearch = { ...querySearch, subcategory };
+    querySearch = { ...querySearch, subcats: { $in: subcategory } };
   }
   if (parent && parent.length > 0) {
-    querySearch = { ...querySearch, parent };
+    querySearch = { ...querySearch, parent: { $in: parent } };
   }
+  console.log(querySearch)
   if (stars) {
     handleStarQuery(req, res, querySearch, address, stars);
   } else {
     await handleSearchQuery(req, res, querySearch, address);
+  }
+};
+
+exports.bulkChangePrice = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const { category, subcats, parent, supprice, suppricetype, markup, markuptype } = req.body.values;
+  let querySearch = {};
+
+  if (category)
+    querySearch = { ...querySearch, category: ObjectId(category) }
+  if (subcats)
+    querySearch = { ...querySearch, subcats: ObjectId(subcats) }
+  if (parent)
+    querySearch = { ...querySearch, parent: ObjectId(parent) }
+
+  try {
+    const updatedProducts = [];
+    const products = await Product(estoreid).find(querySearch).exec();
+    products.map(async product => {
+      const finalSupPrice = suppricetype === "%"
+        ? product.supplierPrice * (1 + supprice / 100)
+        : parseFloat(product.supplierPrice) + parseFloat(supprice);
+      const finalPrice = markuptype === "%"
+        ? finalSupPrice * (1 + markup / 100)
+        : parseFloat(finalSupPrice) + parseFloat(markup);
+      updatedProducts.push({
+        ...(product._doc ? product._doc : product),
+        supplierPrice: finalSupPrice.toFixed(2),
+        price: finalPrice.toFixed(2),
+        markup,
+        markuptype
+      });
+      await Product(estoreid)
+        .findOneAndUpdate(
+          { _id: ObjectId(product._id) },
+          { 
+            supplierPrice: finalSupPrice.toFixed(2),
+            price: finalPrice.toFixed(2),
+            markup,
+            markuptype
+          }
+        )
+        .exec();
+    })
+    res.json(updatedProducts);
+  } catch (error) {
+    res.status(400).send("Change product price failed.");
   }
 };

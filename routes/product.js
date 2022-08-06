@@ -12,6 +12,7 @@ const {
   listRelated,
   listOtherVariant,
   searchFilters,
+  bulkChangePrice
 } = require("../controllers/product");
 const { authCheck, adminCheck } = require("../middlewares/auth");
 
@@ -32,5 +33,7 @@ router.get("/product/related/:productId", listRelated);
 router.get("/product/parent/:productId", listOtherVariant);
 
 router.post("/search/filters/:count", searchFilters);
+
+router.put("/product/changeprice/bulk", authCheck, adminCheck, bulkChangePrice);
 
 module.exports = router;
