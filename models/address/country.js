@@ -20,6 +20,12 @@ const countrySchema = new mongoose.Schema({
     minlength: 1,
     maxlength: 3,
   },
+  currencyAlt: {
+    type: String,
+    required: true,
+    minlength: 1,
+    maxlength: 3,
+  },
   adDivName1: {
     type: String,
     minlength: 2,
