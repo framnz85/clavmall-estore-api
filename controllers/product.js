@@ -247,8 +247,6 @@ exports.productStar = async (req, res) => {
 
   product = await populateProduct([product], estoreid);
 
-  console.log(product)
-
   res.json(product);
 };
 
@@ -350,8 +348,6 @@ const handleSearchQuery = async (req, res, querySearch, address) => {
       .exec();
 
     product = await populateProduct(product, estoreid);
-
-    console.log(product)
 
     res.json(product);
   } catch (error) {
@@ -469,7 +465,6 @@ exports.searchFilters = async (req, res) => {
   if (parent && parent.length > 0) {
     querySearch = { ...querySearch, parent: { $in: parent } };
   }
-  console.log(querySearch)
   if (stars) {
     handleStarQuery(req, res, querySearch, address, stars);
   } else {

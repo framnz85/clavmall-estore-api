@@ -159,7 +159,6 @@ exports.getProducts = async (req, res) => {
 
     res.json(products);
   } catch (error) {
-    console.log(error)
     res.status(400).send("Getting sub-category products failed.");
   }
 };

@@ -157,7 +157,6 @@ exports.getUserCart = async (req, res) => {
       res.json({ products, cartTotal, delfee, discount, servefee, grandTotal });
     }
   } catch (error) {
-    console.log(error)
     res.status(400).send("Getting user cart failed.");
   }
 };
