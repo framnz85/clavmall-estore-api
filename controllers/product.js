@@ -118,30 +118,6 @@ exports.list = async (req, res) => {
       .limit(pageSize)
       .exec();
 
-    if (products.length < 10 && subcat) {
-      let products2 = await Product(estoreid).find({
-        subcats: { $in: [ObjectId(subcat)] }
-      })
-      .skip((curPage - 1) * pageSize)
-      .sort({ [sortkey]: sort })
-      .limit(pageSize)
-      .exec();
-      
-      products = [ ...products, ...products2 ];
-    }
-
-    if (products.length < 10 && parent) {
-      let products3 = await Product(estoreid).find({
-        parent: ObjectId(parent)
-      })
-      .skip((curPage - 1) * pageSize)
-      .sort({ [sortkey]: sort })
-      .limit(pageSize)
-      .exec();
-      
-      products = [ ...products, ...products3 ];
-    }
-
     products = await populateProduct(products, estoreid);
 
     const countProduct = await Product(estoreid).find(searchObj).exec();

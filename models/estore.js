@@ -6,6 +6,16 @@ const Country = require("./address/country");
 const estoreSchema = new mongoose.Schema(
   {
     name: String,
+    status: {
+      type: String,
+      default: "pending",
+      enum: [
+        "pending",
+        "pause",
+        "stop",
+        "active",
+      ],
+    },
     carouselImages: {
       type: Array,
     },
@@ -70,6 +80,36 @@ const estoreSchema = new mongoose.Schema(
         "cloudinary"
       ],
     },
+    planType: {
+      type: String,
+      default: "plan-1",
+      enum: [
+        "plan-1",
+        "plan-2",
+        "plan-3"
+      ]
+    },
+    endDate: Date,
+    recurringCycle: {
+      type: String,
+      default: "One",
+      enum: [
+        "One",
+        "Unlimited"
+      ]
+    },
+    billingHistory: [
+      {
+        cycleId: String,
+        cycleType: String,
+        totalPrice: String,
+        payment: String,
+        payStatus: String,
+        duration: Number,
+        planId: String,
+        subscriptionID: String,
+      },
+    ],
   },
   { timestamps: true }
 );
