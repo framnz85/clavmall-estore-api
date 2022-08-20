@@ -474,13 +474,13 @@ exports.searchFilters = async (req, res) => {
 
 exports.bulkChangePrice = async (req, res) => {
   const estoreid = req.headers.estoreid;
-  const { category, subcats, parent, supprice, suppricetype, markup, markuptype } = req.body.values;
+  const { category, subcat, parent, supprice, suppricetype, markup, markuptype } = req.body.values;
   let querySearch = {};
 
   if (category)
     querySearch = { ...querySearch, category: ObjectId(category) }
-  if (subcats)
-    querySearch = { ...querySearch, subcats: ObjectId(subcats) }
+  if (subcat)
+    querySearch = { ...querySearch, subcats: ObjectId(subcat) }
   if (parent)
     querySearch = { ...querySearch, parent: ObjectId(parent) }
 
@@ -516,5 +516,63 @@ exports.bulkChangePrice = async (req, res) => {
     res.json(updatedProducts);
   } catch (error) {
     res.status(400).send("Change product price failed.");
+  }
+};
+
+exports.bulkDeleteProduct = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const { category, subcat, parent } = req.body.values;
+  let querySearch = {};
+
+  if (category)
+    querySearch = { ...querySearch, category: ObjectId(category) }
+  if (subcat)
+    querySearch = { ...querySearch, subcats: ObjectId(subcat) }
+  if (parent)
+    querySearch = { ...querySearch, parent: ObjectId(parent) }
+console.log(querySearch)
+  try {
+    const products = await Product(estoreid).find(querySearch).exec();
+    products.map(async product => {
+      await Product(estoreid).findOneAndRemove({
+        _id: ObjectId(product._id)
+      }).exec();
+    })
+    res.json(products);
+  } catch (error) {
+    res.status(400).send("Deleting products has failed.");
+  }
+};
+
+exports.bulkStatusProduct = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const { category, subcat, parent, status } = req.body.values;
+  let querySearch = {};
+
+  if (category)
+    querySearch = { ...querySearch, category: ObjectId(category) }
+  if (subcat)
+    querySearch = { ...querySearch, subcats: ObjectId(subcat) }
+  if (parent)
+    querySearch = { ...querySearch, parent: ObjectId(parent) }
+
+  try {
+    const updatedProducts = [];
+    const products = await Product(estoreid).find(querySearch).exec();
+    products.map(async product => {
+      updatedProducts.push({
+        ...(product._doc ? product._doc : product),
+        activate: status,
+      });
+      await Product(estoreid)
+        .findOneAndUpdate(
+          { _id: ObjectId(product._id) },
+          { activate: status }
+        )
+        .exec();
+    })
+    res.json(updatedProducts);
+  } catch (error) {
+    res.status(400).send("Change product status failed.");
   }
 };
