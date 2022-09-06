@@ -6,6 +6,7 @@ const {
   listMyPayments,
   createPayment,
   updatePayment,
+  imageupdate,
   deletePayment,
 } = require("../controllers/payment");
 const { authCheck, adminCheck } = require("../middlewares/auth");
@@ -16,6 +17,7 @@ router.post("/payment/mypayments", listMyPayments);
 router.get("/payment/mypayment/:payid", listMyPayment);
 router.post("/payment/mypayment", authCheck, adminCheck, createPayment);
 router.put("/payment/mypayment", authCheck, adminCheck, updatePayment);
+router.put("/payment/imageupdate/:payid", authCheck, adminCheck, imageupdate);
 router.delete(
   "/payment/mypayment/:payid",
   authCheck,

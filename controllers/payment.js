@@ -134,6 +134,15 @@ exports.updatePayment = async (req, res) => {
   }
 };
 
+exports.imageupdate = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  await MyPayment(estoreid).findOneAndUpdate(
+    { _id: ObjectId(req.params.payid) },
+    { images: req.body.images },
+    { new: true }
+  );
+};
+
 exports.deletePayment = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {

@@ -38,6 +38,9 @@ const myPaymentSchema = new mongoose.Schema(
         addiv3Name: String,
       },
     ],
+    images: {
+      type: Array,
+    },
   },
   { timestamps: true }
 );
