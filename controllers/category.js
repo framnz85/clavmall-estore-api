@@ -10,9 +10,9 @@ const { populateProduct } = require("./common");
 exports.create = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
-    const { name } = req.body;
+    const { name, images } = req.body;
     const newCategory = await Category(estoreid).collection.insertOne({
-      name, slug: slugify(name.toString().toLowerCase()), createdAt: new Date(), updatedAt: new Date(), __v: 0
+      name, slug: slugify(name.toString().toLowerCase()), images, createdAt: new Date(), updatedAt: new Date(), __v: 0
     });
     res.json(newCategory);
   } catch (error) {
@@ -134,6 +134,15 @@ exports.update = async (req, res) => {
   } catch (error) {
     res.status(400).send("Delete category failed.");
   }
+};
+
+exports.imageupdate = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  await Category(estoreid).findOneAndUpdate(
+    { slug: req.params.slug },
+    { images: req.body.images },
+    { new: true }
+  );
 };
 
 exports.remove = async (req, res) => {
