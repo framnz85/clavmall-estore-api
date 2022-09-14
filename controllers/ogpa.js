@@ -35,7 +35,7 @@ exports.newOgpa = async (req, res) => {
     if (user) {
       res.json(req.body);
     } else {
-      const newUser = new Ogpas(req.body).save();
+      const newUser = await new Ogpas(req.body).save();
       res.json(newUser);
     }
   } catch (error) {
