@@ -18,11 +18,14 @@ exports.getOgpa = async (req, res) => {
 
 exports.existOgpa = async (req, res) => {
   try {
-    const user = await Ogpas.findOne({ email: req.params.email });
+    const user = await Ogpas.findOne({
+      email: req.params.email,
+      md5pass: req.params.password,
+    }, "_id name");
     if (user) {
       res.json(user);
     } else {
-      res.json({err: "No OGPA user exist"});
+      res.json({err: "Email or Password is incorrect"});
     }
   } catch (error) {
     res.status(400).send("Adding user failed.");
