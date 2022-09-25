@@ -21,7 +21,7 @@ exports.existOgpa = async (req, res) => {
     const user = await Ogpas.findOne({
       email: req.params.email,
       md5pass: req.params.password,
-    }, "_id name");
+    }, "_id name dateStart");
     if (user) {
       res.json(user);
     } else {
