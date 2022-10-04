@@ -16,6 +16,21 @@ exports.getOgpa = async (req, res) => {
   }
 };
 
+exports.getOgpaEmail = async (req, res) => {
+  try {
+    const user = await Ogpas.findOne({
+      email: req.params.email,
+    }, "_id name email amount mobile payment").exec();
+    if (user) {
+      res.json(user);
+    } else {
+      res.json({err: "Email or Password is incorrect"});
+    }
+  } catch (error) {
+    res.status(400).send("Adding user failed.");
+  }
+};
+
 exports.existOgpa = async (req, res) => {
   try {
     const user = await Ogpas.findOne({
