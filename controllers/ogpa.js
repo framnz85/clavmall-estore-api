@@ -1,5 +1,6 @@
 const Ogpadet = require("../models/ogpadet");
 const Ogpas = require("../models/ogpa");
+const request = require('request');
 
 exports.getOgpa = async (req, res) => {
   const ogpaId = "62e881f29d4bfbb9acd1d260";
@@ -59,4 +60,59 @@ exports.newOgpa = async (req, res) => {
   } catch (error) {
     res.status(400).send("Adding user failed.");
   }
+};
+
+exports.manyChat = async (req, res) => {
+  const mcid = req.params.mcid;
+  const flowns = req.params.flowns;
+  request(
+    {
+      url: 'https://api.manychat.com/fb/sending/sendFlow',
+      method: 'POST',
+      form: {
+        "subscriber_id": mcid,
+        "flow_ns": flowns
+      },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer 843408572424096:ad8860bb8765434719648f616736d3af",
+        "Accept": "application/json"
+      },
+    },
+    (error, response, body) => {
+      if (error || response.statusCode !== 200) {
+        return res.status(500).json({ type: 'error' });
+      }
+
+      res.json(JSON.parse(body));
+    }
+  )
+};
+
+exports.manyChatPurchase = async (req, res) => {
+  const mcid = req.params.mcid;
+  const email = req.params.email;
+  request(
+    {
+      url: 'https://api.manychat.com/fb/subscriber/setCustomField',
+      method: 'POST',
+      form: {
+        "subscriber_id": mcid,
+        "field_id": 130923,
+        "field_value": email
+      },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer 843408572424096:ad8860bb8765434719648f616736d3af",
+        "Accept": "application/json"
+      },
+    },
+    (error, response, body) => {
+      if (error || response.statusCode !== 200) {
+        return res.status(500).json({ type: 'error' });
+      }
+
+      res.json(JSON.parse(body));
+    }
+  )
 };
