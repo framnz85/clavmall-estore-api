@@ -1,6 +1,8 @@
 const Ogpadet = require("../models/ogpadet");
 const Ogpas = require("../models/ogpa");
+const Product = require("../models/pmb");
 const request = require('request');
+const ObjectId = require("mongoose").Types.ObjectId;
 
 exports.getOgpa = async (req, res) => {
   const ogpaId = "62e881f29d4bfbb9acd1d260";
@@ -115,4 +117,43 @@ exports.manyChatPurchase = async (req, res) => {
       res.json(JSON.parse(body));
     }
   )
+};
+
+exports.getProducts = async (req, res) => {
+  try {
+    const products = await Product.find({}, "_id, title supplierPrice");
+    if (products) {
+      res.json(products);
+    } else {
+      res.json({err: "No products was fetch"});
+    }
+  } catch (error) {
+    res.status(400).send("Fetching products failed.");
+  }
+};
+
+exports.getProduct = async (req, res) => {
+  try {
+    const product = await Product.findOne({ _id: req.params.prodid }, "prices votes");
+    if (product) {
+      res.json(product);
+    } else {
+      res.json({err: "No product was fetch"});
+    }
+  } catch (error) {
+    res.status(400).send("Fetching product failed.");
+  }
+};
+
+exports.updateProduct = async (req, res) => {
+  try {
+    const product = await Product.findOneAndUpdate({ _id: ObjectId(req.params.prodid) }, req.body).exec();
+    if (product) {
+      res.json(product);
+    } else {
+      res.json({err: "No product was fetch"});
+    }
+  } catch (error) {
+    res.status(400).send("Fetching product failed.");
+  }
 };

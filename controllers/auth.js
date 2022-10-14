@@ -1,21 +1,27 @@
 const User = require("../models/user");
 const { populateWishlist, populateProduct } = require("./common");
+const jwt = require('jsonwebtoken');
+const md5 = require('md5');
 
 exports.createOrUpdateUser = async (req, res) => {
   const estoreid = req.headers.estoreid;
-  const { name, picture, email } = req.user;
+  const { name, picture, email, password } = req.user;
   const newAddress = req.body.address;
-  const { name: newName, phone } = req.body.namePhone;
+  const { name: newName, phone, emailConfirm } = req.body.namePhone ? req.body.namePhone : {};
 
   const finalName = name ? name : newName;
 
   try {
     const withAddress = phone
-      ? { name: finalName, phone, picture, address: newAddress }
-      : { name: finalName, picture, address: newAddress };
+      ? finalName ? { name: finalName, phone, picture, address: newAddress, emailConfirm }
+        : { phone, picture, address: newAddress, emailConfirm }
+      : finalName ? { name: finalName, picture, address: newAddress, emailConfirm }
+        : { picture, address: newAddress, emailConfirm };
     const noAddress = phone
-      ? { name: finalName, phone, picture }
-      : { name: finalName, picture };
+      ? finalName ? { name: finalName, phone, picture, emailConfirm }
+        :{ phone, picture, emailConfirm }
+      : finalName ? { name: finalName, picture, emailConfirm }
+        : { picture, emailConfirm };
 
     const user = await User(estoreid).findOneAndUpdate(
       { email },
@@ -29,6 +35,8 @@ exports.createOrUpdateUser = async (req, res) => {
       await User(estoreid).collection.insertOne({
         email,
         name: finalName,
+        emailConfirm: false,
+        password: md5(password),
         phone,
         picture,
         role: "customer",
@@ -39,9 +47,12 @@ exports.createOrUpdateUser = async (req, res) => {
         updatedAt: new Date(),
         __v: 0
       });
+      const newUser = await User(estoreid).findOne({ email }, "_id").exec();
       res.json({
+        _id: newUser._id,
         email,
         name: finalName,
+        emailConfirm,
         phone,
         picture,
         role: "customer",
@@ -83,5 +94,33 @@ exports.updateEmailAddress = async (req, res) => {
     res.json(user);
   } catch (error) {
     res.status(400).send("Fetching user failed.");
+  }
+};
+
+exports.generateAuthToken = async (req, res) => {
+  try {
+    const token = jwt.sign(req.body.user, process.env.JWT_PRIVATE_KEY);
+    res.json(token);
+  } catch (error) {
+    res.status(400).send("Unable to generate token.");
+  }
+};
+
+exports.existUserAuthToken = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const email = req.body.email;
+  const password = req.body.password;
+
+  try {
+    const user = await User(estoreid).findOne({ email, password: md5(password) });
+
+    if (user) {
+      const token = jwt.sign({email, password: md5(password)}, process.env.JWT_PRIVATE_KEY);
+      res.json(token);
+    } else {
+      res.json({err: "Email or password is incorrect"});
+    }
+  } catch (error) {
+    res.status(400).send("Unable to generate token.");
   }
 };
