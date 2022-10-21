@@ -121,7 +121,7 @@ exports.manyChatPurchase = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find({}, "_id, title supplierPrice");
+    const products = await Product.find({}, "_id, title prices");
     if (products) {
       res.json(products);
     } else {
