@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const conn = require("../dbconnect/ogt");
+const { ObjectId } = mongoose.Schema;
 
 const ogpaSchema = new mongoose.Schema(
   {
@@ -13,6 +14,7 @@ const ogpaSchema = new mongoose.Schema(
       unique: true,
       index: true,
     },
+    refid: ObjectId,
     password: String,
     mobile: String,
     payment: String,
