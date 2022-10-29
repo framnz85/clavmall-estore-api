@@ -4,6 +4,8 @@ const { ObjectId } = mongoose.Schema;
 
 const ogpaSchema = new mongoose.Schema(
   {
+    refid: ObjectId,
+    affid: ObjectId,
     amount: String,
     name: {
       type: String,
@@ -14,7 +16,6 @@ const ogpaSchema = new mongoose.Schema(
       unique: true,
       index: true,
     },
-    refid: ObjectId,
     password: String,
     mobile: String,
     payment: String,

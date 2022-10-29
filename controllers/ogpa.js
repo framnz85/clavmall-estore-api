@@ -3,6 +3,7 @@ const Ogpas = require("../models/ogpa");
 const Product = require("../models/pmb");
 const request = require('request');
 const ObjectId = require("mongoose").Types.ObjectId;
+const Affiliate = require("../models/affiliate");
 
 exports.getOgpa = async (req, res) => {
   const ogpaId = "62e881f29d4bfbb9acd1d260";
@@ -56,7 +57,18 @@ exports.newOgpa = async (req, res) => {
     if (user) {
       res.json(req.body);
     } else {
+      const { name, amount } = req.body;
       const newUser = await new Ogpas(req.body).save();
+      const newAffiliate = await Affiliate(req.body.refid).collection.insertOne({
+        name, product: "OGPA Program", amount, commission: 1000, status: "Pending", createdAt: new Date(), updatedAt: new Date(), __v: 0
+      });
+      const ogpaid = newUser._id;
+      const affid = newAffiliate.ops[0]._id;
+      await Ogpas.findOneAndUpdate(
+        { _id: ogpaid },
+        { affid },
+        { new: true }
+      )
       res.json(newUser);
     }
   } catch (error) {
