@@ -17,6 +17,9 @@ const withdrawalSchema = new mongoose.Schema(
     },
     amount: Number,
     commission: Number,
+    bank: String,
+    accountNumber: String,
+    accountName: String,
     status: {
       type: String,
       default: "Pending",

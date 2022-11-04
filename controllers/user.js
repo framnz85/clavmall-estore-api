@@ -16,8 +16,19 @@ const {
 
 exports.listUsers = async (req, res) => {
   const estoreid = req.headers.estoreid;
-  const users = await User(estoreid).find({}).exec();
-  res.json(users);
+  const { sortkey, sort, currentPage, pageSize, searchQuery } = req.body;
+  const curPage = currentPage || 1;
+  let searchObj = searchQuery ? { $text: { $search: searchQuery } } : {};
+
+  const users = await User(estoreid).find(searchObj)
+    .skip((curPage - 1) * pageSize)
+    .sort({ superAdmin: -1, role: 1, [sortkey]: sort })
+    .limit(pageSize)
+    .exec();
+  
+  const countUsers = await User(estoreid).find({}).exec();
+  
+  res.json({users, count: countUsers.length});
 };
 
 exports.userCart = async (req, res) => {

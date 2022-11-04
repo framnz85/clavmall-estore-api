@@ -108,6 +108,7 @@ const estoreSchema = new mongoose.Schema(
         duration: Number,
         planId: String,
         subscriptionID: String,
+        domainName: String
       },
     ],
   },

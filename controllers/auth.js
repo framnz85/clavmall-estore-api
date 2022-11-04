@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 const User = require("../models/user");
 const { populateWishlist, populateProduct } = require("./common");
 const jwt = require('jsonwebtoken');
@@ -82,6 +84,39 @@ exports.currentUser = async (req, res) => {
   }
 };
 
+exports.updateRole = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  try {
+    const { userid, role } = req.body;
+    const updated = await User(estoreid).findOneAndUpdate(
+      { _id: Object(userid) },
+      { role },
+      { new: true }
+    );
+    if (!updated) {
+      res.status(404).send("No user exist under userid " + userid);
+      return;
+    }
+    res.json(updated);
+  } catch (error) {
+    res.status(400).send("Update user failed.");
+  }
+};
+
+exports.removeUser = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  try {
+    const deleted = await User(estoreid).findOneAndDelete({ _id: ObjectId(req.params.userid) });
+    if (!deleted) {
+      res.status(404).send(`No user exist`);
+      return;
+    }
+    res.json(deleted);
+  } catch (error) {
+    res.status(400).send("User delete failed.");
+  }
+};
+
 exports.updateEmailAddress = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const { oldEmail } = req.body;
@@ -116,6 +151,25 @@ exports.existUserAuthToken = async (req, res) => {
 
     if (user) {
       const token = jwt.sign({email, password: md5(password)}, process.env.JWT_PRIVATE_KEY);
+      res.json(token);
+    } else {
+      res.json({err: "Email or password is incorrect"});
+    }
+  } catch (error) {
+    res.status(400).send("Unable to generate token.");
+  }
+};
+
+exports.loginAsAuthToken = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const email = req.body.email;
+  const password = req.body.password;
+
+  try {
+    const user = await User(estoreid).findOne({ email, password });
+
+    if (user) {
+      const token = jwt.sign({email, password}, process.env.JWT_PRIVATE_KEY);
       res.json(token);
     } else {
       res.json({err: "Email or password is incorrect"});

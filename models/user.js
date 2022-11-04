@@ -4,12 +4,12 @@ const conn = require("../dbconnect/estore");
 
 const userSchema = new mongoose.Schema(
   {
-    name: String,
-    phone: {
+    name: {
       type: String,
       required: true,
       index: true,
     },
+    phone: String,
     email: {
       type: String,
       required: true,

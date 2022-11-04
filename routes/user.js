@@ -17,7 +17,7 @@ const {
 } = require("../controllers/user");
 const { authCheck, adminCheck } = require("../middlewares/auth");
 
-router.get("/admin/users", authCheck, adminCheck, listUsers);
+router.post("/admin/users", listUsers);
 
 router.post("/user/cart", authCheck, userCart);
 router.get("/user/cart/:coucode/:addiv3Id", authCheck, getUserCart);
