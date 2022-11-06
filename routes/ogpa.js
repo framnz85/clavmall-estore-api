@@ -9,7 +9,8 @@ const {
     manyChatPurchase,
     getProducts,
     getProduct,
-    updateProduct
+    updateProduct,
+    updateProducts
 } = require("../controllers/ogpa");
 
 router.get("/ogpa", getOgpa);
@@ -23,5 +24,6 @@ router.get("/manychat-purchase/:mcid/:email", manyChatPurchase);
 router.get("/pmd-products", getProducts);
 router.get("/pmd-product/:prodid", getProduct);
 router.put("/pmd-product/:prodid", updateProduct);
+router.put("/pmd-products", updateProducts);
 
 module.exports = router;

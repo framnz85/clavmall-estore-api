@@ -169,3 +169,19 @@ exports.updateProduct = async (req, res) => {
     res.status(400).send("Fetching product failed.");
   }
 };
+
+exports.updateProducts = async (req, res) => {
+  try {
+    const products = req.body;
+    for (let i = 0; i < products.length; i++) {
+      await Product.findOneAndUpdate(
+        { _id: ObjectId(products[i]._id) },
+        products[i],
+        { new: true }
+      );
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    res.status(400).send("Importing products failed");
+  }
+};
