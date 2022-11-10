@@ -97,6 +97,8 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+productSchema.index({ title: 'text' });
+
 const Product = (estoreid) => {
   return conn[estoreid].model("Product", productSchema);
 };

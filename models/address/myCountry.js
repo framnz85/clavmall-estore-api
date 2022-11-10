@@ -37,6 +37,8 @@ const myCountrySchema = new mongoose.Schema({
   },
 });
 
+myCountrySchema.index({ name: 'text' });
+
 const MyCountry = (estoreid) => {
   return conn[estoreid].model("MyCountry", myCountrySchema);
 };

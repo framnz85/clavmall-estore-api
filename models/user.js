@@ -52,9 +52,12 @@ const userSchema = new mongoose.Schema(
       addiv3: {},
     },
     wishlist: [{ type: ObjectId, ref: "Product" }],
+    addInstruct: String,
   },
   { timestamps: true }
 );
+
+userSchema.index({ name: 'text' });
 
 const User = (estoreid) => {
   return conn[estoreid].model("User", userSchema);

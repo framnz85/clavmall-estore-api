@@ -35,6 +35,8 @@ const couponSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+couponSchema.index({ code: 'text' });
+
 const Coupon = (estoreid) => {
   return conn[estoreid].model("Coupon", couponSchema);
 };

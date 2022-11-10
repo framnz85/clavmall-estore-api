@@ -25,4 +25,6 @@ const paymentSchema = new mongoose.Schema({
   },
 });
 
+paymentSchema.index({ name: 'text' });
+
 module.exports = conn.model("Payment", paymentSchema);

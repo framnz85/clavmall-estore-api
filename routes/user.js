@@ -6,10 +6,7 @@ const {
   getUserCart,
   emptyCart,
   saveAddress,
-  createOrder,
   applyCouponToUserCart,
-  orders,
-  order,
   addToWishlist,
   wishlist,
   removeFromWishlist,
@@ -23,10 +20,6 @@ router.post("/user/cart", authCheck, userCart);
 router.get("/user/cart/:coucode/:addiv3Id", authCheck, getUserCart);
 router.delete("/user/cart", authCheck, emptyCart);
 router.post("/user/address", authCheck, saveAddress);
-
-router.post("/user/order", authCheck, createOrder);
-router.post("/user/orders", authCheck, orders);
-router.get("/user/order/:orderid", authCheck, order);
 
 router.post("/user/cart/coupon", authCheck, applyCouponToUserCart);
 

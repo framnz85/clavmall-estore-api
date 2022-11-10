@@ -67,6 +67,8 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+orderSchema.index({ orderCode: 'text' });
+
 const Order = (estoreid) => {
   return conn[estoreid].model("Order", orderSchema);
 };

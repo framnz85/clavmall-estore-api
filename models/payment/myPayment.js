@@ -45,6 +45,8 @@ const myPaymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+myPaymentSchema.index({ name: 'text' });
+
 const MyPayment = (estoreid) => {
   return conn[estoreid].model("MyPayment", myPaymentSchema);
 };
