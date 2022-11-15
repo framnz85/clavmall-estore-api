@@ -133,9 +133,24 @@ exports.updateEmailAddress = async (req, res) => {
 };
 
 exports.generateAuthToken = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const email = req.body.user.email;
+  const password = req.body.user.password;
+
   try {
     const token = jwt.sign(req.body.user, process.env.JWT_PRIVATE_KEY);
-    res.json(token);
+    const emailExist = await User(estoreid).findOne({ email});
+
+    if (emailExist) {
+      const user = await User(estoreid).findOne({ email, password: md5(password) });
+      if (user) {
+        res.json(token);
+      } else {
+        res.json({err: `User with ${email} is already existing but your password is incorrect`});
+      }
+    } else {
+      res.json(token);
+    }
   } catch (error) {
     res.status(400).send("Unable to generate token.");
   }
