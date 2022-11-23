@@ -31,10 +31,17 @@ exports.listUsers = async (req, res) => {
 exports.userCart = async (req, res) => {
   const { cart } = req.body;
   const estoreid = req.headers.estoreid;
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
 
   let products = [];
 
-  const user = await User(estoreid).findOne({ email: req.user.email }).exec();
+  if (email) {
+    user = await User(estoreid).findOne({ email }).exec();
+  } else if (phone) {
+    user = await User(estoreid).findOne({ phone }).exec();
+  }
 
   let cartExistByThisUser = await Cart(estoreid).findOne({ orderedBy: user._id }).exec();
 
@@ -81,9 +88,16 @@ exports.getUserCart = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const coucode = req.params.coucode;
   const addiv3Id = new ObjectId(req.params.addiv3Id);
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
 
   try {
-    const user = await User(estoreid).findOne({ email: req.user.email }).exec();
+    if (email) {
+      user = await User(estoreid).findOne({ email }).exec();
+    } else if (phone) {
+      user = await User(estoreid).findOne({ phone }).exec();
+    }
 
     const addiv3 = await MyAddiv3(coucode, estoreid).findOne({ _id: addiv3Id }).exec();
 
@@ -156,7 +170,15 @@ exports.getUserCart = async (req, res) => {
 
 exports.emptyCart = async (req, res) => {
   const estoreid = req.headers.estoreid;
-  const user = await User(estoreid).findOne({ email: req.user.email }).exec();
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
+
+  if (email) {
+    user = await User(estoreid).findOne({ email }).exec();
+  } else if (phone) {
+    user = await User(estoreid).findOne({ phone }).exec();
+  }
 
   let cart = await Cart(estoreid).findOneAndRemove({ orderedBy: user._id }).exec();
 
@@ -171,20 +193,32 @@ exports.saveAddress = async (req, res) => {
   const homeCoucode = req.body.homeAddress.country.countryCode;
   const coupon = req.body.coupon;
   const addInstruct = req.body.addInstruct;
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
 
   const addiv3 = await MyAddiv3(coucode, estoreid).findOne({ _id: addiv3Id }).exec();
   const homeAddiv3 = await MyAddiv3(homeCoucode, estoreid)
     .findOne({ _id: homeAddiv3Id })
     .exec();
 
-  const user = await User(estoreid).findOneAndUpdate(
-    { email: req.user.email },
-    {
-      address: { ...req.body.address, addiv3 },
-      homeAddress: { ...req.body.homeAddress, homeAddiv3 },
-      addInstruct,
-    }
-  ).exec();
+  if (email) {
+    user = await User(estoreid).findOneAndUpdate({ email },
+      {
+        address: { ...req.body.address, addiv3 },
+        homeAddress: { ...req.body.homeAddress, homeAddiv3 },
+        addInstruct,
+      }
+    ).exec();
+  } else if (phone) {
+    user = await User(estoreid).findOneAndUpdate({ phone },
+      {
+        address: { ...req.body.address, addiv3 },
+        homeAddress: { ...req.body.homeAddress, homeAddiv3 },
+        addInstruct,
+      }
+    ).exec();
+  }
 
   let couponAmount = 0;
 
@@ -279,6 +313,9 @@ exports.saveAddress = async (req, res) => {
 exports.applyCouponToUserCart = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const { coupon } = req.body;
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
 
   if(coupon.length > 0){
     const validCoupon = await Coupon(estoreid).findOne({ code: coupon }).exec();
@@ -296,7 +333,11 @@ exports.applyCouponToUserCart = async (req, res) => {
       });
     }
 
-    const user = await User(estoreid).findOne({ email: req.user.email }).exec();
+  if (email) {
+    user = await User(estoreid).findOne({ email }).exec();
+  } else if (phone) {
+    user = await User(estoreid).findOne({ phone }).exec();
+  }
 
     const { cartTotal } = await Cart(estoreid).findOne({ orderedBy: user._id }).exec();
 
@@ -311,15 +352,23 @@ exports.applyCouponToUserCart = async (req, res) => {
 exports.addToWishlist = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const { productId } = req.body;
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let list = {};
 
-  await User(estoreid).findOneAndUpdate(
-    { email: req.user.email },
-    { $addToSet: { wishlist: productId } }
-  ).exec();
-
-  let list = await User(estoreid).findOne({ email: req.user.email })
-    .select("wishlist")
-    .exec();
+  if (email) {
+    await User(estoreid).findOneAndUpdate(
+      { email },
+      { $addToSet: { wishlist: productId } }
+    ).exec();
+    list = await User(estoreid).findOne({ email }).select("wishlist").exec();
+  } else if (phone) {
+    await User(estoreid).findOneAndUpdate(
+      { phone },
+      { $addToSet: { wishlist: productId } }
+    ).exec();
+    list = await User(estoreid).findOne({ phone }).select("wishlist").exec();
+  }
   
   let wishlist = await populateWishlist(list.wishlist, estoreid);
   wishlist = await populateProduct(wishlist, estoreid);
@@ -330,9 +379,15 @@ exports.addToWishlist = async (req, res) => {
 
 exports.wishlist = async (req, res) => {
   const estoreid = req.headers.estoreid;
-  let list = await User(estoreid).findOne({ email: req.user.email })
-    .select("wishlist")
-    .exec();
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let list = {};
+
+  if (email) {
+    list = await User(estoreid).findOne({ email }).select("wishlist").exec();
+  } else if (phone) {
+    list = await User(estoreid).findOne({ phone }).select("wishlist").exec();
+  }
   
   let wishlist = await populateWishlist(list.wishlist, estoreid);
   wishlist = await populateProduct(wishlist, estoreid);
@@ -344,10 +399,20 @@ exports.wishlist = async (req, res) => {
 exports.removeFromWishlist = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const { productId } = req.params;
-  await User(estoreid).findOneAndUpdate(
-    { email: req.user.email },
-    { $pull: { wishlist: productId } }
-  ).exec();
+  const email = req.user.email;
+  const phone = req.user.phone;
+
+  if (email) {
+    await User(estoreid).findOneAndUpdate(
+      { email },
+      { $pull: { wishlist: productId } }
+    ).exec();
+  } else if (phone) {
+    await User(estoreid).findOneAndUpdate(
+      { phone },
+      { $pull: { wishlist: productId } }
+    ).exec();
+  }
 
   res.json({ ok: true });
 };

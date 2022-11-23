@@ -4,6 +4,7 @@ const conn = require("../dbconnect/estore");
 
 const userSchema = new mongoose.Schema(
   {
+    refid: String,
     name: {
       type: String,
       required: true,
@@ -32,10 +33,6 @@ const userSchema = new mongoose.Schema(
         "moderator",
         "customer",
       ],
-    },
-    cart: {
-      type: Array,
-      default: [],
     },
     address: {
       details: String,

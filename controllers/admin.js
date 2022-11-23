@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const ObjectId = require("mongoose").Types.ObjectId;
 const Order = require("../models/order");
+const Cart = require("../models/cart");
 const User = require("../models/user");
 const Product = require("../models/product");
 const {  orderProductUser, orderProductsProduct } = require("./common");
@@ -92,6 +93,61 @@ exports.order = async (req, res) => {
   order = await orderProductsProduct(order, estoreid);
   
   res.json(order);
+}
+
+exports.carts = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  try {
+    const {
+      sortkey,
+      sort,
+      currentPage,
+      pageSize,
+      searchQuery,
+    } = req.body;
+
+    let searchObj = {};
+    const curPage = currentPage || 1;
+
+    const userIds = searchQuery
+      ? await User(estoreid).find({ $text: { $search: searchQuery } }, { _id: 1 }).exec() : [];
+
+    if (searchQuery || userIds.length > 0) {
+      searchObj = {
+        ...searchObj, orderedBy: {
+          $in: userIds.map((userId) => new mongoose.Types.ObjectId(userId._id))
+        }
+      };
+    }
+
+    let carts = await Cart(estoreid).find(searchObj, "_id cartTotal orderedBy createdAt")
+      .skip((curPage - 1) * pageSize)
+      .sort({ [sortkey]: sort })
+      .limit(pageSize)
+      .exec();
+    
+    carts = await orderProductUser(carts, estoreid);
+
+    const countOrder = await Order(estoreid).find(searchObj).exec();
+
+    const query = searchQuery !== "" || Object.keys(searchObj).length > 0;
+
+    res.json({ carts, count: countOrder.length, query: query });
+  } catch (error) {
+    res.status(400).send("Listing orders failed.");
+  }
+};
+
+exports.cart = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const cartid = new ObjectId(req.params.cartid);
+  let cart = await Cart(estoreid).find({ _id: cartid }).exec();
+    
+  cart = await orderProductUser(cart, estoreid);
+
+  cart = await orderProductsProduct(cart, estoreid);
+  
+  res.json(cart);
 }
 
 exports.orderStatus = async (req, res) => {

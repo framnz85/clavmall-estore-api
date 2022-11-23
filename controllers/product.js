@@ -219,9 +219,18 @@ exports.productsCount = async (req, res) => {
 
 exports.productStar = async (req, res) => {
   const estoreid = req.headers.estoreid;
-  let product = await Product(estoreid).findById(req.params.productId).exec();
-  const user = await User(estoreid).findOne({ email: req.user.email }).exec();
   const { star } = req.body;
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
+
+  let product = await Product(estoreid).findById(req.params.productId).exec();
+
+  if (email) {
+    user = await User(estoreid).findOne({ email }).exec();
+  } else if (phone) {
+    user = await User(estoreid).findOne({ phone }).exec();
+  }
 
   let existingRatingObject = product.ratings.find(
     (ele) => ele.postedBy.toString() === user._id.toString()

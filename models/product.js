@@ -39,6 +39,12 @@ const productSchema = new mongoose.Schema(
       trim: true,
       maxlength: 32,
     },
+    referral: {
+      type: Number,
+      trim: true,
+      maxlength: 32,
+    },
+    referraltype: String,
     category: {
       type: ObjectId,
       ref: "Category",

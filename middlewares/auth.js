@@ -25,10 +25,10 @@ exports.authCheck = async (req, res, next) => {
 };
 
 exports.adminCheck = async (req, res, next) => {
-  const { email } = req.user;
+  const { email, phone } = req.user;
   const estoreid = req.headers.estoreid;
 
-  const adminUser = await User(estoreid).findOne({ email }).exec();
+  const adminUser = await User(estoreid).findOne({ $or: [ { email }, { phone } ] }).exec();
 
   if (adminUser.role !== "admin") {
     res.status(403).json({

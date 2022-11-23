@@ -5,7 +5,12 @@ const MyPayment = require("../models/payment/myPayment");
 exports.cretePaymentIntent = async (req, res) => {
   const estoreid = req.headers.estoreid;
   let stripe = {};
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
+
   const payment = await MyPayment(estoreid).findOne({ name: "Stripe", category: "Credit/Debit Card" }).exec();
+
   if (payment) {
     const secretKey = payment.details.filter(p => p.desc === "Secret key");
     if (secretKey[0]) {
@@ -16,8 +21,12 @@ exports.cretePaymentIntent = async (req, res) => {
   }else {
       res.send({err: "Cannot find Stripe details. Contact the administrator."})
   }
-  
-  const user = await User(estoreid).findOne({ email: req.user.email }).exec();
+
+  if (email) {
+    user = await User(estoreid).findOne({ email }).exec();
+  } else if (phone) {
+    user = await User(estoreid).findOne({ phone }).exec();
+  }
 
   const { _id, cartTotal, grandTotal } = await Cart(estoreid).findOne({
     orderedBy: user._id,
@@ -40,7 +49,12 @@ exports.cretePaymentIntent = async (req, res) => {
 exports.getCartTotals = async (req, res) => {  
   let paypal = "";
   const estoreid = req.headers.estoreid;
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
+
   const payment = await MyPayment(estoreid).findOne({ name: "Paypal", category: "Credit/Debit Card" }).exec();
+
   if (payment) {
     const id = payment.details.filter(p => p.desc === "Client ID");
     if (id[0]) {
@@ -52,7 +66,11 @@ exports.getCartTotals = async (req, res) => {
       res.send({err: "Cannot find Paypal Client ID. Contact the administrator."})
   }
 
-  const user = await User(estoreid).findOne({ email: req.user.email }).exec();
+  if (email) {
+    user = await User(estoreid).findOne({ email }).exec();
+  } else if (phone) {
+    user = await User(estoreid).findOne({ phone }).exec();
+  }
 
   const { _id, cartTotal, grandTotal } = await Cart(estoreid).findOne({
     orderedBy: user._id,
@@ -68,7 +86,15 @@ exports.getCartTotals = async (req, res) => {
 
 exports.getSubGrandTotal = async (req, res) => {
   const estoreid = req.headers.estoreid;
-  const user = await User(estoreid).findOne({ email: req.user.email }).exec();
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
+
+  if (email) {
+    user = await User(estoreid).findOne({ email }).exec();
+  } else if (phone) {
+    user = await User(estoreid).findOne({ phone }).exec();
+  }
 
   const { _id, cartTotal, grandTotal } = await Cart(estoreid).findOne({
     orderedBy: user._id,

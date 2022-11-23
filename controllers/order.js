@@ -11,8 +11,16 @@ const {
 
 exports.order = async (req, res) => {
   const estoreid = req.headers.estoreid;
-  const user = await User(estoreid).findOne({ email: req.user.email }).exec();
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
   const orderid = new ObjectId(req.params.orderid);
+
+  if (email) {
+    user = await User(estoreid).findOne({ email }).exec();
+  } else if (phone) {
+    user = await User(estoreid).findOne({ phone }).exec();
+  }
 
   let order = await Order(estoreid).find({ _id: orderid, orderedBy: user._id }).exec();
 
@@ -26,9 +34,17 @@ exports.order = async (req, res) => {
 
 exports.createOrder = async (req, res) => {
   const estoreid = req.headers.estoreid;
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
   const history = [];
   let { paymentOption, orderCode, sellerTxnID } = req.body.orderObjects;
-  const user = await User(estoreid).findOne({ email: req.user.email }).exec();
+  
+  if (email) {
+    user = await User(estoreid).findOne({ email }).exec();
+  } else if (phone) {
+    user = await User(estoreid).findOne({ phone }).exec();
+  }
   
   if (sellerTxnID) {
     history.push({
@@ -71,6 +87,10 @@ exports.createOrder = async (req, res) => {
 
 exports.orders = async (req, res) => {
   const estoreid = req.headers.estoreid;
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
+
   try {
     const {
       sortkey,
@@ -88,7 +108,11 @@ exports.orders = async (req, res) => {
     let searchObj = {};
     const curPage = currentPage || 1;
 
-    let user = await User(estoreid).findOne({ email: req.user.email }).exec();
+    if (email) {
+      user = await User(estoreid).findOne({ email }).exec();
+    } else if (phone) {
+      user = await User(estoreid).findOne({ phone }).exec();
+    }
 
     let orderIds = searchQuery
       ? await Order(estoreid).find({ $text: { $search: searchQuery }, orderedBy: user._id }, { _id: 1 }).exec() : [];
@@ -146,8 +170,15 @@ exports.orders = async (req, res) => {
 exports.updateOrder = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const orderid = req.params.orderid;
-  
-  const user = await User(estoreid).findOne({ email: req.user.email }).exec();
+  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
+
+  if (email) {
+    user = await User(estoreid).findOne({ email }).exec();
+  } else if (phone) {
+    user = await User(estoreid).findOne({ phone }).exec();
+  }
 
   const { products, cartTotal, delfee, discount, servefee, grandTotal } =
     await Cart(estoreid).findOne({
@@ -183,4 +214,24 @@ exports.updatePayment = async (req, res) => {
   );
 
   res.json(updated);
+};
+
+exports.checkExistCart = async (req, res) => {
+  const estoreid = req.headers.estoreid;  const email = req.user.email;
+  const phone = req.user.phone;
+  let user = {};
+  try {
+    if (email) {
+      user = await User(estoreid).findOne({ email }).exec();
+    } else if (phone) {
+      user = await User(estoreid).findOne({ phone }).exec();
+    }
+    let cart = await Cart(estoreid).find({ orderedBy: user._id }).exec();
+
+    cart = await orderProductsProduct(cart, estoreid);
+
+    res.json({ cart });
+  } catch (error) {
+    res.status(400).send("Listing cart failed.");
+  }
 };
