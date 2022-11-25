@@ -14,7 +14,8 @@ const {
   searchFilters,
   bulkChangePrice,
   bulkDeleteProduct,
-  bulkStatusProduct
+  bulkStatusProduct,
+  bulkReferralProduct
 } = require("../controllers/product");
 const { authCheck, adminCheck } = require("../middlewares/auth");
 
@@ -39,5 +40,6 @@ router.post("/search/filters/:count", searchFilters);
 router.put("/product/changeprice/bulk", authCheck, adminCheck, bulkChangePrice);
 router.put("/product/deleteproduct/bulk", authCheck, adminCheck, bulkDeleteProduct);
 router.put("/product/statusproduct/bulk", authCheck, adminCheck, bulkStatusProduct);
+router.put("/product/referralproduct/bulk", authCheck, adminCheck, bulkReferralProduct);
 
 module.exports = router;

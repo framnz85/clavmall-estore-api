@@ -4,7 +4,7 @@ const Product = require("../models/product");
 exports.allproducts = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
-    const products = await Product(estoreid).find({}, " _id title supplierPrice markup markuptype ")
+    const products = await Product(estoreid).find({}, " _id title supplierPrice markup markuptype referral referraltype ")
       .sort({ title: 1 })
       .exec();
 

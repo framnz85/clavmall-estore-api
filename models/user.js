@@ -4,7 +4,7 @@ const conn = require("../dbconnect/estore");
 
 const userSchema = new mongoose.Schema(
   {
-    refid: String,
+    refid: ObjectId,
     name: {
       type: String,
       required: true,

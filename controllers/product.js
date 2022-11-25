@@ -585,3 +585,36 @@ exports.bulkStatusProduct = async (req, res) => {
     res.status(400).send("Change product status failed.");
   }
 };
+
+exports.bulkReferralProduct = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const { category, subcat, parent, referral, referraltype } = req.body.values;
+  let querySearch = {};
+
+  if (category)
+    querySearch = { ...querySearch, category: ObjectId(category) }
+  if (subcat)
+    querySearch = { ...querySearch, subcats: ObjectId(subcat) }
+  if (parent)
+    querySearch = { ...querySearch, parent: ObjectId(parent) }
+
+  try {
+    const updatedProducts = [];
+    const products = await Product(estoreid).find(querySearch).exec();
+    products.map(async product => {
+      updatedProducts.push({
+        ...(product._doc ? product._doc : product),
+        referral, referraltype
+      });
+      await Product(estoreid)
+        .findOneAndUpdate(
+          { _id: ObjectId(product._id) },
+          { referral, referraltype }
+        )
+        .exec();
+    })
+    res.json(updatedProducts);
+  } catch (error) {
+    res.status(400).send("Change product referral failed.");
+  }
+};

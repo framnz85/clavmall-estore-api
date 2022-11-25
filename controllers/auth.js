@@ -12,6 +12,9 @@ exports.createOrUpdateUser = async (req, res) => {
   let combineUser = { ...req.user, ...values };
   let user = {};
   let newUser = {};
+  
+  const superAdminUser = await User(estoreid).findOne({ superAdmin: true });
+  combineUser = {...combineUser, refid: combineUser.refid ? ObjectId(combineUser.refid) : superAdminUser._id}
 
   try {
     if (!email) {
@@ -31,7 +34,7 @@ exports.createOrUpdateUser = async (req, res) => {
       await User(estoreid).collection.insertOne({
         ...combineUser,
         emailConfirm: false,
-        password: password ? password : md5("grocery"),
+        password: password ? password : md5("Grocery@1234"),
         role: "customer",
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -140,13 +143,20 @@ exports.updateEmailAddress = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const { oldEmail } = req.body;
   const { phone, password } = req.user;
+  let user = {};
+
   try {
-    const user = await User(estoreid).findOneAndUpdate({
-      $or: [ { email: oldEmail, password }, { phone, password } ]
-    }, {
-      email: req.user.email,
-      emailConfirm: false
-    }, { new: true });
+    if (oldEmail) {
+      user = await User(estoreid).findOneAndUpdate({ email: oldEmail, password }, {
+        email: req.user.email,
+        emailConfirm: false
+      }, { new: true });
+    } else if (phone) {
+      user = await User(estoreid).findOneAndUpdate({ phone, password }, {
+        email: req.user.email,
+        emailConfirm: false
+      }, { new: true });
+    }
     if (user) {
       res.json(user);
     } else {
