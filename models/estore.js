@@ -47,6 +47,7 @@ const estoreSchema = new mongoose.Schema(
     showCategories: Boolean,
     showNewArrival: Boolean,
     showBestSeller: Boolean,
+    allowAffiliateUser: Boolean,
     headerColor: String,
     carouselColor: String,
     categoryChange: {
