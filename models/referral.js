@@ -4,8 +4,12 @@ const conn = require("../dbconnect/estore");
 
 const referralSchema = new mongoose.Schema(
   {
+    ownerid: ObjectId,
+    ownername: String,
     orderid: ObjectId,
+    orderCode: String,
     userid: ObjectId,
+    username: String,
     amount: Number,
     commission: Number,
     bank: String,
