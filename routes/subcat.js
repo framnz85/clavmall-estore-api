@@ -4,13 +4,15 @@ const {
   create,
   update,
   remove,
-  list,
+  listsWithCatids,
+  lists,
   getProducts,
 } = require("../controllers/subcat");
 const { authCheck, adminCheck } = require("../middlewares/auth");
 
 router.post("/subcat", authCheck, adminCheck, create);
-router.get("/subcats/:count", list);
+router.get("/subcats/:count", lists);
+router.post("/subcats-with-catids", listsWithCatids);
 router.put("/subcat/:slug", authCheck, adminCheck, update);
 router.delete("/subcat/:slug", authCheck, adminCheck, remove);
 

@@ -35,6 +35,20 @@ exports.list = async (req, res) => {
   res.json(parents);
 };
 
+exports.listsWithCatids = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  try {
+    const catids = req.body.catids;
+    const parents = await Parent(estoreid).find({
+      parent: { $in: catids }
+    }).sort({ name: 1 });
+
+    res.json(parents);
+  } catch (error) {
+    res.status(400).send("Something in parents failed.");
+  }
+};
+
 exports.update = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
