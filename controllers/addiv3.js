@@ -70,17 +70,10 @@ exports.updateMyAddiv3 = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const coucode = req.query.coucode;
   const couid = req.body.couid;
-  const adDivId1 = req.body.adDivId1;
-  const adDivId2 = req.body.adDivId2;
   try {
     const updated = await MyAddiv3(coucode, estoreid).findOneAndUpdate(
       { _id: req.params.addiv3 },
-      {
-        ...req.body,
-        couid: ObjectId(couid),
-        adDivId1: ObjectId(adDivId1),
-        adDivId2: ObjectId(adDivId2)
-      },
+      { ...req.body, couid: ObjectId(couid) },
       { new: true }
     );
     res.json(updated);
