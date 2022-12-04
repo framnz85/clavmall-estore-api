@@ -30,7 +30,8 @@ const ogpaSchema = new mongoose.Schema(
         "active",
       ],
     },
-  }
+  },
+  { timestamps: true }
 );
 
 module.exports = conn.model("Ogpa", ogpaSchema);
