@@ -76,6 +76,7 @@ exports.createOrder = async (req, res) => {
     servefee,
     grandTotal,
     orderedBy: user._id,
+    delAddress: user.address,
     history,
     createdAt: new Date(),
     updatedAt: new Date(),

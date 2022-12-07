@@ -28,6 +28,8 @@ const myAddiv3Schema = new mongoose.Schema({
   discounttype: String,
   servefee: String,
   servefeetype: String,
+  referral: String,
+  referraltype: String,
   deltime: String,
   deltimetype: String,
 });

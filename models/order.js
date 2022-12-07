@@ -53,6 +53,13 @@ const orderSchema = new mongoose.Schema(
     servefee: Number,
     grandTotal: Number,
     orderedBy: { type: ObjectId, ref: "User" },
+    delAddress: {
+      details: String,
+      country: {},
+      addiv1: {},
+      addiv2: {},
+      addiv3: {},
+    },
     history: [
       {
         historyDate: {
