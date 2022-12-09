@@ -54,7 +54,7 @@ exports.updateOgpa = async (req, res) => {
             ogpa = await Ogpa.findByIdAndUpdate(ogpaid, { ...req.body, md5pass }, { new: true });
             if(refid) await Affiliate(refid).findByIdAndUpdate(affid, {status: "Approved"}, {new: true});
         } else {
-            ogpa = await Ogpa.findByIdAndUpdate(ogpaid, req.body, {new: true});
+            ogpa = await Ogpa.findByIdAndUpdate(ogpaid, { ...req.body, md5pass }, {new: true});
         }
 
         if (!ogpa)
