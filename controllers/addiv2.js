@@ -1,4 +1,5 @@
 const ObjectId = require("mongoose").Types.ObjectId;
+const MyCountry = require("../models/address/myCountry");
 const { Addiv2 } = require("../models/address/addiv2");
 const { MyAddiv2 } = require("../models/address/myAddiv2");
 
@@ -29,4 +30,16 @@ exports.listMyAddiv2 = async (req, res) => {
       .exec();
   }
   res.json(addiv2);
+};
+
+exports.estoreAddiv2s = async (req, res) => {
+  const estoreid = req.params.estoreid;
+  const couid = req.params.couid;
+  try {
+    const country = await MyCountry(estoreid).findOne({_id: couid}).exec();
+    const addiv2 = await MyAddiv2(country.countryCode, estoreid).find({}).exec();
+    res.json(addiv2);
+  } catch (error) {
+    res.json({err: "Fetching location failed."});
+  }
 };

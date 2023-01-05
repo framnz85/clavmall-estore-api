@@ -11,3 +11,13 @@ exports.listMyCountry = async (req, res) => {
   const countries = await MyCountry(estoreid).find({}).exec();
   res.json(countries);
 };
+
+exports.estoreCountries = async (req, res) => {
+  const estoreid = req.params.estoreid;
+  try {
+    const countries = await MyCountry(estoreid).find({}, "name").exec();
+    res.json(countries);
+  } catch (error) {
+    res.json({err: "Fetching location failed."});
+  }
+};

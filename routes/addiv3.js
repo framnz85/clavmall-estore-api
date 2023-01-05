@@ -6,6 +6,7 @@ const {
   listAddiv3,
   listMyAddiv3,
   updateMyAddiv3,
+  estoreAddiv3s,
 } = require("../controllers/addiv3");
 const { authCheck, adminCheck } = require("../middlewares/auth");
 
@@ -22,5 +23,7 @@ router.put(
   adminCheck,
   updateMyAddiv3
 );
+
+router.get("/address/estoreAddiv3s/:estoreid/:couid", estoreAddiv3s);
 
 module.exports = router;
