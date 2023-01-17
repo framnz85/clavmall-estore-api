@@ -483,7 +483,7 @@ exports.searchFilters = async (req, res) => {
 
 exports.bulkChangePrice = async (req, res) => {
   const estoreid = req.headers.estoreid;
-  const { category, subcat, parent, supprice, suppricetype, markup, markuptype } = req.body.values;
+  const { category, subcat, parent, supprice, suppricetype } = req.body.values;
   let querySearch = {};
 
   if (category)
@@ -500,21 +500,58 @@ exports.bulkChangePrice = async (req, res) => {
       const finalSupPrice = suppricetype === "%"
         ? product.supplierPrice * (1 + supprice / 100)
         : parseFloat(product.supplierPrice) + parseFloat(supprice);
-      const finalPrice = markuptype === "%"
-        ? finalSupPrice * (1 + markup / 100)
-        : parseFloat(finalSupPrice) + parseFloat(markup);
+      const finalPrice = product.markuptype === "%"
+        ? finalSupPrice * (1 + product.markup / 100)
+        : parseFloat(finalSupPrice) + parseFloat(product.markup);
       updatedProducts.push({
         ...(product._doc ? product._doc : product),
         supplierPrice: finalSupPrice.toFixed(2),
-        price: finalPrice.toFixed(2),
-        markup,
-        markuptype
+        price: finalPrice.toFixed(2)
       });
       await Product(estoreid)
         .findOneAndUpdate(
           { _id: ObjectId(product._id) },
           { 
             supplierPrice: finalSupPrice.toFixed(2),
+            price: finalPrice.toFixed(2)
+          }
+        )
+        .exec();
+    })
+    res.json(updatedProducts);
+  } catch (error) {
+    res.status(400).send("Change product price failed.");
+  }
+};
+
+exports.bulkChangeMarkup = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const { category, subcat, parent, supprice, suppricetype, markup, markuptype } = req.body.values;
+  let querySearch = {};
+
+  if (category)
+    querySearch = { ...querySearch, category: ObjectId(category) }
+  if (subcat)
+    querySearch = { ...querySearch, subcats: ObjectId(subcat) }
+  if (parent)
+    querySearch = { ...querySearch, parent: ObjectId(parent) }
+
+  try {
+    const updatedProducts = [];
+    const products = await Product(estoreid).find(querySearch).exec();
+    products.map(async product => {
+      const finalPrice = markuptype === "%"
+        ? product.supplierPrice * (1 + markup / 100)
+        : parseFloat(product.supplierPrice) + parseFloat(markup);
+      updatedProducts.push({
+        ...(product._doc ? product._doc : product),
+        supplierPrice: product.supplierPrice.toFixed(2),
+        price: finalPrice.toFixed(2),
+      });
+      await Product(estoreid)
+        .findOneAndUpdate(
+          { _id: ObjectId(product._id) },
+          { 
             price: finalPrice.toFixed(2),
             markup,
             markuptype

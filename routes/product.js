@@ -13,6 +13,7 @@ const {
   listOtherVariant,
   searchFilters,
   bulkChangePrice,
+  bulkChangeMarkup,
   bulkDeleteProduct,
   bulkStatusProduct,
   bulkReferralProduct
@@ -38,6 +39,7 @@ router.get("/product/parent/:productId", listOtherVariant);
 router.post("/search/filters/:count", searchFilters);
 
 router.put("/product/changeprice/bulk", authCheck, adminCheck, bulkChangePrice);
+router.put("/product/changemarkup/bulk", authCheck, adminCheck, bulkChangeMarkup);
 router.put("/product/deleteproduct/bulk", authCheck, adminCheck, bulkDeleteProduct);
 router.put("/product/statusproduct/bulk", authCheck, adminCheck, bulkStatusProduct);
 router.put("/product/referralproduct/bulk", authCheck, adminCheck, bulkReferralProduct);
