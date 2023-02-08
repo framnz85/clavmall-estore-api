@@ -23,9 +23,17 @@ exports.listAll = async (req, res) => {
 exports.listChanges = async (req, res) => {
   const estore = await Estore.find({ _id: req.params.estid })
     .select(
-      "categoryChange parentChange subcatChange productChange estoreChange"
+      "categoryChange parentChange subcatChange productChange estoreChange recurringCycle planType endDate status"
     )
     .exec();
+  if (estore[0].recurringCycle && estore[0].recurringCycle === "One" && (!estore[0].endDate || (new Date(estore[0].endDate)).getTime() < (new Date()).getTime())) {
+    estore[0] = { ...estore[0]._doc, status: "stop" };
+    await Estore.findOneAndUpdate(
+      { _id: req.params.estid },
+      { status: "stop" },
+      { new: true }
+    );
+  }
   res.json(estore);
 };
 
