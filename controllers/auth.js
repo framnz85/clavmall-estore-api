@@ -13,8 +13,10 @@ exports.createOrUpdateUser = async (req, res) => {
   let user = {};
   let newUser = {};
   
-  const superAdminUser = await User(estoreid).findOne({ superAdmin: true });
-  combineUser = {...combineUser, refid: combineUser.refid ? ObjectId(combineUser.refid) : superAdminUser._id}
+  // const superAdminUser = await User(estoreid).findOne({ superAdmin: true });
+  if (combineUser.refid) {
+    combineUser = { ...combineUser, refid: ObjectId(combineUser.refid) };
+  }
 
   try {
     if (!email) {
