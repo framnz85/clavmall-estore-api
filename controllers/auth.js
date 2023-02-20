@@ -16,6 +16,8 @@ exports.createOrUpdateUser = async (req, res) => {
   // const superAdminUser = await User(estoreid).findOne({ superAdmin: true });
   if (combineUser.refid) {
     combineUser = { ...combineUser, refid: ObjectId(combineUser.refid) };
+  } else {
+    delete combineUser.refid;
   }
 
   try {
@@ -47,6 +49,7 @@ exports.createOrUpdateUser = async (req, res) => {
       } else if (phone) {
         newUser = await User(estoreid).findOne({ phone }, "_id").exec();
       }
+      
       res.json({
         ...combineUser,
         _id: newUser._id,
