@@ -18,7 +18,9 @@ const ogpaSchema = new mongoose.Schema(
     password: String,
     mobile: String,
     payment: String,
-    payDetails: String,
+    paymentType: String,
+    finalAmount: Number,
+    monthlyAmount: Number,
     dateStart: Date,
     md5pass: String,
     status: {
