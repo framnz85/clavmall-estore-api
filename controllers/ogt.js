@@ -51,9 +51,12 @@ exports.createOrUpdateUser = async (req, res) => {
   const password = md5(req.body.password);
 
   try {
-    const user = await Ogts.findOne({ email, password }).exec();
-    if (user) {
-    res.json({err: "User under this email is already existing"});
+    const user = await Ogts.findOne({ email }).exec();
+    if (user && user.password) {
+      res.json({err: "User under this email is already existing"});
+    } else if (user && !user.password) {
+      await Ogts.findOneAndUpdate({ email }, { password }, { new: true });
+      res.json(user);
     } else {
       const newUser = await new Ogts({...req.body, password}).save();
       res.json(newUser);
