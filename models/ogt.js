@@ -4,13 +4,14 @@ const { ObjectId } = mongoose.Schema;
 
 const ogtSchema = new mongoose.Schema(
   {
+    refid: ObjectId,
     name: String,
     email: {
       type: String,
       required: true,
       index: true,
     },
-    refid: ObjectId,
+    password: String,
   },
   { timestamps: true }
 );

@@ -15,6 +15,15 @@ const ogpaSchema = new mongoose.Schema(
       index: true,
     },
     refid: ObjectId,
+    afftype: {
+      type: String,
+      default: "ogpa",
+      enum: [
+        "ogpa",
+        "non-ogpa",
+      ]
+    },
+    commission: Number,
     password: String,
     mobile: String,
     payment: String,
