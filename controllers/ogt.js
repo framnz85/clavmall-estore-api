@@ -67,3 +67,17 @@ exports.createOrUpdateUser = async (req, res) => {
     res.json({err: "Create user failed."});
   }
 };
+
+exports.newOgpa = async (req, res) => {
+  try {
+    const user = await Ogpas.findOneAndUpdate({ email: req.body.email }, req.body).exec();
+    if (user) {
+      res.json(req.body);
+    } else {
+      const newUser = await new Ogpas(req.body).save();
+      res.json(newUser);
+    }
+  } catch (error) {
+    res.status(400).send("Adding user failed.");
+  }
+};

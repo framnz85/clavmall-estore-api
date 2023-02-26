@@ -57,10 +57,10 @@ exports.newOgpa = async (req, res) => {
     if (user) {
       res.json(req.body);
     } else {
-      const { name, amount } = req.body;
+      const { name, amount, commission } = req.body;
       const newUser = await new Ogpas(req.body).save();
       const newAffiliate = await Affiliate(req.body.refid).collection.insertOne({
-        name, product: "OGPA Program", amount, commission: 1000, status: "Pending", createdAt: new Date(), updatedAt: new Date(), __v: 0
+        name, product: "OGPA Program", amount, commission, status: "Pending", createdAt: new Date(), updatedAt: new Date(), __v: 0
       });
       const ogpaid = newUser._id;
       const affid = newAffiliate.ops[0]._id;
