@@ -24,7 +24,8 @@ exports.getOgpas = async (req, res) => {
   const userid = req.params.userid;
 
   try {
-    const result = await Ogpas.find({ refid: ObjectId(userid), afftype: "non-ogpa" });
+    const result1 = await Ogpas.find({ refid: ObjectId(userid), afftype: "non-ogpa" });
+    const result2 = await Ogts.find({ refid: ObjectId(userid) });
 
     const sumCommission = await Ogpas.aggregate([
       { $match: { refid: ObjectId(userid), afftype: "non-ogpa", commission: { $gte: 0 }, status: "Approved" } },
@@ -40,7 +41,7 @@ exports.getOgpas = async (req, res) => {
 
     const countAffiliate = await Ogpas.find({}).exec();
 
-    res.json({result, sumCommission, sumWithdraw, totalProducts: totalProducts.length, count: countAffiliate.length});
+    res.json({result1, result2, sumCommission, sumWithdraw, totalProducts: totalProducts.length, count: countAffiliate.length});
   } catch (error) {
     res.json({err: "Fetching OGPA Users failed."});
   }
@@ -62,6 +63,7 @@ exports.createOrUpdateUser = async (req, res) => {
       res.json(newUser);
     }
   } catch (error) {
+    console.log(error)
     res.json({err: "Create user failed."});
   }
 };
