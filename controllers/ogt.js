@@ -28,7 +28,7 @@ exports.getOgpas = async (req, res) => {
     const result2 = await Ogts.find({ refid: ObjectId(userid) });
 
     const sumCommission = await Ogpas.aggregate([
-      { $match: { refid: ObjectId(userid), afftype: "non-ogpa", commission: { $gte: 0 }, status: "Approved" } },
+      { $match: { refid: ObjectId(userid), afftype: "non-ogpa", commission: { $gte: 0 }, status: "active" } },
       { $group: { _id : null, sum : { $sum: "$commission" } } }
     ]).exec();
 
@@ -37,7 +37,7 @@ exports.getOgpas = async (req, res) => {
       { $group: { _id : null, sum : { $sum: "$commission" } } }
     ]).exec();
 
-    const totalProducts = await Ogpas.find({ refid: ObjectId(userid), afftype: "non-ogpa", commission: { $gte: 0 }, status: "Approved" }).exec();
+    const totalProducts = await Ogpas.find({ refid: ObjectId(userid), afftype: "non-ogpa", commission: { $gte: 0 }, status: "active" }).exec();
 
     const countAffiliate = await Ogpas.find({}).exec();
 
