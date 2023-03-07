@@ -81,3 +81,15 @@ exports.newOgpa = async (req, res) => {
     res.status(400).send("Adding user failed.");
   }
 };
+
+exports.updateUser = async (req, res) => {
+  const email = req.body.email;
+
+  try {
+    const user = await Ogts.findOneAndUpdate({ email }, req.body, { new: true });
+    res.json(user);
+  } catch (error) {
+    console.log(error)
+    res.json({err: "Update user failed."});
+  }
+};

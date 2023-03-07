@@ -260,12 +260,12 @@ exports.productStar = async (req, res) => {
 };
 
 exports.listRelated = async (req, res) => {
-  const estoreid = req.headers.estoreid;
+  const { estoreid, size } = req.headers;
   const product = await Product(estoreid).findById(req.params.productId).exec();
 
   let related = await Product(estoreid).aggregate([
     { $match: { _id: { $ne: product._id }, category: product.category, activate: true } },
-    { $sample: { size: 60 } },
+    { $sample: { size: size ? parseInt(size) : 60 } },
   ]).exec();
 
   related = await populateProduct(related, estoreid);
@@ -274,12 +274,12 @@ exports.listRelated = async (req, res) => {
 };
 
 exports.listOtherVariant = async (req, res) => {
-  const estoreid = req.headers.estoreid;
+  const { estoreid, size } = req.headers;
   const product = await Product(estoreid).findById(req.params.productId).exec();
 
   let parent = await Product(estoreid).aggregate([
     { $match: { _id: { $ne: product._id }, parent: product.parent, activate: true } },
-    { $sample: { size: 60 } },
+    { $sample: { size: size ? parseInt(size) : 60 } },
   ]).exec();
 
   parent = await populateProduct(parent, estoreid);

@@ -50,6 +50,7 @@ const userSchema = new mongoose.Schema(
     },
     wishlist: [{ type: ObjectId, ref: "Product" }],
     addInstruct: String,
+    premiumProgUsed: Boolean,
   },
   { timestamps: true }
 );

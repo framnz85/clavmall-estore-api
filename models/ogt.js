@@ -12,6 +12,7 @@ const ogtSchema = new mongoose.Schema(
       index: true,
     },
     password: String,
+    premiumProgUsed: Boolean,
   },
   { timestamps: true }
 );
