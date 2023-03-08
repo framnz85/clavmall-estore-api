@@ -63,7 +63,6 @@ exports.createOrUpdateUser = async (req, res) => {
       res.json(newUser);
     }
   } catch (error) {
-    console.log(error)
     res.json({err: "Create user failed."});
   }
 };
@@ -89,7 +88,6 @@ exports.updateUser = async (req, res) => {
     const user = await Ogts.findOneAndUpdate({ email }, req.body, { new: true });
     res.json(user);
   } catch (error) {
-    console.log(error)
     res.json({err: "Update user failed."});
   }
 };

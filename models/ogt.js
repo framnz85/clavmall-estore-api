@@ -12,7 +12,18 @@ const ogtSchema = new mongoose.Schema(
       index: true,
     },
     password: String,
-    premiumProgUsed: Boolean,
+    premium: Number,
+    billingHistory: [
+      {
+        productName: String,
+        totalPrice: String,
+        payment: String,
+        payStatus: String,
+        duration: Number,
+        subscriptionID: String,
+        domainName: String,
+      },
+    ],
   },
   { timestamps: true }
 );
