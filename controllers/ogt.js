@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const Ogts = require("../models/ogt");
 const Ogpas = require("../models/ogpa");
+const Program = require("../models/program");
 const md5 = require('md5');
 
 exports.getUser = async (req, res) => {
@@ -43,7 +44,27 @@ exports.getOgpas = async (req, res) => {
 
     res.json({result1, result2, sumCommission, sumWithdraw, totalProducts: totalProducts.length, count: countAffiliate.length});
   } catch (error) {
+    console.log(error)
     res.json({err: "Fetching OGPA Users failed."});
+  }
+};
+
+exports.getPrograms = async (req, res) => {
+  try {
+    const program = await Program.find();
+    res.json(program);
+  } catch (error) {
+    res.json({err: "Fetching programs failed."});
+  }
+};
+
+exports.getProgram = async (req, res) => {
+  const { slug } = req.params
+  try {
+    const program = await Program.findOne({slug});
+    res.json(program);
+  } catch (error) {
+    res.json({err: "Fetching programs failed."});
   }
 };
 
