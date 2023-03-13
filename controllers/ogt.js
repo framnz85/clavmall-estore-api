@@ -3,6 +3,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const Ogts = require("../models/ogt");
 const Ogpas = require("../models/ogpa");
 const Program = require("../models/program");
+const Earning = require("../models/earning");
 const md5 = require('md5');
 
 exports.getUser = async (req, res) => {
@@ -16,6 +17,16 @@ exports.getUser = async (req, res) => {
     } else {
       res.json({err: "Email or password is incorrect"});
     }
+  } catch (error) {
+    res.json({err: "Fetching user failed."});
+  }
+};
+
+exports.getOgts = async (req, res) => {
+  const userid = req.params.userid;
+  try {
+    const result = await Ogts.findOne({ _id: ObjectId(userid) }).populate('programList.progid');
+    res.json(result);
   } catch (error) {
     res.json({err: "Fetching user failed."});
   }
@@ -44,7 +55,6 @@ exports.getOgpas = async (req, res) => {
 
     res.json({result1, result2, sumCommission, sumWithdraw, totalProducts: totalProducts.length, count: countAffiliate.length});
   } catch (error) {
-    console.log(error)
     res.json({err: "Fetching OGPA Users failed."});
   }
 };
@@ -84,6 +94,7 @@ exports.createOrUpdateUser = async (req, res) => {
       res.json(newUser);
     }
   } catch (error) {
+    console.log(error)
     res.json({err: "Create user failed."});
   }
 };
@@ -106,9 +117,56 @@ exports.updateUser = async (req, res) => {
   const email = req.body.email;
 
   try {
-    const user = await Ogts.findOneAndUpdate({ email }, req.body, { new: true });
+    const user = await Ogts.findOneAndUpdate({ email }, req.body, { new: true }).populate('programList.progid');
     res.json(user);
   } catch (error) {
     res.json({err: "Update user failed."});
+  }
+};
+
+exports.createEarning = async (req, res) => {
+  const owner = ObjectId(req.body.owner);
+  const customer = ObjectId(req.body.customer);
+  const product = ObjectId(req.body.product);
+  const productName = req.body.productName;
+
+  try {
+    const result = await Earning.findOne({ owner, customer, product, productName }).exec();
+
+    if (result) {
+      res.json({err: "Earnings already exist."});
+    } else {
+      const earning = await new Earning(req.body).save();
+      res.json(earning);
+    }
+  } catch (error) {
+    res.json({err: "Update earning failed."});
+  }
+};
+
+exports.getEarnings = async (req, res) => {
+  const userid = req.params.userid;
+
+  try {
+    const result1 = await Earning.find({ owner: ObjectId(userid) }).populate('customer').populate('product');
+    const result2 = await Ogts.find({ refid: ObjectId(userid) });
+
+    const sumCommission = await Earning.aggregate([
+      { $match: { owner: ObjectId(userid), commission: { $gte: 0 }, status: true } },
+      { $group: { _id : null, sum : { $sum: "$commission" } } }
+    ]).exec();
+
+    // const sumWithdraw = await Ogpas.aggregate([
+    //   { $match: { refid: ObjectId(userid), afftype: "non-ogpa", commission: { $lte: 0 } } },
+    //   { $group: { _id : null, sum : { $sum: "$commission" } } }
+    // ]).exec();
+
+    const totalProducts = await Earning.find({ owner: ObjectId(userid), commission: { $gte: 0 }, status: true }).exec();
+
+    const countAffiliate = await Earning.find({ owner: ObjectId(userid) }).exec();
+
+    res.json({result1, result2, sumCommission, sumWithdraw : [], totalProducts: totalProducts.length, count: countAffiliate.length});
+  } catch (error) {
+    res.json({err: "Fetching earning failed."});
   }
 };

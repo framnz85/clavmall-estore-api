@@ -24,6 +24,17 @@ const ogtSchema = new mongoose.Schema(
         domainName: String,
       },
     ],
+    programList: [
+      {
+        progid: {
+          type: ObjectId,
+          ref: "Program"
+        },
+        amount: Number,
+        payment: String,
+        status: Boolean,
+      }
+    ]
   },
   { timestamps: true }
 );
