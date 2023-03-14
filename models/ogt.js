@@ -33,6 +33,7 @@ const ogtSchema = new mongoose.Schema(
         amount: Number,
         payment: String,
         status: Boolean,
+        steps: Number,
       }
     ]
   },
