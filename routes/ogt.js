@@ -10,7 +10,8 @@ const {
     newOgpa,
     updateUser,
     createEarning,
-    getEarnings
+    getEarnings,
+    checkOgtsMcid
 } = require("../controllers/ogt");
 
 router.get("/ogt/:email/:password", getUser);
@@ -24,5 +25,6 @@ router.post("/ogt", createOrUpdateUser);
 router.post("/ogt/ogpa-new", newOgpa);
 router.post("/ogt/update-user", updateUser);
 router.post("/ogt/earning", createEarning);
+router.post("/ogt/checkogt-mcid", checkOgtsMcid);
 
 module.exports = router;

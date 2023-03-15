@@ -12,6 +12,9 @@ const ogtSchema = new mongoose.Schema(
       index: true,
     },
     password: String,
+    recovery: String,
+    confirmed: Boolean,
+    mcid: String,
     premium: Number,
     billingHistory: [
       {

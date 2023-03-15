@@ -170,3 +170,69 @@ exports.getEarnings = async (req, res) => {
     res.json({err: "Fetching earning failed."});
   }
 };
+
+exports.checkOgtsMcid = async (req, res) => {
+  const userid = req.body.userid;
+  const mcid = req.body.mcid;
+  const email = req.body.email;
+
+  let checkUser = {};
+
+  try {
+    if (userid && mcid) {
+      const checkMcid = await Ogts.findOne({ mcid }).exec();
+      if (checkMcid) {
+        res.json({err: "Bonus declined!!! The Facebook Account you use to get the bonus is already being used by other user."});
+      } else {
+        checkUser = await Ogts.findOneAndUpdate({ _id: ObjectId(userid) }, { mcid, confirmed: true, }).exec();
+      }
+    } else if (email) {
+      checkUser = await Ogts.findOneAndUpdate({ email }, { confirmed: true, }).exec();
+    } else {
+      res.json({err: "Something is wrong."});
+    }
+
+    if (checkUser._id) {
+      const checkReward1 = await Earning.findOne({
+        owner: ObjectId(checkUser._id),
+        customer: ObjectId(checkUser._id),
+        productName: "Registration Bonus",
+        amount: 100,
+        commission: 100,
+      }).exec();
+
+      if (checkReward1) {
+        res.json({err: "Bonus has already been credited to your account. Check it in your dashboard."});
+      } else {
+        await new Earning({
+            owner: ObjectId(checkUser._id),
+            customer: ObjectId(checkUser._id),
+            productName: "Registration Bonus",
+            amount: 100,
+            commission: 100,
+            status: true,
+        }).save();
+        
+        const checkReward2 = await Earning.findOne({
+          owner: ObjectId(checkUser.refid),
+          customer: ObjectId(checkUser._id),
+          productName: "Recruitment Reward",
+          amount: 1,
+          commission: 1,
+        }).exec();
+        if (!checkReward2) {
+          await new Earning({
+              owner: ObjectId(checkUser.refid),
+              customer: ObjectId(checkUser._id),
+              productName: "Recruitment Reward",
+              amount: 1,
+              commission: 1,
+              status: true,
+          }).save();
+        }
+      }
+    }
+  } catch (error) {
+    res.json({err: "Fetching user failed."});
+  }
+};
