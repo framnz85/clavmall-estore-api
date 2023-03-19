@@ -127,13 +127,26 @@ exports.updateUser = async (req, res) => {
 exports.updatePassword = async (req, res) => {
   const email = req.body.email;
   const recovery = req.body.recovery;
-  const password = md5(req.body.password);
+  const password = req.body.password && md5(req.body.password);
 
   try {
-    const updateUser = await Ogts.findOneAndUpdate({ email, recovery }, {password}, { new: true }).populate('programList.progid');
-    res.json(updateUser);
+    const checkEmail = await Ogts.findOne({ email }).exec();
+    if (checkEmail) {
+      if (recovery && password) {
+        const updateUser = await Ogts.findOneAndUpdate({ email, recovery }, { password }, { new: true }).populate('programList.progid');
+        if (updateUser) {
+          res.json(updateUser);
+        } else {
+          res.json({err: "Email or recovery code is not valid."});
+        }
+      } else {
+        res.json(checkEmail);
+      }
+    } else {
+      res.json({err: "Email is not yet registered."});
+    }
   } catch (error) {
-    res.json({err: "Email or recovery code is not valid."});
+    res.json({err: "Fetching user failed."});
   }
 };
 
