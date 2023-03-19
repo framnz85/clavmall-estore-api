@@ -9,6 +9,7 @@ const {
     createOrUpdateUser,
     newOgpa,
     updateUser,
+    updatePassword,
     createEarning,
     getEarnings,
     checkOgtsMcid
@@ -24,6 +25,7 @@ router.get("/ogt-earning/:userid", getEarnings);
 router.post("/ogt", createOrUpdateUser);
 router.post("/ogt/ogpa-new", newOgpa);
 router.post("/ogt/update-user", updateUser);
+router.post("/ogt/update-password", updatePassword);
 router.post("/ogt/earning", createEarning);
 router.post("/ogt/checkogt-mcid", checkOgtsMcid);
 

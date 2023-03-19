@@ -124,6 +124,19 @@ exports.updateUser = async (req, res) => {
   }
 };
 
+exports.updatePassword = async (req, res) => {
+  const email = req.body.email;
+  const recovery = req.body.recovery;
+  const password = md5(req.body.password);
+
+  try {
+    const updateUser = await Ogts.findOneAndUpdate({ email, recovery }, {password}, { new: true }).populate('programList.progid');
+    res.json(updateUser);
+  } catch (error) {
+    res.json({err: "Email or recovery code is not valid."});
+  }
+};
+
 exports.createEarning = async (req, res) => {
   const owner = ObjectId(req.body.owner);
   const customer = ObjectId(req.body.customer);
