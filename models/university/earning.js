@@ -1,16 +1,16 @@
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
-const conn = require("../dbconnect/ogt");
+const conn = require("../../dbconnect/university");
 
 const earningSchema = new mongoose.Schema(
   {
     owner: {
       type: ObjectId,
-      ref: "Ogt",
+      ref: "User",
     },
     customer: {
       type: ObjectId,
-      ref: "Ogt",
+      ref: "User",
     },
     product: {
       type: ObjectId,

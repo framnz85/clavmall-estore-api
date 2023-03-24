@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const Ogts = require("../models/ogt");
 const Ogpas = require("../models/ogpa");
-const Program = require("../models/program");
-const Earning = require("../models/earning");
+const Program = require("../models/university/program");
+const Earning = require("../models/university/earning");
 const md5 = require('md5');
 
 exports.getUser = async (req, res) => {
@@ -71,7 +71,7 @@ exports.getPrograms = async (req, res) => {
 exports.getProgram = async (req, res) => {
   const { slug } = req.params
   try {
-    const program = await Program.findOne({slug});
+    const program = await Program.findOne({$or: [{slug}, {saleSlug: slug}]});
     res.json(program);
   } catch (error) {
     res.json({err: "Fetching programs failed."});
@@ -94,7 +94,6 @@ exports.createOrUpdateUser = async (req, res) => {
       res.json(newUser);
     }
   } catch (error) {
-    console.log(error)
     res.json({err: "Create user failed."});
   }
 };
@@ -260,5 +259,37 @@ exports.checkOgtsMcid = async (req, res) => {
     }
   } catch (error) {
     res.json({err: "Fetching user failed."});
+  }
+};
+
+exports.getMyPrograms = async (req, res) => {
+  const { userid } = req.params
+  try {
+    const myPrograms = await Program.find({owner: ObjectId(userid)});
+    res.json(myPrograms);
+  } catch (error) {
+    res.json({err: "Fetching programs failed."});
+  }
+};
+
+exports.updateProgram = async (req, res) => {
+  const progid = req.params.progid;
+  try {
+    const updated = await Program.findOneAndUpdate(
+      { _id: ObjectId(progid) },
+      req.body,
+      { new: true }
+    );
+    if (updated) {
+      res.json(updated);
+    } else {
+      res.json({err: "No program exist under Program ID: " + progid});
+    }
+  } catch (error) {
+    if (error.code === 11000) {
+      res.json({err: "Program Slug or Sales Slug is already existing"});
+    } else {
+      res.json({err: "Updating program failed."});
+    }
   }
 };
