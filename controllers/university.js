@@ -201,8 +201,8 @@ exports.updateUsersMcid = async (req, res) => {
         owner: ObjectId(checkUser._id),
         customer: ObjectId(checkUser._id),
         productName: "Registration Bonus",
-        amount: 100,
-        commission: 100,
+        amount: 750,
+        commission: 750,
       }).exec();
 
       if (checkReward1) {
@@ -212,8 +212,8 @@ exports.updateUsersMcid = async (req, res) => {
             owner: ObjectId(checkUser._id),
             customer: ObjectId(checkUser._id),
             productName: "Registration Bonus",
-            amount: 100,
-            commission: 100,
+            amount: 750,
+            commission: 750,
             status: true,
         }).save();
         
