@@ -50,13 +50,10 @@ exports.getPrograms = async (req, res) => {
   }
 };
 
-exports.getEarnings = async (req, res) => {
+exports.getDashboard = async (req, res) => {
   const userid = req.params.userid;
 
   try {
-    const result1 = await Earning.find({ owner: ObjectId(userid) }).populate('customer').populate('product');
-    const result2 = await User.find({ refid: ObjectId(userid) });
-
     const sumCommission = await Earning.aggregate([
       { $match: { owner: ObjectId(userid), commission: { $gte: 0 }, status: true } },
       { $group: { _id : null, sum : { $sum: "$commission" } } }
@@ -64,9 +61,48 @@ exports.getEarnings = async (req, res) => {
 
     const totalProducts = await Earning.find({ owner: ObjectId(userid), commission: { $gte: 0 }, status: true }).exec();
 
-    const countAffiliate = await Earning.find({ owner: ObjectId(userid) }).exec();
+    res.json({sumCommission, sumWithdraw : [], totalProducts: totalProducts.length});
+  } catch (error) {
+    res.json({err: "Fetching earnings for dashboard failed."});
+  }
+};
 
-    res.json({result1, result2, sumCommission, sumWithdraw : [], totalProducts: totalProducts.length, count: countAffiliate.length});
+exports.getEarnings = async (req, res) => {
+  const userid = req.params.userid;
+  const pageSize = req.body.pageSize;
+  const current = req.body.current;
+  const sortkey = req.body.sortkey;
+  const sort = req.body.sort;
+
+  try {
+    const earnings = await Earning.find({ owner: ObjectId(userid) })
+      .populate('customer')
+      .populate('product')
+      .skip((current - 1) * pageSize)
+      .sort({ [sortkey]: sort })
+      .limit(pageSize);
+    const earningsTotal = await Earning.find({ owner: ObjectId(userid) }).exec();
+
+    res.json({earnings, earningsTotal: earningsTotal.length});
+  } catch (error) {
+    res.json({err: "Fetching earnings failed."});
+  }
+};
+
+exports.getReferrals = async (req, res) => {
+  const userid = req.params.userid;
+  const pageSize = req.body.pageSize;
+  const current = req.body.current;
+  const sortkey = req.body.sortkey;
+  const sort = req.body.sort;
+
+  try {
+    const referrals = await User.find({ refid: ObjectId(userid) })
+      .skip((current - 1) * pageSize)
+      .sort({ [sortkey]: sort })
+      .limit(pageSize);
+    const referralsTotal = await User.find({ refid: ObjectId(userid) }).exec();
+    res.json({ referrals, referralsTotal: referralsTotal.length});
   } catch (error) {
     res.json({err: "Fetching earning failed."});
   }
