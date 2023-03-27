@@ -6,7 +6,8 @@ const {
     getReferrals,
     createUser,
     updateUser,
-    updatePassword,
+    recoverPassword,
+    changePassword,
     updateUsersMcid,
 } = require("../controllers/university/user");
 const {
@@ -41,7 +42,8 @@ router.post("/university/referrals", uniLogAuthCheck, getReferrals);
 router.post("/university/add-earning", uniLogAuthCheck, addEarning);
 
 router.put("/university/update-user", uniLogAuthCheck, updateUser);
-router.put("/university/update-password", updatePassword);
+router.put("/university/recover-password", recoverPassword);
+router.put("/university/change-password", uniLogAuthCheck, changePassword);
 router.put("/university/update-user-mcid", updateUsersMcid);
 router.put("/university/update-program/:progid", uniLogAuthCheck, updateProgram);
 

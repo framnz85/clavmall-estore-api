@@ -39,7 +39,15 @@ const userSchema = new mongoose.Schema(
         steps: Number,
       }
     ],
-    multiLogin: Number
+    multiLogin: Number,
+    currency: {
+      type: String,
+      default: "USD",
+      enum: [
+        "USD",
+        "PHP",
+      ],
+    },
   },
   { timestamps: true }
 );

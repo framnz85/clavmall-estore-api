@@ -94,7 +94,7 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-exports.updatePassword = async (req, res) => {
+exports.recoverPassword = async (req, res) => {
   const email = req.body.email;
   const recovery = req.body.recovery;
   const password = req.body.password && md5(req.body.password);
@@ -114,6 +114,28 @@ exports.updatePassword = async (req, res) => {
       }
     } else {
       res.json({err: "Email is not yet registered."});
+    }
+  } catch (error) {
+    res.json({err: "Fetching user failed."});
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  const email = req.user.email;
+  const password = req.user.password;
+  const oldpassword = md5(req.body.oldpassword);
+  const newpassword = md5(req.body.newpassword);
+
+  try {
+    if (password === oldpassword) {
+      const updateUser = await User.findOneAndUpdate({ email, password }, { password : newpassword }, { new: true }).populate('programList.progid');
+      if (updateUser) {
+        res.json(updateUser);
+      } else {
+        res.json({err: "Email or old password is not valid."});
+      }
+    } else {
+      res.json({err: "Sorry, you have entered incorrect Old Password."});
     }
   } catch (error) {
     res.json({err: "Fetching user failed."});
