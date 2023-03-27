@@ -38,7 +38,8 @@ const userSchema = new mongoose.Schema(
         status: Boolean,
         steps: Number,
       }
-    ]
+    ],
+    multiLogin: Number
   },
   { timestamps: true }
 );
