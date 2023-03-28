@@ -16,6 +16,7 @@ const {
     addEarning,
 } = require("../controllers/university/earning");
 const {
+    getPromote,
     getProgram,
     getPrograms,
     getMyPrograms,
@@ -35,6 +36,8 @@ router.get("/university/program/:slug", getProgram);
 router.get("/university/program", getPrograms);
 router.get("/university/dashboard/:userid", getDashboard);
 router.get("/university/myprogram", uniLogAuthCheck, getMyPrograms);
+
+router.get("/faculty/promote", getPromote);
 
 router.post("/university/add-user", uniRegAuthCheck, createUser);
 router.post("/university/earnings", uniLogAuthCheck, getEarnings);
