@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema(
     multiLogin: Number,
     currency: {
       type: String,
-      default: "USD",
+      default: "PHP",
       enum: [
         "USD",
         "PHP",
