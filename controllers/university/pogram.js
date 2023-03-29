@@ -3,18 +3,6 @@ const ObjectId = mongoose.Types.ObjectId;
 
 const User = require("../../models/university/user");
 const Program = require("../../models/university/program");
-const Faculty = require("../../models/university/faculty");
-
-const facultyId = "641fa5d9ddc99d42e626e3ed";
-
-exports.getPromote = async (req, res) => {
-  try {
-    const faculty = await Faculty.findOne({ _id: ObjectId(facultyId) });
-    res.json(faculty);
-  } catch (error) {
-    res.json({err: "Fetching faculty promotion failed."});
-  }
-};
 
 exports.getProgram = async (req, res) => {
   const { slug } = req.params

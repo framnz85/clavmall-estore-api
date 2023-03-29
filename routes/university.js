@@ -16,7 +16,6 @@ const {
     addEarning,
 } = require("../controllers/university/earning");
 const {
-    getPromote,
     getProgram,
     getPrograms,
     getMyPrograms,
@@ -27,6 +26,9 @@ const {
     uniRegAuthCheck,
     uniLogAuthCheck
 } = require("../middlewares/universityAuth");
+const {
+    getPromote
+} = require("../controllers/university/promote");
 
 router.get("/university/generate-token/:email/:password", generateAuthToken);
 
@@ -37,12 +39,12 @@ router.get("/university/program", getPrograms);
 router.get("/university/dashboard/:userid", getDashboard);
 router.get("/university/myprogram", uniLogAuthCheck, getMyPrograms);
 
-router.get("/faculty/promote", getPromote);
-
 router.post("/university/add-user", uniRegAuthCheck, createUser);
 router.post("/university/earnings", uniLogAuthCheck, getEarnings);
 router.post("/university/referrals", uniLogAuthCheck, getReferrals);
 router.post("/university/add-earning", uniLogAuthCheck, addEarning);
+
+router.post("/university/promote", getPromote);
 
 router.put("/university/update-user", uniLogAuthCheck, updateUser);
 router.put("/university/recover-password", recoverPassword);
