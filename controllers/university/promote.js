@@ -12,13 +12,23 @@ exports.getPromote = async (req, res) => {
   const type = req.body.type;
   
   try {
-    const promote = await Promote.find({ program: ObjectId(progid), type })
-        .skip((current - 1) * pageSize)
-        .sort({ [sortkey]: sort })
-        .limit(pageSize);
-    const totalPromote = await Promote.find({ program: ObjectId(progid), type }).exec();
+    if (type === "all") {
+      const promote = await Promote.find({ program: ObjectId(progid) })
+          .skip((current - 1) * pageSize)
+          .sort({ [sortkey]: sort })
+          .limit(pageSize);
+      const totalPromote = await Promote.find({ program: ObjectId(progid) }).exec();
     
-    res.json({promote, total: totalPromote.length});
+      res.json({promote, total: totalPromote.length});
+    } else {
+      const promote = await Promote.find({ program: ObjectId(progid), type })
+          .skip((current - 1) * pageSize)
+          .sort({ [sortkey]: sort })
+          .limit(pageSize);
+      const totalPromote = await Promote.find({ program: ObjectId(progid), type }).exec();
+    
+      res.json({promote, total: totalPromote.length});
+    }
   } catch (error) {
     res.json({err: "Fetching faculty promotion failed."});
   }
