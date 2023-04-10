@@ -13,9 +13,11 @@ exports.getDashboard = async (req, res) => {
       { $group: { _id : null, sum : { $sum: "$commission" } } }
     ]).exec();
 
-    const totalProducts = await Earning.find({ owner: ObjectId(userid), commission: { $gte: 0 }, status: true }).exec();
+    const totalCommission = sumCommission[0] ? sumCommission[0].sum : 0;
 
-    res.json({sumCommission, sumWithdraw : [], totalProducts: totalProducts.length});
+    const numberOfEarnings = await Earning.find({ owner: ObjectId(userid), commission: { $gte: 0 }, status: true }).exec();
+
+    res.json({totalCommission, totalWithdraw : 0, totalProducts: numberOfEarnings.length});
   } catch (error) {
     res.json({err: "Fetching earnings for dashboard failed."});
   }
@@ -32,18 +34,50 @@ exports.getEarnings = async (req, res) => {
   try {
     const result = await User.findOne({ email, password });
     if (result) {
+      const recruitExist = await Earning.findOne({ owner: ObjectId(result._id), productName: "Recruitment Reward" }).exec();
+      
+      const referrals = await User.aggregate([
+        { $match: { refid: ObjectId(result._id), confirmed: true } },
+        { $group: { _id : null, sum : { $sum: "$recruitCommission" } } }
+      ]).exec();
+
+      const sumOfRecruitment = referrals[0] && referrals[0].sum ? referrals[0].sum : 0;
+
+      if (recruitExist) {
+        if (recruitExist.commission !== sumOfRecruitment) {
+          await Earning.findOneAndUpdate({ _id: ObjectId(recruitExist._id) }, { 
+            amount: sumOfRecruitment,
+            commission: sumOfRecruitment,
+          }, { new: true }).exec();
+        }
+      } else {
+        if (sumOfRecruitment > 0) {
+          await new Earning({
+              owner: ObjectId(result._id),
+              customer: ObjectId(result._id),
+              productName: "Recruitment Reward",
+              amount: sumOfRecruitment,
+              commission: sumOfRecruitment,
+              status: true,
+          }).save();
+        }
+      }
+      
       const earnings = await Earning.find({ owner: ObjectId(result._id) })
         .populate('customer')
         .populate('product')
         .skip((current - 1) * pageSize)
         .sort({ [sortkey]: sort })
         .limit(pageSize);
+
       const earningsTotal = await Earning.find({ owner: ObjectId(result._id) }).exec();
+
       res.json({earnings, earningsTotal: earningsTotal.length});
     } else {
       res.json({err: "Error fetching user details."});
     }
   } catch (error) {
+    console.log(error)
     res.json({err: "Fetching earnings failed."});
   }
 };

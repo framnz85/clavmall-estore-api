@@ -6,6 +6,8 @@ const User = require("../../models/university/user");
 const Earning = require("../../models/university/earning");
 const Faculty = require("../../models/university/faculty");
 
+const { recruitReward1, recruitReward2 } = require("./common");
+
 const facultyId = "641fa5d9ddc99d42e626e3ed";
 
 exports.getUser = async (req, res) => {
@@ -55,7 +57,7 @@ exports.getReferrals = async (req, res) => {
     if (result) {
       const referrals = await User.find({ refid: ObjectId(result._id) })
         .skip((current - 1) * pageSize)
-        .sort({ [sortkey]: sort })
+        .sort({ confirmed: -1, [sortkey]: sort })
         .limit(pageSize);
       const referralsTotal = await User.find({ refid: ObjectId(result._id) }).exec();
       res.json({ referrals, referralsTotal: referralsTotal.length });
@@ -182,22 +184,10 @@ exports.updateUsersMcid = async (req, res) => {
             status: true,
         }).save();
         
-        const checkReward2 = await Earning.findOne({
-          owner: ObjectId(checkUser.refid),
-          customer: ObjectId(checkUser._id),
-          productName: "Recruitment Reward",
+        const referral = await User.findOne({ _id: ObjectId(checkUser.refid) });
+        await User.findOneAndUpdate({ _id: ObjectId(checkUser._id) }, {
+          recruitCommission: referral.premium && referral.premium === 2 ? recruitReward2 : recruitReward1
         }).exec();
-        if (!checkReward2) {
-          const referral = await User.findOne({ _id: ObjectId(checkUser.refid) });
-          await new Earning({
-              owner: ObjectId(checkUser.refid),
-              customer: ObjectId(checkUser._id),
-              productName: "Recruitment Reward",
-              amount: referral.premium && referral.premium === 2 ? 3 : 1,
-              commission: referral.premium && referral.premium === 2 ? 3 : 1,
-              status: true,
-          }).save();
-        }
       }
     }
   } catch (error) {
