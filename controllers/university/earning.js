@@ -3,6 +3,8 @@ const ObjectId = mongoose.Types.ObjectId;
 
 const User = require("../../models/university/user");
 const Earning = require("../../models/university/earning");
+const Loginreward = require("../../models/university/loginreward");
+const Postreward = require("../../models/university/postreward");
 
 exports.getDashboard = async (req, res) => {
   const userid = req.params.userid;
@@ -35,6 +37,8 @@ exports.getEarnings = async (req, res) => {
     const result = await User.findOne({ email, password });
     if (result) {
       const recruitExist = await Earning.findOne({ owner: ObjectId(result._id), productName: "Recruitment Reward" }).exec();
+      const loginExist = await Earning.findOne({ owner: ObjectId(result._id), productName: "Login Reward" }).exec();
+      const postExist = await Earning.findOne({ owner: ObjectId(result._id), productName: "Post Reward" }).exec();
       
       const referrals = await User.aggregate([
         { $match: { refid: ObjectId(result._id), confirmed: true } },
@@ -63,6 +67,60 @@ exports.getEarnings = async (req, res) => {
         }
       }
       
+      const loginRewards = await Loginreward.aggregate([
+        { $match: { owner: ObjectId(result._id), status: true } },
+        { $group: { _id : null, sum : { $sum: "$commission" } } }
+      ]).exec();
+
+      const sumOfLoginRewards = loginRewards[0] && loginRewards[0].sum ? loginRewards[0].sum : 0;
+
+      if (loginExist) {
+        if (loginExist.commission !== sumOfLoginRewards) {
+          await Earning.findOneAndUpdate({ _id: ObjectId(loginExist._id) }, { 
+            amount: sumOfLoginRewards,
+            commission: sumOfLoginRewards,
+          }, { new: true }).exec();
+        }
+      } else {
+        if (sumOfLoginRewards > 0) {
+          await new Earning({
+              owner: ObjectId(result._id),
+              customer: ObjectId(result._id),
+              productName: "Login Reward",
+              amount: sumOfLoginRewards,
+              commission: sumOfLoginRewards,
+              status: true,
+          }).save();
+        }
+      }
+      
+      const postRewards = await Postreward.aggregate([
+        { $match: { owner: ObjectId(result._id), status: true } },
+        { $group: { _id : null, sum : { $sum: "$commission" } } }
+      ]).exec();
+
+      const sumOfPostRewards = postRewards[0] && postRewards[0].sum ? postRewards[0].sum : 0;
+
+      if (postExist) {
+        if (postExist.commission !== sumOfPostRewards) {
+          await Earning.findOneAndUpdate({ _id: ObjectId(postExist._id) }, { 
+            amount: sumOfPostRewards,
+            commission: sumOfPostRewards,
+          }, { new: true }).exec();
+        }
+      } else {
+        if (sumOfPostRewards > 0) {
+          await new Earning({
+              owner: ObjectId(result._id),
+              customer: ObjectId(result._id),
+              productName: "Post Reward",
+              amount: sumOfPostRewards,
+              commission: sumOfPostRewards,
+              status: true,
+          }).save();
+        }
+      }
+
       const earnings = await Earning.find({ owner: ObjectId(result._id) })
         .populate('customer')
         .populate('product')
@@ -77,7 +135,6 @@ exports.getEarnings = async (req, res) => {
       res.json({err: "Error fetching user details."});
     }
   } catch (error) {
-    console.log(error)
     res.json({err: "Fetching earnings failed."});
   }
 };
