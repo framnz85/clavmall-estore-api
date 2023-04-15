@@ -48,7 +48,8 @@ const userSchema = new mongoose.Schema(
         "PHP",
       ],
     },
-    recruitCommission: Number
+    recruitCommission: Number,
+    endPoint: Array
   },
   { timestamps: true }
 );
