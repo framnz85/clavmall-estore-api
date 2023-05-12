@@ -1,9 +1,14 @@
 const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 const conn = require("../../dbconnect/university");
 
 const programSchema = new mongoose.Schema(
   {
     title: String,
+    owner: {
+      type: ObjectId,
+      ref: "User"
+    },
     description: String,
     commission1: String,
     commission2: String,

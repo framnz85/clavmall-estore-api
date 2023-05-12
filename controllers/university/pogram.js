@@ -39,6 +39,24 @@ exports.getMyPrograms = async (req, res) => {
   }
 };
 
+exports.createProgram = async (req, res) => {
+  const email = req.user.email;
+  const password = req.user.password;
+  try {
+    const result = await User.findOne({ email, password });
+    if (result) {
+      const program = new Program({ ...req.body, owner: ObjectId(result._id) });
+      program.save();
+      
+      res.json(program);
+    } else {
+      res.json({err: "Error fetching user details."});
+    }
+  } catch (error) {
+    res.json({err: "Creating program failed."});
+  }
+};
+
 exports.updateProgram = async (req, res) => {
   const email = req.user.email;
   const password = req.user.password;

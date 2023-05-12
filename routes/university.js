@@ -19,6 +19,7 @@ const {
     getProgram,
     getPrograms,
     getMyPrograms,
+    createProgram,
     updateProgram
 } = require("../controllers/university/pogram");
 const {
@@ -65,6 +66,7 @@ router.post("/university/login-rewards", uniLogAuthCheck, getLoginRewards);
 
 router.post("/university/create-post-reward", uniLogAuthCheck, createPostReward);
 router.post("/university/post-rewards", uniLogAuthCheck, getPostRewards);
+router.post("/university/create-program", uniLogAuthCheck, createProgram);
 
 router.put("/university/update-user", uniLogAuthCheck, updateUser);
 router.put("/university/recover-password", recoverPassword);
