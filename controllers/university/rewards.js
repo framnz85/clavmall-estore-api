@@ -7,19 +7,6 @@ const Postreward = require("../../models/university/postreward");
 
 const { sendPushNotification } = require("../../notification/webpush");
 
-const dataText = {
-    title: 'Yay a message.',
-    body: 'We have received a push message.',
-    icon: 'https://clavstoreimages.etnants.com/funnel_images/clavstoreuniversity.png',
-    tag: 'simple-push-demo-notification-tag',
-    actions: [
-      {action: 'like', title: 'See Details'}
-    ],
-    data: {
-      url: '/'
-    }
-}
-
 exports.rewardDailyCheck = () => {
     const dateToday = new Date();
     setInterval(async () => {

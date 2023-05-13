@@ -20,7 +20,8 @@ const {
     getPrograms,
     getMyPrograms,
     createProgram,
-    updateProgram
+    updateProgram,
+    getProgramSales
 } = require("../controllers/university/pogram");
 const {
     generateAuthToken,
@@ -46,6 +47,7 @@ router.get("/university/generate-token/:email/:password", generateAuthToken);
 router.get("/university/login-user", uniLogAuthCheck, getUser);
 router.get("/university/get-user", uniLogAuthCheck, getUserByToken);
 router.get("/university/program/:slug", getProgram);
+router.get("/university/program-sales/:progid", getProgramSales);
 router.get("/university/program", getPrograms);
 router.get("/university/dashboard/:userid", getDashboard);
 router.get("/university/myprogram", uniLogAuthCheck, getMyPrograms);

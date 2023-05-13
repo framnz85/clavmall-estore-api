@@ -7,7 +7,7 @@ const Program = require("../../models/university/program");
 exports.getProgram = async (req, res) => {
   const { slug } = req.params
   try {
-    const program = await Program.findOne({$or: [{slug}, {saleSlug: slug}]});
+    const program = await Program.findOne({$or: [{slug}, {saleSlug: slug}]}).select('-salesPage');
     res.json(program);
   } catch (error) {
     res.json({err: "Fetching programs failed."});
@@ -16,7 +16,7 @@ exports.getProgram = async (req, res) => {
 
 exports.getPrograms = async (req, res) => {
   try {
-    const program = await Program.find();
+    const program = await Program.find().select('-salesPage');
     res.json(program);
   } catch (error) {
     res.json({err: "Fetching programs failed."});
@@ -29,7 +29,7 @@ exports.getMyPrograms = async (req, res) => {
   try {
     const result = await User.findOne({ email, password });
     if (result) {
-      const myPrograms = await Program.find({owner: ObjectId(result._id)});
+      const myPrograms = await Program.find({owner: ObjectId(result._id)}).select('-salesPage');
       res.json(myPrograms);
     } else {
       res.json({err: "Error fetching user details."});
@@ -83,5 +83,15 @@ exports.updateProgram = async (req, res) => {
     } else {
       res.json({err: "Updating program failed."});
     }
+  }
+};
+
+exports.getProgramSales = async (req, res) => {
+  const { progid } = req.params
+  try {
+    const program = await Program.findOne({ _id: ObjectId(progid) }).select('salesPage owner');
+    res.json(program);
+  } catch (error) {
+    res.json({err: "Fetching programs sales failed."});
   }
 };
