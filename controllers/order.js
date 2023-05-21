@@ -236,3 +236,12 @@ exports.checkExistCart = async (req, res) => {
     res.status(400).send("Listing cart failed.");
   }
 };
+
+exports.removeOrder = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const orderid = req.params.orderid;
+
+  const deleted = await Order(estoreid).findByIdAndDelete(orderid);
+
+  res.json(deleted);
+};

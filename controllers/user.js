@@ -185,6 +185,15 @@ exports.emptyCart = async (req, res) => {
   res.json(cart);
 };
 
+exports.emptyCartById = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const userid = req.params.userid;
+
+  let cart = await Cart(estoreid).remove({ orderedBy: userid }).exec();
+
+  res.json(cart);
+};
+
 exports.saveAddress = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const addiv3Id = req.body.address.addiv3._id;
