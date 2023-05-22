@@ -14,7 +14,7 @@ exports.getUser = async (req, res) => {
   const email = req.user.email;
   const password = req.user.password;
   try {
-    const user = await User.findOne({ email, password }).populate('programList.progid');
+    const user = await User.findOne({ email, password }).populate('programList.progid', '-salesPage');
     const faculty = await Faculty.findOne({ _id: ObjectId(facultyId) });
     if (user) {
       await User.findOneAndUpdate({ email, password }, { multiLogin: faculty.multiLogin }, { new: true }).exec();
@@ -31,7 +31,7 @@ exports.getUserByToken = async (req, res) => {
   const email = req.user.email;
   const password = req.user.password;
   try {
-    const result = await User.findOne({ email, password }).populate('programList.progid');
+    const result = await User.findOne({ email, password }).populate('programList.progid', '-salesPage');
     const faculty = await Faculty.findOne({ _id: ObjectId(facultyId) });
     if (result.multiLogin !== faculty.multiLogin) {
       res.json({login: "You are required to login again due to recent system updates"});
@@ -89,7 +89,7 @@ exports.createUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
   const email = req.user.email;
   try {
-    const user = await User.findOneAndUpdate({ email }, req.body, { new: true }).populate('programList.progid');
+    const user = await User.findOneAndUpdate({ email }, req.body, { new: true }).populate('programList.progid', '-salesPage');
     res.json(user);
   } catch (error) {
     res.json({err: "Update user failed."});
@@ -105,7 +105,7 @@ exports.recoverPassword = async (req, res) => {
     const checkEmail = await User.findOne({ email }).exec();
     if (checkEmail) {
       if (recovery && password) {
-        const updateUser = await User.findOneAndUpdate({ email, recovery }, { password }, { new: true }).populate('programList.progid');
+        const updateUser = await User.findOneAndUpdate({ email, recovery }, { password }, { new: true }).populate('programList.progid', '-salesPage');
         if (updateUser) {
           res.json(updateUser);
         } else {
@@ -130,7 +130,7 @@ exports.changePassword = async (req, res) => {
 
   try {
     if (password === oldpassword) {
-      const updateUser = await User.findOneAndUpdate({ email, password }, { password : newpassword }, { new: true }).populate('programList.progid');
+      const updateUser = await User.findOneAndUpdate({ email, password }, { password : newpassword }, { new: true }).populate('programList.progid', '-salesPage');
       if (updateUser) {
         res.json(updateUser);
       } else {
