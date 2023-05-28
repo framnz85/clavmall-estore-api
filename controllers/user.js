@@ -43,11 +43,7 @@ exports.userCart = async (req, res) => {
     user = await User(estoreid).findOne({ phone }).exec();
   }
 
-  let cartExistByThisUser = await Cart(estoreid).findOne({ orderedBy: user._id }).exec();
-
-  if (cartExistByThisUser) {
-    cartExistByThisUser.remove();
-  }
+  await Cart(estoreid).deleteMany({ orderedBy: user._id }).exec();
 
   for (let i = 0; i < cart.length; i++) {
     let object = {};
@@ -180,7 +176,7 @@ exports.emptyCart = async (req, res) => {
     user = await User(estoreid).findOne({ phone }).exec();
   }
 
-  let cart = await Cart(estoreid).findOneAndRemove({ orderedBy: user._id }).exec();
+  let cart = await Cart(estoreid).deleteMany({ orderedBy: user._id }).exec();
 
   res.json(cart);
 };
