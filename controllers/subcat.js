@@ -22,7 +22,7 @@ exports.create = async (req, res) => {
   }
 };
 
-exports.lists = async (req, res) => {
+exports.getSubcats = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
     const maxItem = req.params.count;
@@ -34,6 +34,17 @@ exports.lists = async (req, res) => {
         : await Subcat(estoreid).find({}).sort({ name: 1 });
 
     res.json(subcats);
+  } catch (error) {
+    res.status(400).send("Something in subcategory failed.");
+  }
+};
+
+exports.getSubcat = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  try {
+    const slug = req.params.slug;
+    const subcat = await Subcat(estoreid).findOne({slug});
+    res.json(subcat);
   } catch (error) {
     res.status(400).send("Something in subcategory failed.");
   }

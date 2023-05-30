@@ -41,61 +41,56 @@ exports.list = async (req, res) => {
     
     for (let i = 0; i < catResult.length; i++) {
       const product = await Product(estoreid).aggregate([
-        { $match: { activate: true}},
-        { $sample: { size: 50 } },
+        { $match: { category: catResult[i]._id, activate: true}},
+        { $sample: { size: 1 } },
         {
           $match: {
-            $and: [
-              { category: catResult[i]._id },
+            $nor: [
               {
-                $nor: [
+                $and: [
                   {
-                    $and: [
-                      {
-                        "noAvail.couid": ObjectId(country._id),
-                      },
-                      {
-                        "noAvail.addiv1": ObjectId(addiv1._id),
-                      },
-                      {
-                        "noAvail.addiv2": undefined,
-                      },
-                      {
-                        "noAvail.addiv3": undefined,
-                      },
-                    ],
+                    "noAvail.couid": ObjectId(country._id),
                   },
                   {
-                    $and: [
-                      {
-                        "noAvail.couid": ObjectId(country._id),
-                      },
-                      {
-                        "noAvail.addiv1": ObjectId(addiv1._id),
-                      },
-                      {
-                        "noAvail.addiv2": ObjectId(addiv2._id),
-                      },
-                      {
-                        "noAvail.addiv3": undefined,
-                      },
-                    ],
+                    "noAvail.addiv1": ObjectId(addiv1._id),
                   },
                   {
-                    $and: [
-                      {
-                        "noAvail.couid": ObjectId(country._id),
-                      },
-                      {
-                        "noAvail.addiv1": ObjectId(addiv1._id),
-                      },
-                      {
-                        "noAvail.addiv2": ObjectId(addiv2._id),
-                      },
-                      {
-                        "noAvail.addiv3": ObjectId(addiv3._id),
-                      },
-                    ],
+                    "noAvail.addiv2": undefined,
+                  },
+                  {
+                    "noAvail.addiv3": undefined,
+                  },
+                ],
+              },
+              {
+                $and: [
+                  {
+                    "noAvail.couid": ObjectId(country._id),
+                  },
+                  {
+                    "noAvail.addiv1": ObjectId(addiv1._id),
+                  },
+                  {
+                    "noAvail.addiv2": ObjectId(addiv2._id),
+                  },
+                  {
+                    "noAvail.addiv3": undefined,
+                  },
+                ],
+              },
+              {
+                $and: [
+                  {
+                    "noAvail.couid": ObjectId(country._id),
+                  },
+                  {
+                    "noAvail.addiv1": ObjectId(addiv1._id),
+                  },
+                  {
+                    "noAvail.addiv2": ObjectId(addiv2._id),
+                  },
+                  {
+                    "noAvail.addiv3": ObjectId(addiv3._id),
                   },
                 ],
               },
