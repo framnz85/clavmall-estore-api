@@ -1,5 +1,6 @@
 const ObjectId = require("mongoose").Types.ObjectId;
 const slugify = require("slugify");
+const Category = require("../models/category");
 const Parent = require("../models/parent");
 const Product = require("../models/product");
 const mongoose = require("mongoose");
@@ -53,8 +54,9 @@ exports.update = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
     const { name, parent } = req.body;
+    const category = await Category(estoreid).findOne({ slug: req.params.parSlug });
     const updated = await Parent(estoreid).findOneAndUpdate(
-      { slug: req.params.slug },
+      { slug: req.params.slug, parent: ObjectId(category._id)  },
       { name, parent, slug: slugify(name.toString().toLowerCase()) },
       { new: true }
     );
@@ -71,7 +73,10 @@ exports.update = async (req, res) => {
 exports.remove = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
-    const parent = await Parent(estoreid).findOne({ slug: req.params.slug }).select("_id name");
+    const parent = await Parent(estoreid).findOne({
+      parent: ObjectId(req.params.parent),
+      slug: req.params.slug
+    }).select("_id name");
     const product = await Product(estoreid).findOne({ parent: ObjectId(parent._id) });
     if(product){
       res.status(401).send(`${parent.name} has product/s under it. Remove or unassign all of it first before deleting.`);

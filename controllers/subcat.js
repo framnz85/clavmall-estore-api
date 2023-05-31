@@ -1,5 +1,6 @@
 const ObjectId = require("mongoose").Types.ObjectId;
 const slugify = require("slugify");
+const Category = require("../models/category");
 const Subcat = require("../models/subcat");
 const Product = require("../models/product");
 const mongoose = require("mongoose");
@@ -68,8 +69,9 @@ exports.update = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
     const { name, parent } = req.body;
+    const category = await Category(estoreid).findOne({ slug: req.params.parSlug });
     const updated = await Subcat(estoreid).findOneAndUpdate(
-      { slug: req.params.slug },
+      { slug: req.params.slug, parent: ObjectId(category._id) },
       { name, slug: slugify(name.toString().toLowerCase()), parent },
       { new: true }
     );
@@ -86,7 +88,10 @@ exports.update = async (req, res) => {
 exports.remove = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
-    const subcat = await Subcat(estoreid).findOne({ slug: req.params.slug }).select("_id name");
+    const subcat = await Subcat(estoreid).findOne({
+      parent: ObjectId(req.params.parent),
+      slug: req.params.slug
+    }).select("_id name");
     const product = await Product(estoreid).find({ 
       subcats: { 
           $elemMatch: { $eq: subcat._id }
