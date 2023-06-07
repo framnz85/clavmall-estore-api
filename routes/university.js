@@ -1,45 +1,43 @@
 const express = require("express");
 const router = express.Router();
 const {
-    getUser,
-    getUserByToken,
-    getReferrals,
-    createUser,
-    updateUser,
-    recoverPassword,
-    changePassword,
-    updateUsersMcid,
+  getUser,
+  getUserByToken,
+  getReferrals,
+  createUser,
+  updateUser,
+  recoverPassword,
+  changePassword,
+  updateUsersMcid,
 } = require("../controllers/university/user");
 const {
-    getDashboard,
-    getEarnings,
-    addEarning,
+  getDashboard,
+  getEarnings,
+  addEarning,
 } = require("../controllers/university/earning");
 const {
-    getProgram,
-    getPrograms,
-    getMyPrograms,
-    createProgram,
-    updateProgram,
-    getProgramSales
-} = require("../controllers/university/pogram");
+  getProgram,
+  getPrograms,
+  getMyPrograms,
+  createProgram,
+  updateProgram,
+  getProgramSales,
+} = require("../controllers/university/program");
 const {
-    generateAuthToken,
-    uniRegAuthCheck,
-    uniLogAuthCheck
+  generateAuthToken,
+  uniRegAuthCheck,
+  uniLogAuthCheck,
 } = require("../middlewares/universityAuth");
+const { getPromote } = require("../controllers/university/promote");
 const {
-    getPromote
-} = require("../controllers/university/promote");
-const {
-    getLoginRewards,
-    checkLoginToday,
-    createLoginReward
+  getLoginRewards,
+  checkLoginToday,
+  createLoginReward,
 } = require("../controllers/university/loginreward");
 const {
-    getPostRewards,
-    checkPostToday,
-    createPostReward
+  getPostRewards,
+  checkPostToday,
+  createPostReward,
 } = require("../controllers/university/postreward");
 
 router.get("/university/generate-token/:email/:password", generateAuthToken);
@@ -63,10 +61,18 @@ router.post("/university/add-earning", uniLogAuthCheck, addEarning);
 
 router.post("/university/promote", getPromote);
 
-router.post("/university/create-login-reward", uniLogAuthCheck, createLoginReward);
+router.post(
+  "/university/create-login-reward",
+  uniLogAuthCheck,
+  createLoginReward
+);
 router.post("/university/login-rewards", uniLogAuthCheck, getLoginRewards);
 
-router.post("/university/create-post-reward", uniLogAuthCheck, createPostReward);
+router.post(
+  "/university/create-post-reward",
+  uniLogAuthCheck,
+  createPostReward
+);
 router.post("/university/post-rewards", uniLogAuthCheck, getPostRewards);
 router.post("/university/create-program", uniLogAuthCheck, createProgram);
 
@@ -74,6 +80,10 @@ router.put("/university/update-user", uniLogAuthCheck, updateUser);
 router.put("/university/recover-password", recoverPassword);
 router.put("/university/change-password", uniLogAuthCheck, changePassword);
 router.put("/university/update-user-mcid", updateUsersMcid);
-router.put("/university/update-program/:progid", uniLogAuthCheck, updateProgram);
+router.put(
+  "/university/update-program/:progid",
+  uniLogAuthCheck,
+  updateProgram
+);
 
 module.exports = router;

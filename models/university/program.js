@@ -7,7 +7,7 @@ const programSchema = new mongoose.Schema(
     title: String,
     owner: {
       type: ObjectId,
-      ref: "User"
+      ref: "User",
     },
     description: String,
     commission1: String,
@@ -17,10 +17,7 @@ const programSchema = new mongoose.Schema(
     currency: {
       type: String,
       default: "USD",
-      enum: [
-        "USD",
-        "PHP",
-      ],
+      enum: ["USD", "PHP"],
     },
     price: String,
     slug: {
