@@ -66,15 +66,21 @@ exports.updateProgram = async (req, res) => {
   const email = req.user.email;
   const password = req.user.password;
   const progid = req.params.progid;
-  const { salesPage, index } = req.body;
+  const { saleid, salesPage, index } = req.body;
   try {
     const result = await User.findOne({ email, password });
     if (result) {
       if (index === 1) {
-        const existSale = await ProgramSale.findOne({
-          progid: ObjectId(progid),
-          owner: result._id,
-        });
+        const existSale = saleid
+          ? await ProgramSale.findOne({
+              _id: ObjectId(saleid),
+              progid: ObjectId(progid),
+              owner: result._id,
+            })
+          : await ProgramSale.findOne({
+              progid: ObjectId(progid),
+              owner: result._id,
+            });
         if (existSale) {
           const updateSale = await ProgramSale.findOneAndUpdate(
             {
@@ -82,45 +88,46 @@ exports.updateProgram = async (req, res) => {
               progid: ObjectId(progid),
               owner: result._id,
             },
-            { salesPage }
+            { salesPageTemp: salesPage }
           );
           if (updateSale) {
-            res.json(updateSale);
+            res.json({ ok: true });
           } else {
-            res.json({ err: "Error saving program sales page." });
+            res.json({ err: "Error updating first program sales page." });
           }
         } else {
-          const newSale = new ProgramSale({
+          new ProgramSale({
             progid: ObjectId(progid),
             owner: result._id,
-            salesPage,
-          }).save();
-          if (newSale) {
-            res.json(newSale);
-          } else {
-            res.json({ err: "Error saving program sales page." });
-          }
+            salesPageTemp: salesPage,
+          }).save((error, result) => {
+            if (error) {
+              res.json({ err: "Error saving program sales page." });
+            } else {
+              res.json({ saleid: result._id });
+            }
+          });
         }
       } else {
         const updateSale = await ProgramSale.findOneAndUpdate(
-          { progid: ObjectId(progid), owner: result._id },
-          { $push: { salesPage } }
+          {
+            _id: ObjectId(saleid),
+            progid: ObjectId(progid),
+            owner: result._id,
+          },
+          { $push: { salesPageTemp: salesPage } }
         );
         if (updateSale) {
-          res.json(updateSale);
+          res.json({ ok: true });
         } else {
-          res.json({ err: "Error saving program sales page." });
+          res.json({ err: "Error updating program sales page." });
         }
       }
     } else {
       res.json({ err: "Error fetching user details." });
     }
   } catch (error) {
-    if (error.code === 11000) {
-      res.json({ err: "Program Slug or Sales Slug is already existing" });
-    } else {
-      res.json({ err: "Updating program failed." });
-    }
+    res.json({ err: "Updating program failed." });
   }
 };
 
@@ -129,9 +136,35 @@ exports.getProgramSales = async (req, res) => {
   try {
     const salesPage = await ProgramSale.findOne({
       progid: ObjectId(progid),
-    });
+    }).select("-salesPageTemp");
     res.json(salesPage);
   } catch (error) {
+    res.json({ err: "Fetching program sales page failed." });
+  }
+};
+
+exports.copySalesTemp = async (req, res) => {
+  const { saleid, progid } = req.params;
+  try {
+    const existSale = await ProgramSale.findOne({
+      _id: ObjectId(saleid),
+      progid: ObjectId(progid),
+    });
+    if (existSale) {
+      const salesPageTemp = existSale.salesPageTemp;
+      const salesPage = await ProgramSale.findOneAndUpdate(
+        {
+          _id: ObjectId(saleid),
+          progid: ObjectId(progid),
+        },
+        { $set: { salesPage: salesPageTemp } }
+      );
+      if (salesPage) res.json({ ok: true });
+    } else {
+      res.json({ err: "Program sales page doesn't exist." });
+    }
+  } catch (error) {
+    console.log(error);
     res.json({ err: "Fetching program sales page failed." });
   }
 };

@@ -22,6 +22,7 @@ const {
   createProgram,
   updateProgram,
   getProgramSales,
+  copySalesTemp,
 } = require("../controllers/university/program");
 const {
   generateAuthToken,
@@ -84,6 +85,11 @@ router.put(
   "/university/update-program/:progid",
   uniLogAuthCheck,
   updateProgram
+);
+router.put(
+  "/university/update-copysales/:saleid/:progid",
+  uniLogAuthCheck,
+  copySalesTemp
 );
 
 module.exports = router;

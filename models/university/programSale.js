@@ -13,6 +13,7 @@ const programSaleSchema = new mongoose.Schema(
       ref: "User",
     },
     salesPage: Array,
+    salesPageTemp: Array,
   },
   { timestamps: true }
 );
