@@ -90,12 +90,19 @@ exports.getCartTotals = async (req, res) => {
     })
     .exec();
 
-  res.send({
-    clientId: paypal,
-    orderCode: cart ? _id.toString().slice(-12) : "",
-    cartTotal: cart ? cart.cartTotal : "",
-    grandTotal: cart ? cart.grandTotal : "",
-  });
+  if (cart) {
+    const { _id, cartTotal, grandTotal } = cart;
+    res.send({
+      clientId: paypal,
+      orderCode: _id.toString().slice(-12),
+      cartTotal,
+      grandTotal,
+    });
+  } else {
+    res.send({
+      clientId: paypal,
+    });
+  }
 };
 
 exports.getSubGrandTotal = async (req, res) => {
