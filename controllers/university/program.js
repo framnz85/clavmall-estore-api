@@ -66,6 +66,33 @@ exports.updateProgram = async (req, res) => {
   const email = req.user.email;
   const password = req.user.password;
   const progid = req.params.progid;
+  try {
+    const result = await User.findOne({ email, password });
+    if (result) {
+      const update = await Program.findOneAndUpdate(
+        {
+          _id: ObjectId(progid),
+          owner: result._id,
+        },
+        req.body
+      );
+      if (update) {
+        res.json({ ok: true });
+      } else {
+        res.json({ err: "Error updating program details." });
+      }
+    } else {
+      res.json({ err: "Error fetching user details." });
+    }
+  } catch (error) {
+    res.json({ err: "Updating program failed." });
+  }
+};
+
+exports.updateSalesPage = async (req, res) => {
+  const email = req.user.email;
+  const password = req.user.password;
+  const progid = req.params.progid;
   const { saleid, salesPage, index } = req.body;
   try {
     const result = await User.findOne({ email, password });

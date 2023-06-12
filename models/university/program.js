@@ -10,23 +10,28 @@ const programSchema = new mongoose.Schema(
       ref: "User",
     },
     description: String,
-    commission1: String,
-    commission2: String,
-    commission3: String,
     image1: String,
-    currency: {
-      type: String,
-      default: "USD",
-      enum: ["USD", "PHP"],
-    },
-    price: String,
     slug: {
       type: String,
       unique: true,
       lowercase: true,
     },
     subtitle: String,
-    discountPrice: String,
+    packages: [
+      {
+        name: String,
+        price: String,
+        discountPrice: String,
+        commission1: String,
+        commission2: String,
+        commission3: String,
+        currency: {
+          type: String,
+          default: "USD",
+          enum: ["USD", "PHP"],
+        },
+      },
+    ],
     saleSlug: {
       type: String,
       unique: true,

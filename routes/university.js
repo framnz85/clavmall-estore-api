@@ -21,6 +21,7 @@ const {
   getMyPrograms,
   createProgram,
   updateProgram,
+  updateSalesPage,
   getProgramSales,
   copySalesTemp,
 } = require("../controllers/university/program");
@@ -85,6 +86,11 @@ router.put(
   "/university/update-program/:progid",
   uniLogAuthCheck,
   updateProgram
+);
+router.put(
+  "/university/update-sales/:progid",
+  uniLogAuthCheck,
+  updateSalesPage
 );
 router.put(
   "/university/update-copysales/:saleid/:progid",
