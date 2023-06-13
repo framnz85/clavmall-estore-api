@@ -31,25 +31,23 @@ const userSchema = new mongoose.Schema(
       {
         progid: {
           type: ObjectId,
-          ref: "Program"
+          ref: "Program",
         },
         amount: Number,
         payment: String,
         status: Boolean,
         steps: Number,
-      }
+        package: ObjectId,
+      },
     ],
     multiLogin: Number,
     currency: {
       type: String,
       default: "PHP",
-      enum: [
-        "USD",
-        "PHP",
-      ],
+      enum: ["USD", "PHP"],
     },
     recruitCommission: Number,
-    endPoint: Array
+    endPoint: Array,
   },
   { timestamps: true }
 );

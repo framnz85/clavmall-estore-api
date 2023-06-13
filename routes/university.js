@@ -13,7 +13,7 @@ const {
 const {
   getDashboard,
   getEarnings,
-  addEarning,
+  addUpdateEarning,
 } = require("../controllers/university/earning");
 const {
   getProgram,
@@ -59,7 +59,11 @@ router.get("/university/check-post-today", uniLogAuthCheck, checkPostToday);
 router.post("/university/add-user", uniRegAuthCheck, createUser);
 router.post("/university/earnings", uniLogAuthCheck, getEarnings);
 router.post("/university/referrals", uniLogAuthCheck, getReferrals);
-router.post("/university/add-earning", uniLogAuthCheck, addEarning);
+router.post(
+  "/university/add-update-earning",
+  uniLogAuthCheck,
+  addUpdateEarning
+);
 
 router.post("/university/promote", getPromote);
 
