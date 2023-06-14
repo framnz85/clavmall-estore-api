@@ -9,12 +9,7 @@ const estoreSchema = new mongoose.Schema(
     status: {
       type: String,
       default: "pending",
-      enum: [
-        "pending",
-        "pause",
-        "stop",
-        "active",
-      ],
+      enum: ["pending", "pause", "stop", "active"],
     },
     carouselImages: {
       type: Array,
@@ -40,7 +35,7 @@ const estoreSchema = new mongoose.Schema(
     textCarousel: [
       {
         name: { type: String },
-      }
+      },
     ],
     showHomeCarousel: Boolean,
     showRandomItems: Boolean,
@@ -76,28 +71,18 @@ const estoreSchema = new mongoose.Schema(
     },
     imageStorage: {
       type: String,
-      enum: [
-        "clavmall",
-        "cloudinary"
-      ],
+      enum: ["clavmall", "cloudinary"],
     },
     planType: {
       type: String,
       default: "plan-1",
-      enum: [
-        "plan-1",
-        "plan-2",
-        "plan-3"
-      ]
+      enum: ["plan-1", "plan-2", "plan-3"],
     },
     endDate: Date,
     recurringCycle: {
       type: String,
       default: "One",
-      enum: [
-        "One",
-        "Unlimited"
-      ]
+      enum: ["One", "Unlimited"],
     },
     billingHistory: [
       {
@@ -109,7 +94,7 @@ const estoreSchema = new mongoose.Schema(
         duration: Number,
         planId: String,
         subscriptionID: String,
-        domainName: String
+        domainName: String,
       },
     ],
   },

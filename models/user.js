@@ -28,11 +28,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       default: "customer",
-      enum: [
-        "admin",
-        "moderator",
-        "customer",
-      ],
+      enum: ["admin", "moderator", "customer"],
     },
     address: {
       details: String,
@@ -51,11 +47,12 @@ const userSchema = new mongoose.Schema(
     wishlist: [{ type: ObjectId, ref: "Product" }],
     addInstruct: String,
     premiumProgUsed: Boolean,
+    verifyCode: String,
   },
   { timestamps: true }
 );
 
-userSchema.index({ name: 'text' });
+userSchema.index({ name: "text" });
 
 const User = (estoreid) => {
   return conn[estoreid].model("User", userSchema);

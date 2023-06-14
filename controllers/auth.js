@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const User = require("../models/user");
 const { populateWishlist, populateProduct } = require("./common");
-const jwt = require('jsonwebtoken');
-const md5 = require('md5');
+const jwt = require("jsonwebtoken");
+const md5 = require("md5");
 
 exports.createOrUpdateUser = async (req, res) => {
   const estoreid = req.headers.estoreid;
@@ -12,7 +12,7 @@ exports.createOrUpdateUser = async (req, res) => {
   let combineUser = { ...req.user, ...values };
   let user = {};
   let newUser = {};
-  
+
   // const superAdminUser = await User(estoreid).findOne({ superAdmin: true });
   if (combineUser.refid) {
     combineUser = { ...combineUser, refid: ObjectId(combineUser.refid) };
@@ -27,9 +27,13 @@ exports.createOrUpdateUser = async (req, res) => {
       delete combineUser.phone;
     }
     if (email) {
-      user = await User(estoreid).findOneAndUpdate({ email }, combineUser, { new: true });
+      user = await User(estoreid).findOneAndUpdate({ email }, combineUser, {
+        new: true,
+      });
     } else if (phone) {
-      user = await User(estoreid).findOneAndUpdate({ phone }, combineUser, { new: true });
+      user = await User(estoreid).findOneAndUpdate({ phone }, combineUser, {
+        new: true,
+      });
     }
 
     if (user) {
@@ -42,14 +46,14 @@ exports.createOrUpdateUser = async (req, res) => {
         role: "customer",
         createdAt: new Date(),
         updatedAt: new Date(),
-        __v: 0
+        __v: 0,
       });
       if (email) {
         newUser = await User(estoreid).findOne({ email }, "_id").exec();
       } else if (phone) {
         newUser = await User(estoreid).findOne({ phone }, "_id").exec();
       }
-      
+
       res.json({
         ...combineUser,
         _id: newUser._id,
@@ -61,7 +65,7 @@ exports.createOrUpdateUser = async (req, res) => {
       });
     }
   } catch (error) {
-    res.json({err: `Create user failed. ${error.message}`});
+    res.json({ err: `Create user failed. ${error.message}` });
   }
 };
 
@@ -73,22 +77,22 @@ exports.currentUser = async (req, res) => {
 
   try {
     if (email) {
-      user = await User(estoreid).findOne({ email })
+      user = await User(estoreid).findOne({ email });
     } else if (phone) {
-      user = await User(estoreid).findOne({ phone })
+      user = await User(estoreid).findOne({ phone });
     }
     if (user) {
       if (user.wishlist) {
         let wishlist = await populateWishlist(user.wishlist, estoreid);
         wishlist = await populateProduct(wishlist, estoreid);
-        user = { ...(user._doc ? user._doc : user) , wishlist }
+        user = { ...(user._doc ? user._doc : user), wishlist };
       }
       res.json(user);
     } else {
-      res.json({err: "Email or phone is incorrect"});
+      res.json({ err: "Email or phone is incorrect" });
     }
   } catch (error) {
-    res.json({err: `Fetching user failed. ${error.message}`});
+    res.json({ err: `Fetching user failed. ${error.message}` });
   }
 };
 
@@ -98,7 +102,7 @@ exports.defaultPassword = async (req, res) => {
     const { userid } = req.body;
     const updated = await User(estoreid).findOneAndUpdate(
       { _id: Object(userid) },
-      { password: md5('grocery') },
+      { password: md5("Grocery@1234") },
       { new: true }
     );
     if (!updated) {
@@ -133,7 +137,9 @@ exports.updateRole = async (req, res) => {
 exports.removeUser = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
-    const deleted = await User(estoreid).findOneAndDelete({ _id: ObjectId(req.params.userid) });
+    const deleted = await User(estoreid).findOneAndDelete({
+      _id: ObjectId(req.params.userid),
+    });
     if (!deleted) {
       res.status(404).send(`No user exist`);
       return;
@@ -152,23 +158,31 @@ exports.updateEmailAddress = async (req, res) => {
 
   try {
     if (oldEmail) {
-      user = await User(estoreid).findOneAndUpdate({ email: oldEmail, password }, {
-        email: req.user.email,
-        emailConfirm: false
-      }, { new: true });
+      user = await User(estoreid).findOneAndUpdate(
+        { email: oldEmail, password },
+        {
+          email: req.user.email,
+          emailConfirm: false,
+        },
+        { new: true }
+      );
     } else if (phone) {
-      user = await User(estoreid).findOneAndUpdate({ phone, password }, {
-        email: req.user.email,
-        emailConfirm: false
-      }, { new: true });
+      user = await User(estoreid).findOneAndUpdate(
+        { phone, password },
+        {
+          email: req.user.email,
+          emailConfirm: false,
+        },
+        { new: true }
+      );
     }
     if (user) {
       res.json(user);
     } else {
-      res.json({err: "Password is incorrect"});
+      res.json({ err: "Password is incorrect" });
     }
   } catch (error) {
-    es.json({err: `Fetching user failed. ${error.message}`});
+    es.json({ err: `Fetching user failed. ${error.message}` });
   }
 };
 
@@ -184,10 +198,10 @@ exports.updateUserPassword = async (req, res) => {
     if (user) {
       res.json(user);
     } else {
-      res.json({err: "Current password entered is incorrect"});
+      res.json({ err: "Current password entered is incorrect" });
     }
   } catch (error) {
-    es.json({err: `Fetching user failed. ${error.message}`});
+    es.json({ err: `Fetching user failed. ${error.message}` });
   }
 };
 
@@ -196,57 +210,114 @@ exports.generateAuthToken = async (req, res) => {
   const email = req.body.user.email;
   const phone = req.body.user.phone;
   const password = req.body.user.password;
-  const token = password
-    ? jwt.sign({...req.body.user, password: md5(password)}, process.env.JWT_PRIVATE_KEY)
-    : jwt.sign(req.body.user, process.env.JWT_PRIVATE_KEY);
-  let user = {}
+  let tokenObj = password
+    ? { ...req.body.user, password: md5(password) }
+    : req.body.user;
+  let token = "";
+  let user = {};
 
   try {
     if (email) {
       const emailExist = await User(estoreid).findOne({ email });
-  
+
       if (emailExist) {
         if (password) {
-          user = await User(estoreid).findOne({ email, password: md5(password) });
+          user = await User(estoreid).findOne({
+            email,
+            password: md5(password),
+          });
         } else {
           user = emailExist;
         }
         if (user) {
+          if (user.role === "admin" && user.emailConfirm) {
+            tokenObj = {
+              ...tokenObj,
+              aud: "clavmall-estore",
+              email_verified: true,
+            };
+          }
+          token = jwt.sign(tokenObj, process.env.JWT_PRIVATE_KEY);
           res.json(token);
         } else {
           if (emailExist.password) {
-            res.json({err: `User with ${email} is already existing but your password is incorrect`});
+            res.json({
+              err: `User with ${email} is already existing but your password is incorrect`,
+            });
           } else {
+            if (emailExist.role === "admin" && emailExist.emailConfirm) {
+              tokenObj = {
+                ...tokenObj,
+                aud: "clavmall-estore",
+                email_verified: true,
+              };
+            }
+            token = jwt.sign(tokenObj, process.env.JWT_PRIVATE_KEY);
             res.json(token);
           }
         }
       } else {
+        if (emailExist.role === "admin" && emailExist.emailConfirm) {
+          tokenObj = {
+            ...tokenObj,
+            aud: "clavmall-estore",
+            email_verified: true,
+          };
+        }
+        token = jwt.sign(tokenObj, process.env.JWT_PRIVATE_KEY);
         res.json(token);
       }
     } else if (phone) {
       const phoneExist = await User(estoreid).findOne({ phone });
-  
+
       if (phoneExist) {
         if (password) {
-          user = await User(estoreid).findOne({ phone, password: md5(password) });
+          user = await User(estoreid).findOne({
+            phone,
+            password: md5(password),
+          });
         } else {
           user = phoneExist;
         }
         if (user) {
+          if (user.role === "admin" && user.emailConfirm) {
+            tokenObj = {
+              ...tokenObj,
+              aud: "clavmall-estore",
+              email_verified: true,
+            };
+          }
+          token = jwt.sign(tokenObj, process.env.JWT_PRIVATE_KEY);
           res.json(token);
         } else {
           if (phoneExist.password) {
-            res.json({err: `User with ${phone} is already existing but your password is incorrect`});
+            res.json({
+              err: `User with ${phone} is already existing but your password is incorrect`,
+            });
           } else {
+            if (phoneExist.role === "admin" && phoneExist.emailConfirm) {
+              tokenObj = {
+                ...tokenObj,
+                aud: "clavmall-estore",
+                email_verified: true,
+              };
+            }
             res.json(token);
           }
         }
       } else {
+        if (phoneExist.role === "admin" && phoneExist.emailConfirm) {
+          tokenObj = {
+            ...tokenObj,
+            aud: "clavmall-estore",
+            email_verified: true,
+          };
+        }
         res.json(token);
       }
     }
   } catch (error) {
-    res.json({err: `Unable to generate token. ${error.message}`});
+    res.json({ err: `Unable to generate token. ${error.message}` });
   }
 };
 
@@ -255,6 +326,7 @@ exports.existUserAuthToken = async (req, res) => {
   const email = req.body.email;
   const phone = req.body.phone;
   const password = req.body.password;
+  let tokenObj = {};
   let user = {};
 
   try {
@@ -262,42 +334,73 @@ exports.existUserAuthToken = async (req, res) => {
       user = await User(estoreid).findOne({ email });
       if (user) {
         if (password && password === "forgotpassword") {
-          const token = jwt.sign({ email }, process.env.JWT_PRIVATE_KEY);
+          if (user.role === "admin" && user.emailConfirm) {
+            tokenObj = {
+              aud: "clavmall-estore",
+              email_verified: true,
+            };
+          }
+          const token = jwt.sign(
+            { ...tokenObj, email },
+            process.env.JWT_PRIVATE_KEY
+          );
           res.json(token);
           return;
         }
         if (user.password) {
-          if (user.password === md5(password)){
-            const token = jwt.sign({email, phone, password: md5(password)}, process.env.JWT_PRIVATE_KEY);
+          if (user.password === md5(password)) {
+            if (user.role === "admin" && user.emailConfirm) {
+              tokenObj = {
+                aud: "clavmall-estore",
+                email_verified: true,
+              };
+            }
+            const token = jwt.sign(
+              { ...tokenObj, email, phone, password: md5(password) },
+              process.env.JWT_PRIVATE_KEY
+            );
             res.json(token);
           } else {
-            res.json({err: "Password is incorrect"});
+            res.json({ err: "Password is incorrect" });
           }
         } else {
-          res.json({noPass: `Email is existing but no password was set. You need to register first using the email ${email}`})
+          res.json({
+            noPass: `Email is existing but no password was set. You need to register first using the email ${email}`,
+          });
         }
       } else {
-        res.json({err: "Email does not exist"});
+        res.json({ err: "Email does not exist" });
       }
     } else if (phone) {
       user = await User(estoreid).findOne({ phone });
       if (user) {
         if (user.password) {
           if (user.password === md5(password)) {
-            const token = jwt.sign({ email, phone, password: md5(password) }, process.env.JWT_PRIVATE_KEY);
+            if (user.role === "admin" && user.emailConfirm) {
+              tokenObj = {
+                aud: "clavmall-estore",
+                email_verified: true,
+              };
+            }
+            const token = jwt.sign(
+              { ...tokenObj, email, phone, password: md5(password) },
+              process.env.JWT_PRIVATE_KEY
+            );
             res.json(token);
           } else {
-            res.json({err: "Password is incorrect"});
+            res.json({ err: "Password is incorrect" });
           }
         } else {
-          res.json({noPass: `Phone is existing but no password was set. You need to register first using the number ${phone}.`})
+          res.json({
+            noPass: `Phone is existing but no password was set. You need to register first using the number ${phone}.`,
+          });
         }
       } else {
-        res.json({err: "Phone or password is incorrect"});
+        res.json({ err: "Phone or password is incorrect" });
       }
     }
   } catch (error) {
-    res.json({err: `Unable to generate token. ${error.message}`});
+    res.json({ err: `Unable to generate token. ${error.message}` });
   }
 };
 
@@ -305,6 +408,7 @@ exports.loginAsAuthToken = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const email = req.body.email;
   const phone = req.body.phone;
+  let tokenObj = {};
   let user = {};
 
   try {
@@ -315,12 +419,21 @@ exports.loginAsAuthToken = async (req, res) => {
     }
 
     if (user) {
-      const token = jwt.sign({email, phone, password: user.password}, process.env.JWT_PRIVATE_KEY);
+      if (user.role === "admin" && user.emailConfirm) {
+        tokenObj = {
+          aud: "clavmall-estore",
+          email_verified: true,
+        };
+      }
+      const token = jwt.sign(
+        { ...tokenObj, email, phone, password: user.password },
+        process.env.JWT_PRIVATE_KEY
+      );
       res.json(token);
     } else {
-      res.json({err: "Email or phone is incorrect"});
+      res.json({ err: "Email or phone is incorrect" });
     }
   } catch (error) {
-    res.json({err: `Unable to generate token. ${error.message}`});
+    res.json({ err: `Unable to generate token. ${error.message}` });
   }
 };
