@@ -230,7 +230,7 @@ exports.generateAuthToken = async (req, res) => {
           user = emailExist;
         }
         if (user) {
-          if (user.role === "admin" && user.emailConfirm) {
+          if (user && user.role === "admin" && user.emailConfirm) {
             tokenObj = {
               ...tokenObj,
               aud: "clavmall-estore",
@@ -245,7 +245,11 @@ exports.generateAuthToken = async (req, res) => {
               err: `User with ${email} is already existing but your password is incorrect`,
             });
           } else {
-            if (emailExist.role === "admin" && emailExist.emailConfirm) {
+            if (
+              emailExist &&
+              emailExist.role === "admin" &&
+              emailExist.emailConfirm
+            ) {
               tokenObj = {
                 ...tokenObj,
                 aud: "clavmall-estore",
@@ -257,7 +261,11 @@ exports.generateAuthToken = async (req, res) => {
           }
         }
       } else {
-        if (emailExist.role === "admin" && emailExist.emailConfirm) {
+        if (
+          emailExist &&
+          emailExist.role === "admin" &&
+          emailExist.emailConfirm
+        ) {
           tokenObj = {
             ...tokenObj,
             aud: "clavmall-estore",
@@ -280,7 +288,7 @@ exports.generateAuthToken = async (req, res) => {
           user = phoneExist;
         }
         if (user) {
-          if (user.role === "admin" && user.emailConfirm) {
+          if (user && user.role === "admin" && user.emailConfirm) {
             tokenObj = {
               ...tokenObj,
               aud: "clavmall-estore",
@@ -295,7 +303,11 @@ exports.generateAuthToken = async (req, res) => {
               err: `User with ${phone} is already existing but your password is incorrect`,
             });
           } else {
-            if (phoneExist.role === "admin" && phoneExist.emailConfirm) {
+            if (
+              phoneExist &&
+              phoneExist.role === "admin" &&
+              phoneExist.emailConfirm
+            ) {
               tokenObj = {
                 ...tokenObj,
                 aud: "clavmall-estore",
@@ -306,7 +318,11 @@ exports.generateAuthToken = async (req, res) => {
           }
         }
       } else {
-        if (phoneExist.role === "admin" && phoneExist.emailConfirm) {
+        if (
+          phoneExist &&
+          phoneExist.role === "admin" &&
+          phoneExist.emailConfirm
+        ) {
           tokenObj = {
             ...tokenObj,
             aud: "clavmall-estore",
@@ -334,7 +350,7 @@ exports.existUserAuthToken = async (req, res) => {
       user = await User(estoreid).findOne({ email });
       if (user) {
         if (password && password === "forgotpassword") {
-          if (user.role === "admin" && user.emailConfirm) {
+          if (user && user.role === "admin" && user.emailConfirm) {
             tokenObj = {
               aud: "clavmall-estore",
               email_verified: true,
@@ -349,7 +365,7 @@ exports.existUserAuthToken = async (req, res) => {
         }
         if (user.password) {
           if (user.password === md5(password)) {
-            if (user.role === "admin" && user.emailConfirm) {
+            if (user && user.role === "admin" && user.emailConfirm) {
               tokenObj = {
                 aud: "clavmall-estore",
                 email_verified: true,
@@ -376,7 +392,7 @@ exports.existUserAuthToken = async (req, res) => {
       if (user) {
         if (user.password) {
           if (user.password === md5(password)) {
-            if (user.role === "admin" && user.emailConfirm) {
+            if (user && user.role === "admin" && user.emailConfirm) {
               tokenObj = {
                 aud: "clavmall-estore",
                 email_verified: true,
@@ -419,7 +435,7 @@ exports.loginAsAuthToken = async (req, res) => {
     }
 
     if (user) {
-      if (user.role === "admin" && user.emailConfirm) {
+      if (user && user.role === "admin" && user.emailConfirm) {
         tokenObj = {
           aud: "clavmall-estore",
           email_verified: true,

@@ -1,26 +1,15 @@
-const admin = require("../firebase");
 const User = require("../models/user");
-const jwt_decode = require('jwt-decode');
+const jwt_decode = require("jwt-decode");
 
 exports.authCheck = async (req, res, next) => {
-  try {   
-    const firebase = await admin
-      .auth()
-      .verifyIdToken(req.headers.authtoken);
-
-    req.user = firebase;
+  try {
+    const jwtDecode = jwt_decode(req.headers.authtoken);
+    req.user = jwtDecode;
     next();
   } catch (error) {
-    try {
-      const jwtDecode = jwt_decode(req.headers.authtoken);
-
-      req.user = jwtDecode;
-      next();
-    } catch (error) {
-      res.status(401).json({
-        err: "Invalid or expired token",
-      });
-    }
+    res.status(401).json({
+      err: "Invalid or expired token",
+    });
   }
 };
 
