@@ -97,6 +97,7 @@ const estoreSchema = new mongoose.Schema(
         domainName: String,
       },
     ],
+    openaiAPI: "",
   },
   { timestamps: true }
 );
