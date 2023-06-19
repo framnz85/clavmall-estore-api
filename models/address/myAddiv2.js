@@ -18,6 +18,8 @@ const myAddiv2Schema = new mongoose.Schema({
   },
 });
 
+myAddiv2Schema.index({ name: "text" });
+
 const MyAddiv2 = (coucode, estoreid) => {
   return conn[estoreid].model(coucode + "myaddiv2", myAddiv2Schema);
 };

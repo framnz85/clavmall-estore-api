@@ -34,6 +34,8 @@ const myAddiv3Schema = new mongoose.Schema({
   deltimetype: String,
 });
 
+myAddiv3Schema.index({ name: "text" });
+
 const MyAddiv3 = (coucode, estoreid) => {
   return conn[estoreid].model(coucode + "myaddiv3", myAddiv3Schema);
 };

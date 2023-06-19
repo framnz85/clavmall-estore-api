@@ -1,17 +1,67 @@
 const { Configuration, OpenAIApi } = require("openai");
 
+const { MyAddiv1 } = require("../../models/address/myAddiv1");
+const { MyAddiv2 } = require("../../models/address/myAddiv2");
 const { MyAddiv3 } = require("../../models/address/myAddiv3");
 
-const getMyAddiv3s = async (coucode, estoreid) => {
-  return await MyAddiv3(coucode, estoreid).find({}).exec();
+const getMyAddiv1s = async (coucode, estoreid, message) => {
+  const addiv1s = await MyAddiv1(coucode, estoreid)
+    .find({ $text: { $search: message } })
+    .exec();
+
+  if (addiv1s.length > 0) {
+    return addiv1s;
+  } else {
+    return await MyAddiv1(coucode, estoreid).find({}).limit(2).exec();
+  }
+};
+
+const getMyAddiv2s = async (coucode, estoreid, message) => {
+  const addiv2s = await MyAddiv2(coucode, estoreid)
+    .find({ $text: { $search: message } })
+    .exec();
+
+  if (addiv2s.length > 0) {
+    return addiv2s;
+  } else {
+    return await MyAddiv2(coucode, estoreid).find({}).limit(5).exec();
+  }
+};
+
+const getMyAddiv3s = async (coucode, estoreid, message) => {
+  const addiv3s = await MyAddiv3(coucode, estoreid)
+    .find({ $text: { $search: message } })
+    .exec();
+
+  if (addiv3s.length > 0) {
+    return addiv3s;
+  } else {
+    return await MyAddiv2(coucode, estoreid).find({}).limit(10).exec();
+  }
 };
 
 exports.getGroceyResonse = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const coucode = req.query.coucode;
-  let addiv3Array = "";
+  let promptBody = "";
 
-  const addiv3s = await getMyAddiv3s(coucode, estoreid);
+  const addiv1s = await getMyAddiv1s(coucode, estoreid, req.body.message);
+  const addiv2s = await getMyAddiv2s(coucode, estoreid, req.body.message);
+  const addiv3s = await getMyAddiv3s(coucode, estoreid, req.body.message);
+
+  addiv1s.forEach((addiv1) => {
+    const { name } = addiv1;
+    promptBody =
+      promptBody + name + " - prices and delivery vary by exact location \n";
+  });
+
+  addiv2s.forEach((addiv2) => {
+    const { name } = addiv2;
+    promptBody =
+      promptBody +
+      name +
+      " - prices and delivery time vary by exact location \n";
+  });
 
   addiv3s.forEach((addiv3) => {
     const { name, delfee, delfeetype, deltime, deltimetype } = addiv3;
@@ -19,8 +69,8 @@ exports.getGroceyResonse = async (req, res) => {
       delfeetype === "%"
         ? delfee + delfeetype + "of total amount"
         : delfeetype + delfee;
-    addiv3Array =
-      addiv3Array +
+    promptBody =
+      promptBody +
       name +
       " - " +
       delFee +
@@ -47,13 +97,13 @@ exports.getGroceyResonse = async (req, res) => {
             If we can't serve the location asked, just answer "Sorry, we can't deliver in that location right now"\n
 
             If ask about a product availability and price please reply "Please kindly find the product using the search box above to see its prices and availability"\n
-            
+
             Answer in a very concise, gentle and nice manner.\n
 
             If question is something else please respond "Sorry, I can't answer your questions. Start ordering now by going to Home or Shop"\n\n
 
             Location, delivery fees and time:\n
-            ${addiv3Array}\n
+            ${promptBody}\n
 
             ${sentMessage}`,
 
