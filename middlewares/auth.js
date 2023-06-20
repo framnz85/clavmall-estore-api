@@ -1,4 +1,4 @@
-const User = require("../models/user");
+const User = require("../models/user/user");
 const jwt_decode = require("jwt-decode");
 
 exports.authCheck = async (req, res, next) => {

@@ -11,11 +11,13 @@ const app = express();
 rewardDailyCheck();
 
 app.use(morgan("dev"));
-app.use(express.json({ limit: "5mb" }));
+app.use(express.json({ limit: "2mb" }));
 app.use(cors());
 
 readdirSync("./routes").map((route) =>
-  app.use("/api", require("./routes/" + route))
+  readdirSync("./routes/" + route).map((file) =>
+    app.use("/api", require("./routes/" + route + "/" + file))
+  )
 );
 
 const port = process.env.PORT || 8000;
