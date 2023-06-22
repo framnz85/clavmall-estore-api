@@ -1,6 +1,4 @@
 const estoreid1 = [
-  "62c2d017f1598745f948c4db",
-  "62fb4ef152c205001636c6bd",
   "63dc4a14e138066ea0f9e2fb",
   "63cfebdbe138066ea0f9dee3",
   "63ce6719e138066ea0f9ddd6",

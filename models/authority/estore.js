@@ -6,6 +6,12 @@ const Country = require("../address/country");
 const estoreSchema = new mongoose.Schema(
   {
     name: String,
+    slug: {
+      type: String,
+      unique: true,
+      lowercase: true,
+      index: true,
+    },
     status: {
       type: String,
       default: "pending",
@@ -75,8 +81,8 @@ const estoreSchema = new mongoose.Schema(
     },
     planType: {
       type: String,
-      default: "plan-1",
-      enum: ["plan-1", "plan-2", "plan-3"],
+      default: "gratis",
+      enum: ["gratis", "plan-1", "plan-2", "plan-3"],
     },
     endDate: Date,
     recurringCycle: {
