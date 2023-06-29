@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       index: true,
+      unique: true,
     },
     emailConfirm: {
       type: Boolean,
@@ -29,6 +30,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    showPass: String,
     picture: String,
     role: {
       type: String,
@@ -57,6 +59,6 @@ const userSchema = new mongoose.Schema(
 
 userSchema.index({ name: "text" });
 
-const User = conn.model("User", userSchema);
+const User = conn.model("GratisUser", userSchema);
 
 module.exports = User;

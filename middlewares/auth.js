@@ -1,4 +1,6 @@
+const ObjectId = require("mongoose").Types.ObjectId;
 const User = require("../models/user/user");
+const GratisUser = require("../models/gratis/user");
 const jwt_decode = require("jwt-decode");
 
 exports.authCheck = async (req, res, next) => {
@@ -23,6 +25,24 @@ exports.adminCheck = async (req, res, next) => {
   } else if (phone) {
     adminUser = await User(estoreid).findOne({ phone }).exec();
   }
+
+  if (adminUser.role !== "admin") {
+    res.status(403).json({
+      error: "Admin resource. Access denied.",
+    });
+  } else {
+    next();
+  }
+};
+
+exports.adminGratisCheck = async (req, res, next) => {
+  const { email } = req.user;
+  const estoreid = req.headers.estoreid;
+
+  const adminUser = await GratisUser.findOne({
+    email,
+    estoreid: ObjectId(estoreid),
+  }).exec();
 
   if (adminUser.role !== "admin") {
     res.status(403).json({

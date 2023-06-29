@@ -2,6 +2,7 @@ const ObjectId = require("mongoose").Types.ObjectId;
 const jwt = require("jsonwebtoken");
 const md5 = require("md5");
 
+const Country = require("../../models/address/country");
 const User = require("../../models/gratis/user");
 
 exports.loginUser = async (req, res) => {
@@ -26,5 +27,14 @@ exports.loginUser = async (req, res) => {
     }
   } catch (error) {
     res.json({ err: "Fetching user information fails. " + error.message });
+  }
+};
+
+exports.getCountries = async (req, res) => {
+  try {
+    const countries = await Country.find().exec();
+    res.json(countries);
+  } catch (error) {
+    res.json({ err: "Fetching countries fails. " + error.message });
   }
 };

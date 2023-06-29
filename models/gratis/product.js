@@ -33,7 +33,6 @@ const productSchema = new mongoose.Schema(
       trim: true,
       maxlength: 32,
     },
-    markuptype: String,
     price: {
       type: Number,
       required: true,
@@ -42,33 +41,13 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: ObjectId,
-      ref: "Category",
-    },
-    subcats: [
-      {
-        type: ObjectId,
-        ref: "Subcat",
-      },
-    ],
-    parent: {
-      type: ObjectId,
-      ref: "Parent",
+      ref: "GratisCategory",
     },
     quantity: Number,
     sold: {
       type: Number,
       default: 0,
     },
-    variants: [
-      {
-        name: String,
-        quantity: Number,
-        sold: {
-          type: Number,
-          default: 0,
-        },
-      },
-    ],
     images: {
       type: Array,
     },
@@ -82,6 +61,6 @@ const productSchema = new mongoose.Schema(
 
 productSchema.index({ title: "text" });
 
-const Product = conn.model("Product", productSchema);
+const Product = conn.model("GratisProduct", productSchema);
 
 module.exports = Product;

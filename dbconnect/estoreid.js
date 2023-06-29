@@ -4,7 +4,6 @@ const estoreid1 = [
   "63ce6719e138066ea0f9ddd6",
   "63ce29f9e138066ea0f9ddb8",
   "63c50a7fe138066ea0f9d9e6",
-  // Done deleting images up to this point
   "63037ea1899137001636e19e",
   "63218c93c621720f9982975d",
   "63696f8cfb6c2500165335a1",

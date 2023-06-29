@@ -5,7 +5,11 @@ const Country = require("../address/country");
 
 const estoreSchema = new mongoose.Schema(
   {
-    name: String,
+    name: {
+      type: String,
+      required: true,
+    },
+    email: String,
     slug: {
       type: String,
       unique: true,
@@ -23,18 +27,6 @@ const estoreSchema = new mongoose.Schema(
     country: {
       type: ObjectId,
       ref: Country,
-      required: true,
-    },
-    adDivId1: {
-      type: ObjectId,
-      required: true,
-    },
-    adDivId2: {
-      type: ObjectId,
-      required: true,
-    },
-    adDivId3: {
-      type: ObjectId,
       required: true,
     },
     address: String,
@@ -103,7 +95,9 @@ const estoreSchema = new mongoose.Schema(
         domainName: String,
       },
     ],
-    openaiAPI: "",
+    openaiAPI: String,
+    delfee: String,
+    deltime: String,
   },
   { timestamps: true }
 );
