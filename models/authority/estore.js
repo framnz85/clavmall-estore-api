@@ -96,21 +96,6 @@ const estoreSchema = new mongoose.Schema(
       },
     ],
     openaiAPI: String,
-    delfee: String,
-    deltime: String,
-    delloc: String,
-    productLimit: {
-      type: Number,
-      default: 50,
-    },
-    categoryLimit: {
-      type: Number,
-      default: 10,
-    },
-    userLimit: {
-      type: Number,
-      default: 20,
-    },
   },
   { timestamps: true }
 );

@@ -1,7 +1,7 @@
 const ObjectId = require("mongoose").Types.ObjectId;
 const slugify = require("slugify");
 
-const Estore = require("../../models/authority/estore");
+const Estore = require("../../models/gratis/estore");
 
 exports.getEstore = async (req, res) => {
   try {
