@@ -98,6 +98,7 @@ const estoreSchema = new mongoose.Schema(
     openaiAPI: String,
     delfee: String,
     deltime: String,
+    delloc: String,
   },
   { timestamps: true }
 );

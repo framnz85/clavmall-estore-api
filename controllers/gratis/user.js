@@ -27,9 +27,19 @@ exports.getUserDetails = async (req, res) => {
     if (user) {
       res.json(user);
     } else {
-      res.json({
-        err: "Cannot fetch the user details or the user doesn't exist in this store.",
-      });
+      const userWithEmail = await User.findOne({
+        email,
+      })
+        .populate("estoreid")
+        .select("-password -showPass -verifyCode")
+        .exec();
+      if (userWithEmail) {
+        res.json(userWithEmail);
+      } else {
+        res.json({
+          err: "Cannot fetch the user details or the user doesn't exist in this store.",
+        });
+      }
     }
   } catch (error) {
     res.json({ err: "Fetching user information fails. " + error.message });

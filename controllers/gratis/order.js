@@ -22,7 +22,11 @@ exports.userOrder = async (req, res) => {
         .populate("orderedBy")
         .populate("paymentOption")
         .exec();
-      res.json(order);
+      if (order) {
+        res.json(order);
+      } else {
+        res.json({ err: "Sorry, there is no data on this order." });
+      }
     } else {
       res.json({ err: "Cannot fetch this order." });
     }
@@ -68,7 +72,11 @@ exports.adminOrder = async (req, res) => {
       .populate("orderedBy")
       .populate("paymentOption")
       .exec();
-    res.json(order);
+    if (order) {
+      res.json(order);
+    } else {
+      res.json({ err: "Sorry, there is no data on this order." });
+    }
   } catch (error) {
     res.json({ err: "Fetching an order failed. " + error.message });
   }

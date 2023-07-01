@@ -11,12 +11,11 @@ const productSchema = new mongoose.Schema(
       required: true,
       maxlength: 128,
       text: true,
+      index: true,
     },
     slug: {
       type: String,
-      unique: true,
       lowercase: true,
-      index: true,
     },
     description: {
       type: String,
