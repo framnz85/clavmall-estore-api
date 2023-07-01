@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const md5 = require("md5");
 
 const User = require("../../models/gratis/user");
+const Estore = require("../../models/gratis/estore");
 
 exports.getAllUsers = async (req, res) => {
   const estoreid = req.headers.estoreid;
@@ -122,7 +123,20 @@ exports.verifyUserEmail = async (req, res) => {
       .populate("estoreid")
       .select("-password -showPass -verifyCode");
     if (user) {
-      res.json(user);
+      const estore = await Estore.findOneAndUpdate(
+        { estoreid: ObjectId(estoreid) },
+        { status: "active" },
+        {
+          new: true,
+        }
+      );
+      if (estore) {
+        res.json(user);
+      } else {
+        res.json({
+          err: "Verifying your store has failed while we verify your email. Please repeat the process by updating your account.",
+        });
+      }
     } else {
       res.json({
         err: "Sorry, the verification code you submitted is either incorrect or expired!",
