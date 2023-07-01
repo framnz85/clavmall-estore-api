@@ -57,8 +57,27 @@ exports.loadInitProducts = async (req, res) => {
         return { ...product._doc, estoreid };
       });
       const newProducts = await Product.insertMany(copyingProducts);
-      console.log(newProducts);
-      res.json({ ok: true });
+
+      if (newProducts.length) {
+        const categories = await Category.find({
+          estoreid: estoreidFrom,
+        });
+
+        categories.forEach(async (category) => {
+          const newCategory = new Category({
+            name: category.name,
+            slug: category.slug,
+            estoreid,
+          });
+          await newCategory.save();
+          await Product.updateMany(
+            { category: ObjectId(category._id), estoreid },
+            { category: ObjectId(newCategory._id) },
+            { new: true }
+          );
+        });
+        res.json({ ok: true });
+      }
     } else {
       res.json({ err: "Cannot fetch this order." });
     }
@@ -145,7 +164,6 @@ exports.searchProduct = async (req, res) => {
   }
 
   try {
-    console.log(querySearch);
     if (Object.keys(querySearch).length) {
       let products = await Product.find({
         ...querySearch,
