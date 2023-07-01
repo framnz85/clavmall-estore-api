@@ -50,14 +50,26 @@ exports.createNewUser = async (req, res) => {
   const estoreid = req.headers.estoreid;
 
   try {
-    const user = new User({
-      name: req.body.owner,
-      email: req.body.email,
-      password: md5(req.body.password),
-      showPass: req.body.password,
-      role: req.body.role,
-      estoreid: ObjectId(estoreid),
-    });
+    const user = new User(
+      req.body.refid
+        ? {
+            refid: ObjectId(req.body.refid),
+            name: req.body.owner,
+            email: req.body.email,
+            password: md5(req.body.password),
+            showPass: req.body.password,
+            role: req.body.role,
+            estoreid: ObjectId(estoreid),
+          }
+        : {
+            name: req.body.owner,
+            email: req.body.email,
+            password: md5(req.body.password),
+            showPass: req.body.password,
+            role: req.body.role,
+            estoreid: ObjectId(estoreid),
+          }
+    );
     await user.save();
     const token = jwt.sign(
       { email: req.body.email },
