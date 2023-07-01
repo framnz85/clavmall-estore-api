@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 const conn = require("../../dbconnect/gratis");
-const Estore = require("../../models/authority/estore");
+const Estore = require("../../models/gratis/estore");
 
 const userSchema = new mongoose.Schema(
   {

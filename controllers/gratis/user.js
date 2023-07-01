@@ -124,7 +124,7 @@ exports.verifyUserEmail = async (req, res) => {
       .select("-password -showPass -verifyCode");
     if (user) {
       const estore = await Estore.findOneAndUpdate(
-        { estoreid: ObjectId(estoreid) },
+        { _id: ObjectId(estoreid) },
         { status: "active" },
         {
           new: true,
