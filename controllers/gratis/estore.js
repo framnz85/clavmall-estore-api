@@ -12,6 +12,19 @@ exports.getEstore = async (req, res) => {
   }
 };
 
+exports.getEstoreCounters = async (req, res) => {
+  try {
+    const estore = await Estore.findOne({
+      _id: ObjectId(req.params.estoreid),
+    })
+      .select("estoreChange productChange categoryChange paymentChange")
+      .exec();
+    res.json(estore);
+  } catch (error) {
+    res.json({ err: "Fetching store information fails. " + error.message });
+  }
+};
+
 exports.updateEstore = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {

@@ -46,6 +46,7 @@ exports.userOrders = async (req, res) => {
         orderedBy: user._id,
         estoreid: Object(estoreid),
       })
+        .sort({ createdAt: -1 })
         .populate("products.product")
         .populate("orderedBy")
         .populate("paymentOption")
@@ -89,6 +90,7 @@ exports.adminOrders = async (req, res) => {
     const orders = await Order.find({
       estoreid: Object(estoreid),
     })
+      .sort({ createdAt: -1 })
       .populate("products.product")
       .populate("orderedBy")
       .populate("paymentOption")
@@ -225,6 +227,21 @@ exports.updateOrderStatus = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.json({ err: "Updating order status fails. " + error.message });
+  }
+};
+
+exports.deleteAdminOrder = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const orderid = req.params.orderid;
+
+  try {
+    const order = await Order.findOneAndDelete({
+      _id: ObjectId(orderid),
+      estoreid: Object(estoreid),
+    });
+    res.json(order);
+  } catch (error) {
+    res.json({ err: "Deleting order fails. " + error.message });
   }
 };
 

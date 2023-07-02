@@ -8,6 +8,7 @@ const {
   updateCart,
   saveCartOrder,
   updateOrderStatus,
+  deleteAdminOrder,
   deleteOrder,
 } = require("../../controllers/gratis/order");
 const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
@@ -28,6 +29,12 @@ router.put(
   authCheck,
   adminGratisCheck,
   updateOrderStatus
+);
+router.delete(
+  "/gratis/delete-admin-order/:orderid",
+  authCheck,
+  adminGratisCheck,
+  deleteAdminOrder
 );
 router.delete("/gratis/delete-order/:orderid", authCheck, deleteOrder);
 
