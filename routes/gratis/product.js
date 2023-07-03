@@ -9,6 +9,7 @@ const {
   searchProduct,
   updateProduct,
   deleteProduct,
+  checkImageUser,
 } = require("../../controllers/gratis/product");
 const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
 
@@ -39,6 +40,12 @@ router.delete(
   authCheck,
   adminGratisCheck,
   deleteProduct
+);
+router.get(
+  "/gratis/check-image-user/:publicid/:defaultestore",
+  authCheck,
+  adminGratisCheck,
+  checkImageUser
 );
 
 module.exports = router;

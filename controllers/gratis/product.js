@@ -212,3 +212,25 @@ exports.deleteProduct = async (req, res) => {
     res.json({ err: "Updating product failed. " + error.message });
   }
 };
+
+exports.checkImageUser = async (req, res) => {
+  const publicid = req.params.publicid;
+  const defaultestore = req.params.defaultestore;
+
+  try {
+    const product = await Product.findOne({
+      images: {
+        $elemMatch: { public_id: publicid },
+      },
+      estoreid: ObjectId(defaultestore),
+    }).exec();
+
+    if (product) {
+      res.json({ delete: false });
+    } else {
+      res.json({ delete: true });
+    }
+  } catch (error) {
+    res.status(400).send("Checking image user failed.");
+  }
+};
