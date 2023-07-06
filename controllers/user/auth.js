@@ -189,13 +189,22 @@ exports.updateEmailAddress = async (req, res) => {
 exports.updateUserPassword = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const { oldPassword, newPassword } = req.body;
+  let user = {};
   try {
-    const user = await User(estoreid).findOneAndUpdate(
-      { email: req.user.email, password: md5(oldPassword) },
-      { password: md5(newPassword) },
-      { new: true }
-    );
-    if (user) {
+    if (oldPassword) {
+      user = await User(estoreid).findOneAndUpdate(
+        { email: req.user.email, password: md5(oldPassword) },
+        { password: md5(newPassword) },
+        { new: true }
+      );
+    } else {
+      user = await User(estoreid).findOneAndUpdate(
+        { email: req.user.email },
+        { password: md5(newPassword) },
+        { new: true }
+      );
+    }
+    if (user._id) {
       res.json(user);
     } else {
       res.json({ err: "Current password entered is incorrect" });
