@@ -123,20 +123,16 @@ exports.verifyUserEmail = async (req, res) => {
       .populate("estoreid")
       .select("-password -showPass -verifyCode");
     if (user) {
-      const estore = await Estore.findOneAndUpdate(
-        { _id: ObjectId(estoreid) },
-        { status: "active" },
-        {
-          new: true,
-        }
-      );
-      if (estore) {
-        res.json(user);
-      } else {
-        res.json({
-          err: "Verifying your store has failed while we verify your email. Please repeat the process by updating your account.",
-        });
+      if (user.role === "admin") {
+        await Estore.findOneAndUpdate(
+          { _id: ObjectId(estoreid) },
+          { status: "active" },
+          {
+            new: true,
+          }
+        );
       }
+      res.json(user);
     } else {
       res.json({
         err: "Sorry, the verification code you submitted is either incorrect or expired!",
@@ -169,6 +165,46 @@ exports.changePassword = async (req, res) => {
       res.json(user);
     } else {
       res.json({ err: "The old password you have entered is not correct" });
+    }
+  } catch (error) {
+    res.json({ err: "Deleting user fails. " + error.message });
+  }
+};
+
+exports.forgotPassword = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const email = req.body.email;
+  const newpassword = req.body.newpassword;
+  let user = {};
+
+  try {
+    if (estoreid) {
+      user = await User.findOneAndUpdate(
+        {
+          email,
+          estoreid: ObjectId(estoreid),
+        },
+        {
+          password: md5(newpassword),
+        },
+        { new: true }
+      );
+    } else {
+      user = await User.findOneAndUpdate(
+        {
+          email,
+          role: "admin",
+        },
+        {
+          password: md5(newpassword),
+        },
+        { new: true }
+      );
+    }
+    if (user._id) {
+      res.json(user);
+    } else {
+      res.json({ err: "Recovering user fails. No user was found" });
     }
   } catch (error) {
     res.json({ err: "Deleting user fails. " + error.message });

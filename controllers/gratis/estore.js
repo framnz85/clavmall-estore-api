@@ -2,6 +2,7 @@ const ObjectId = require("mongoose").Types.ObjectId;
 const slugify = require("slugify");
 
 const Estore = require("../../models/gratis/estore");
+const User = require("../../models/gratis/user");
 
 exports.getEstore = async (req, res) => {
   try {
@@ -27,8 +28,18 @@ exports.getEstoreCounters = async (req, res) => {
 
 exports.updateEstore = async (req, res) => {
   const estoreid = req.headers.estoreid;
+  let values = req.body;
+  const name = req.body.name;
+
+  if (name) {
+    values = {
+      ...values,
+      slug: slugify(name.toString().toLowerCase()),
+    };
+  }
+
   try {
-    const estore = await Estore.findByIdAndUpdate(estoreid, req.body, {
+    const estore = await Estore.findByIdAndUpdate(estoreid, values, {
       new: true,
     }).exec();
     if (!estore) {
@@ -42,6 +53,7 @@ exports.updateEstore = async (req, res) => {
 };
 
 exports.createEstore = async (req, res) => {
+  const refid = req.body.refid;
   try {
     const checkStoreExist = await Estore.findOne({
       slug: slugify(req.body.name.toString().toLowerCase()),
@@ -58,6 +70,21 @@ exports.createEstore = async (req, res) => {
           country: ObjectId(req.body.country),
         });
         await estore.save();
+
+        if (refid) {
+          const user = await User.findOne({
+            _id: ObjectId(refid),
+            role: "admin",
+          }).exec();
+
+          await Estore.findOneAndUpdate(
+            { _id: user.estoreid },
+            {
+              $inc: { productLimit: 10, categoryLimit: 1, userLimit: 5 },
+            }
+          );
+        }
+
         res.json(estore);
       } else {
         res.json({

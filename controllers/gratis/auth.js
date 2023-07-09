@@ -30,6 +30,32 @@ exports.loginUser = async (req, res) => {
   }
 };
 
+exports.checkEmailExist = async (req, res) => {
+  const email = req.body.email;
+  const estoreid = req.headers.estoreid;
+  let user = {};
+
+  try {
+    if (estoreid) {
+      user = await User.findOne({ email, estoreid: ObjectId(estoreid) }).exec();
+      if (user && user._id) {
+        res.json({ ok: true });
+      } else {
+        res.json({ err: "Email is not yet registered." });
+      }
+    } else {
+      user = await User.findOne({ email, role: "admin" }).exec();
+      if (user && user._id) {
+        res.json({ ok: true });
+      } else {
+        res.json({ err: "Email is not yet registered." });
+      }
+    }
+  } catch (error) {
+    res.json({ err: "Fetching user information fails. " + error.message });
+  }
+};
+
 exports.getCountries = async (req, res) => {
   try {
     const countries = await Country.find().exec();

@@ -7,6 +7,7 @@ const {
   updateUser,
   verifyUserEmail,
   changePassword,
+  forgotPassword,
   deleteUser,
 } = require("../../controllers/gratis/user");
 const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
@@ -17,6 +18,7 @@ router.post("/gratis/user-create", createNewUser);
 router.put("/gratis/user-update", authCheck, updateUser);
 router.put("/gratis/user-verify", authCheck, verifyUserEmail);
 router.put("/gratis/change-password", authCheck, changePassword);
+router.put("/gratis/forgot-password", forgotPassword);
 router.delete(
   "/gratis/user-delete/:userid",
   authCheck,
