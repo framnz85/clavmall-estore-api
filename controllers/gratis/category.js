@@ -2,6 +2,7 @@ const ObjectId = require("mongoose").Types.ObjectId;
 const slugify = require("slugify");
 
 const Category = require("../../models/gratis/category");
+const Estore = require("../../models/gratis/estore");
 
 exports.getCategory = async (req, res) => {
   const slug = req.params.slug;
@@ -35,9 +36,25 @@ exports.addCategory = async (req, res) => {
   const slug = slugify(req.body.name.toString().toLowerCase());
 
   try {
-    const category = new Category({ name, slug, estoreid });
-    await category.save();
-    res.json(category);
+    const estore = await Estore.findOne({
+      _id: ObjectId(estoreid),
+    })
+      .select("categoryLimit")
+      .exec();
+
+    const categoryCount = await Category.countDocuments({
+      estoreid: ObjectId(estoreid),
+    }).exec();
+
+    if (categoryCount < estore.categoryLimit) {
+      const category = new Category({ name, slug, estoreid });
+      await category.save();
+      res.json(category);
+    } else {
+      res.json({
+        err: `Sorry, you already added ${estore.categoryLimit} categories on this account. Go to Upgrades to increase your limit.`,
+      });
+    }
   } catch (error) {
     res.json({ err: "Adding category fails. " + error.message });
   }

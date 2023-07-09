@@ -4,6 +4,7 @@ const slugify = require("slugify");
 const Product = require("../../models/gratis/product");
 const User = require("../../models/gratis/user");
 const Category = require("../../models/gratis/category");
+const Estore = require("../../models/gratis/estore");
 const { populateProduct } = require("./common");
 
 exports.randomItems = async (req, res) => {
@@ -122,22 +123,38 @@ exports.getAdminItems = async (req, res) => {
 exports.addProduct = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
-    const checkExist = await Product.findOne({
-      slug: slugify(req.body.title.toString().toLowerCase()),
+    const estore = await Estore.findOne({
+      _id: ObjectId(estoreid),
+    })
+      .select("productLimit")
+      .exec();
+
+    const productCount = await Product.countDocuments({
       estoreid: ObjectId(estoreid),
-    });
-    if (checkExist) {
-      res.json({
-        err: "Sorry, this product is already existing. Choose another tittle for the product.",
-      });
-    } else {
-      const product = new Product({
-        ...req.body,
+    }).exec();
+
+    if (productCount < estore.productLimit) {
+      const checkExist = await Product.findOne({
         slug: slugify(req.body.title.toString().toLowerCase()),
         estoreid: ObjectId(estoreid),
       });
-      await product.save();
-      res.json(product);
+      if (checkExist) {
+        res.json({
+          err: "Sorry, this product is already existing. Choose another tittle for the product.",
+        });
+      } else {
+        const product = new Product({
+          ...req.body,
+          slug: slugify(req.body.title.toString().toLowerCase()),
+          estoreid: ObjectId(estoreid),
+        });
+        await product.save();
+        res.json(product);
+      }
+    } else {
+      res.json({
+        err: `Sorry, you already uploaded ${estore.productLimit} products on this account. Go to Upgrades to increase your limit.`,
+      });
     }
   } catch (error) {
     res.json({ err: "Listing product failed. " + error.message });
