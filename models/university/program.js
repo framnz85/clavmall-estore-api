@@ -38,6 +38,7 @@ const programSchema = new mongoose.Schema(
       lowercase: true,
     },
     salesPage: String,
+    noEnroll: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
