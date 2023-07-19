@@ -203,8 +203,7 @@ exports.saveCartOrder = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const email = req.user.email;
-  const orderid = req.body.orderid;
-  const orderStatus = req.body.orderStatus;
+  const { orderid, orderStatus, orderedBy } = req.body;
 
   try {
     const user = await User.findOne({ email }).exec();
@@ -212,7 +211,7 @@ exports.updateOrderStatus = async (req, res) => {
       const order = await Order.findOneAndUpdate(
         {
           _id: ObjectId(orderid),
-          orderedBy: ObjectId(user._id),
+          orderedBy: ObjectId(orderedBy),
           estoreid: Object(estoreid),
         },
         {
@@ -220,7 +219,11 @@ exports.updateOrderStatus = async (req, res) => {
         },
         { new: true }
       );
-      res.json(order);
+      if (order) {
+        res.json(order);
+      } else {
+        res.json({ err: "Order does not exist." });
+      }
     } else {
       res.json({ err: "Cannot update the order status." });
     }
