@@ -212,7 +212,7 @@ exports.updateOrderStatus = async (req, res) => {
       const order = await Order.findOneAndUpdate(
         {
           _id: ObjectId(orderid),
-          orderedBy: user._id,
+          orderedBy: ObjectId(user._id),
           estoreid: Object(estoreid),
         },
         {
@@ -225,7 +225,6 @@ exports.updateOrderStatus = async (req, res) => {
       res.json({ err: "Cannot update the order status." });
     }
   } catch (error) {
-    console.log(error);
     res.json({ err: "Updating order status fails. " + error.message });
   }
 };
