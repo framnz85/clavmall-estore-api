@@ -16,6 +16,7 @@ const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
 router.get("/gratis/all-users", authCheck, adminGratisCheck, getAllUsers);
 router.get("/gratis/user-details", authCheck, getUserDetails);
 router.post("/gratis/user-create", createNewUser);
+router.post("/gratis/user-email", sendEmail);
 router.put("/gratis/user-update", authCheck, updateUser);
 router.put("/gratis/user-verify", authCheck, verifyUserEmail);
 router.put("/gratis/change-password", authCheck, changePassword);
@@ -26,7 +27,5 @@ router.delete(
   adminGratisCheck,
   deleteUser
 );
-
-router.post("/gratis/user-email", sendEmail);
 
 module.exports = router;

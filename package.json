@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@sendinblue/client": "^3.3.1",
     "body-parser": "^1.19.0",
     "cloudinary": "^1.26.3",
     "cors": "^2.8.5",
@@ -25,6 +24,7 @@
     "nodemon": "^2.0.12",
     "openai": "^3.3.0",
     "request": "^2.88.2",
+    "sib-api-v3-sdk": "^8.5.0",
     "slugify": "^1.6.0",
     "stripe": "^8.199.0",
     "web-push": "^3.5.0"

@@ -1,7 +1,7 @@
 const ObjectId = require("mongoose").Types.ObjectId;
 const jwt = require("jsonwebtoken");
 const md5 = require("md5");
-const SibApiV3Sdk = require("@sendinblue/client");
+const SibApiV3Sdk = require("sib-api-v3-sdk");
 
 const User = require("../../models/gratis/user");
 const Estore = require("../../models/gratis/estore");
@@ -81,6 +81,42 @@ exports.createNewUser = async (req, res) => {
   } catch (error) {
     res.json({ err: "Creating new user fails. " + error.message });
   }
+};
+
+exports.sendEmail = async (req, res) => {
+  const email = req.body.email;
+  const name = req.body.name;
+  const defaultClient = SibApiV3Sdk.ApiClient.instance;
+
+  let apiKey = defaultClient.authentications["api-key"];
+  apiKey.apiKey = process.env.BREVO_APIKEY;
+
+  let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+  let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail(); // SendSmtpEmail | Values to send a transactional email
+
+  sendSmtpEmail = {
+    to: [
+      {
+        email,
+        name,
+      },
+    ],
+    templateId: 92,
+    headers: {
+      "X-Mailin-custom":
+        "custom_header_1:custom_value_1|custom_header_2:custom_value_2",
+    },
+  };
+
+  apiInstance.sendTransacEmail(sendSmtpEmail).then(
+    function (data) {
+      res.json({ ok: true });
+    },
+    function (error) {
+      res.json({ err: "Sending welcome email fails. " + error.message });
+    }
+  );
 };
 
 exports.updateUser = async (req, res) => {
@@ -225,24 +261,4 @@ exports.deleteUser = async (req, res) => {
   } catch (error) {
     res.json({ err: "Deleting user fails. " + error.message });
   }
-};
-
-exports.sendEmail = async (req, res) => {
-  const apiInstance = new SibApiV3Sdk.AccountApi();
-
-  // Configure API key authorization: apiKey
-
-  apiInstance.setApiKey(
-    SibApiV3Sdk.AccountApiApiKeys.apiKey,
-    process.env.BREVO_APIKEY
-  );
-
-  apiInstance.getAccount().then(
-    function (data) {
-      console.log("API called successfully. Returned data: ", data.body);
-    },
-    function (error) {
-      console.error(error);
-    }
-  );
 };
