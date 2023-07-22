@@ -1,7 +1,7 @@
 const ObjectId = require("mongoose").Types.ObjectId;
 const jwt = require("jsonwebtoken");
 const md5 = require("md5");
-const SibApiV3Sdk = require("sib-api-v3-sdk");
+const SibApiV3Sdk = require("@sendinblue/client");
 
 const User = require("../../models/gratis/user");
 const Estore = require("../../models/gratis/estore");
@@ -228,21 +228,18 @@ exports.deleteUser = async (req, res) => {
 };
 
 exports.sendEmail = async (req, res) => {
-  const defaultClient = SibApiV3Sdk.ApiClient.instance;
+  const apiInstance = new SibApiV3Sdk.AccountApi();
 
-  // Configure API key authorization: api-key
-  let apiKey = defaultClient.authentications["api-key"];
-  apiKey.apiKey =
-    "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";
+  // Configure API key authorization: apiKey
 
-  let apiInstance = new SibApiV3Sdk.ContactsApi();
+  apiInstance.setApiKey(
+    SibApiV3Sdk.AccountApiApiKeys.apiKey,
+    process.env.BREVO_APIKEY
+  );
 
-  let createContact = new SibApiV3Sdk.CreateContact(); // CreateContact | Values to create a contact
-  createContact = { email: "davgros.85@gmail.com" };
-
-  apiInstance.createContact(createContact).then(
+  apiInstance.getAccount().then(
     function (data) {
-      console.log("API called successfully. Returned data: " + data);
+      console.log("API called successfully. Returned data: ", data.body);
     },
     function (error) {
       console.error(error);
