@@ -9,6 +9,7 @@ const {
   changePassword,
   forgotPassword,
   deleteUser,
+  sendEmail,
 } = require("../../controllers/gratis/user");
 const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
 
@@ -25,5 +26,7 @@ router.delete(
   adminGratisCheck,
   deleteUser
 );
+
+router.post("/gratis/user-email", sendEmail);
 
 module.exports = router;

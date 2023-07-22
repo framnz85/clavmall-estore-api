@@ -1,6 +1,7 @@
 const ObjectId = require("mongoose").Types.ObjectId;
 const jwt = require("jsonwebtoken");
 const md5 = require("md5");
+const SibApiV3Sdk = require("sib-api-v3-sdk");
 
 const User = require("../../models/gratis/user");
 const Estore = require("../../models/gratis/estore");
@@ -224,4 +225,27 @@ exports.deleteUser = async (req, res) => {
   } catch (error) {
     res.json({ err: "Deleting user fails. " + error.message });
   }
+};
+
+exports.sendEmail = async (req, res) => {
+  const defaultClient = SibApiV3Sdk.ApiClient.instance;
+
+  // Configure API key authorization: api-key
+  let apiKey = defaultClient.authentications["api-key"];
+  apiKey.apiKey =
+    "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";
+
+  let apiInstance = new SibApiV3Sdk.ContactsApi();
+
+  let createContact = new SibApiV3Sdk.CreateContact(); // CreateContact | Values to create a contact
+  createContact = { email: "davgros.85@gmail.com" };
+
+  apiInstance.createContact(createContact).then(
+    function (data) {
+      console.log("API called successfully. Returned data: " + data);
+    },
+    function (error) {
+      console.error(error);
+    }
+  );
 };
