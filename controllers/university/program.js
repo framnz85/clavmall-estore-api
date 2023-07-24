@@ -170,6 +170,22 @@ exports.getProgramSales = async (req, res) => {
   }
 };
 
+exports.getProgramSalesPerIndex = async (req, res) => {
+  const { progid, index } = req.params;
+  try {
+    const programSales = await ProgramSale.findOne({
+      progid: ObjectId(progid),
+    });
+    res.json({
+      salesPage: programSales.salesPage[parseInt(index)],
+      more: programSales.salesPage[parseInt(index) + 1] ? true : false,
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({ err: "Fetching program sales page failed." });
+  }
+};
+
 exports.copySalesTemp = async (req, res) => {
   const { saleid, progid } = req.params;
   try {
