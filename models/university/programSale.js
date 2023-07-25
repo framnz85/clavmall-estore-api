@@ -12,8 +12,8 @@ const programSaleSchema = new mongoose.Schema(
       type: ObjectId,
       ref: "User",
     },
-    salesPage: Array,
-    salesPageTemp: Array,
+    title: String,
+    salesPagesCount: Number,
   },
   { timestamps: true }
 );

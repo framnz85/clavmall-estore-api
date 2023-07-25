@@ -23,8 +23,6 @@ const {
   updateProgram,
   updateSalesPage,
   getProgramSales,
-  getProgramSalesPerIndex,
-  copySalesTemp,
 } = require("../../controllers/university/program");
 const {
   generateAuthToken,
@@ -49,10 +47,6 @@ router.get("/university/login-user", uniLogAuthCheck, getUser);
 router.get("/university/get-user", uniLogAuthCheck, getUserByToken);
 router.get("/university/program/:slug", getProgram);
 router.get("/university/program-sales/:progid", getProgramSales);
-router.get(
-  "/university/program-sales-perindex/:progid/:index",
-  getProgramSalesPerIndex
-);
 router.get("/university/program", getPrograms);
 router.get("/university/dashboard/:userid", getDashboard);
 router.get("/university/myprogram", uniLogAuthCheck, getMyPrograms);
@@ -100,11 +94,6 @@ router.put(
   "/university/update-sales/:progid",
   uniLogAuthCheck,
   updateSalesPage
-);
-router.put(
-  "/university/update-copysales/:saleid/:progid",
-  uniLogAuthCheck,
-  copySalesTemp
 );
 
 module.exports = router;

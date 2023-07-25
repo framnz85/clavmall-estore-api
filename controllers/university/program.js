@@ -93,61 +93,48 @@ exports.updateSalesPage = async (req, res) => {
   const email = req.user.email;
   const password = req.user.password;
   const progid = req.params.progid;
-  const { saleid, salesPage, index } = req.body;
+  const { saleid, salesPagesCount } = req.body;
   try {
     const result = await User.findOne({ email, password });
     if (result) {
-      if (index === 1) {
-        const existSale = saleid
-          ? await ProgramSale.findOne({
-              _id: ObjectId(saleid),
-              progid: ObjectId(progid),
-              owner: result._id,
-            })
-          : await ProgramSale.findOne({
-              progid: ObjectId(progid),
-              owner: result._id,
-            });
-        if (existSale) {
-          const updateSale = await ProgramSale.findOneAndUpdate(
-            {
-              _id: existSale._id,
-              progid: ObjectId(progid),
-              owner: result._id,
-            },
-            { salesPageTemp: salesPage }
-          );
-          if (updateSale) {
-            res.json({ ok: true });
-          } else {
-            res.json({ err: "Error updating first program sales page." });
-          }
-        } else {
-          new ProgramSale({
-            progid: ObjectId(progid),
-            owner: result._id,
-            salesPageTemp: salesPage,
-          }).save((error, result) => {
-            if (error) {
-              res.json({ err: "Error saving program sales page." });
-            } else {
-              res.json({ saleid: result._id });
-            }
-          });
-        }
-      } else {
-        const updateSale = await ProgramSale.findOneAndUpdate(
-          {
+      const existSale = saleid
+        ? await ProgramSale.findOne({
             _id: ObjectId(saleid),
             progid: ObjectId(progid),
             owner: result._id,
+          })
+        : await ProgramSale.findOne({
+            progid: ObjectId(progid),
+            owner: result._id,
+          });
+      if (existSale) {
+        const updateSale = await ProgramSale.findOneAndUpdate(
+          {
+            _id: existSale._id,
+            progid: ObjectId(progid),
+            owner: result._id,
           },
-          { $push: { salesPageTemp: salesPage } }
+          { salesPagesCount },
+          { new: true }
         );
         if (updateSale) {
-          res.json({ ok: true });
+          res.json(updateSale);
         } else {
-          res.json({ err: "Error updating program sales page." });
+          res.json({ err: "Error updating first program sales page." });
+        }
+      } else {
+        const newProgSale = new ProgramSale({
+          progid: ObjectId(progid),
+          owner: result._id,
+          salesPagesCount,
+        });
+
+        await newProgSale.save();
+
+        if (newProgSale) {
+          res.json(newProgSale);
+        } else {
+          res.json({ err: "Error saving program sales page." });
         }
       }
     } else {
@@ -163,51 +150,9 @@ exports.getProgramSales = async (req, res) => {
   try {
     const salesPage = await ProgramSale.findOne({
       progid: ObjectId(progid),
-    }).select("-salesPageTemp");
+    }).sort("createdAt");
     res.json(salesPage);
   } catch (error) {
-    res.json({ err: "Fetching program sales page failed." });
-  }
-};
-
-exports.getProgramSalesPerIndex = async (req, res) => {
-  const { progid, index } = req.params;
-  try {
-    const programSales = await ProgramSale.findOne({
-      progid: ObjectId(progid),
-    });
-    res.json({
-      salesPage: programSales.salesPage[parseInt(index)],
-      more: programSales.salesPage[parseInt(index) + 1] ? true : false,
-    });
-  } catch (error) {
-    console.log(error);
-    res.json({ err: "Fetching program sales page failed." });
-  }
-};
-
-exports.copySalesTemp = async (req, res) => {
-  const { saleid, progid } = req.params;
-  try {
-    const existSale = await ProgramSale.findOne({
-      _id: ObjectId(saleid),
-      progid: ObjectId(progid),
-    });
-    if (existSale) {
-      const salesPageTemp = existSale.salesPageTemp;
-      const salesPage = await ProgramSale.findOneAndUpdate(
-        {
-          _id: ObjectId(saleid),
-          progid: ObjectId(progid),
-        },
-        { $set: { salesPage: salesPageTemp } }
-      );
-      if (salesPage) res.json({ ok: true });
-    } else {
-      res.json({ err: "Program sales page doesn't exist." });
-    }
-  } catch (error) {
-    console.log(error);
     res.json({ err: "Fetching program sales page failed." });
   }
 };
