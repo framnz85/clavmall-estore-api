@@ -69,12 +69,13 @@ exports.updateProgram = async (req, res) => {
   try {
     const result = await User.findOne({ email, password });
     if (result) {
+      delete req.body.productChange;
       const update = await Program.findOneAndUpdate(
         {
           _id: ObjectId(progid),
           owner: result._id,
         },
-        req.body
+        { ...req.body, $inc: { productChange: 1 } }
       );
       if (update) {
         res.json({ ok: true });
@@ -85,6 +86,7 @@ exports.updateProgram = async (req, res) => {
       res.json({ err: "Error fetching user details." });
     }
   } catch (error) {
+    console.log(error);
     res.json({ err: "Updating program failed." });
   }
 };
@@ -93,28 +95,18 @@ exports.updateSalesPage = async (req, res) => {
   const email = req.user.email;
   const password = req.user.password;
   const progid = req.params.progid;
-  const { saleid, salesPagesCount } = req.body;
+  const { saleid, title, salesPagesCount } = req.body;
   try {
     const result = await User.findOne({ email, password });
     if (result) {
-      const existSale = saleid
-        ? await ProgramSale.findOne({
+      if (saleid) {
+        const updateSale = await ProgramSale.findOneAndUpdate(
+          {
             _id: ObjectId(saleid),
             progid: ObjectId(progid),
             owner: result._id,
-          })
-        : await ProgramSale.findOne({
-            progid: ObjectId(progid),
-            owner: result._id,
-          });
-      if (existSale) {
-        const updateSale = await ProgramSale.findOneAndUpdate(
-          {
-            _id: existSale._id,
-            progid: ObjectId(progid),
-            owner: result._id,
           },
-          { salesPagesCount },
+          { title, salesPagesCount },
           { new: true }
         );
         if (updateSale) {
@@ -126,6 +118,7 @@ exports.updateSalesPage = async (req, res) => {
         const newProgSale = new ProgramSale({
           progid: ObjectId(progid),
           owner: result._id,
+          title,
           salesPagesCount,
         });
 
@@ -148,11 +141,33 @@ exports.updateSalesPage = async (req, res) => {
 exports.getProgramSales = async (req, res) => {
   const { progid } = req.params;
   try {
-    const salesPage = await ProgramSale.findOne({
+    const salesPage = await ProgramSale.find({
       progid: ObjectId(progid),
     }).sort("createdAt");
     res.json(salesPage);
   } catch (error) {
     res.json({ err: "Fetching program sales page failed." });
+  }
+};
+
+exports.deleteProgramSales = async (req, res) => {
+  const email = req.user.email;
+  const password = req.user.password;
+  const { progid, saleid } = req.params;
+
+  try {
+    const result = await User.findOne({ email, password });
+    if (result) {
+      const salesPage = await ProgramSale.findOneAndDelete({
+        _id: ObjectId(saleid),
+        progid: ObjectId(progid),
+        owner: result._id,
+      });
+      res.json(salesPage);
+    } else {
+      res.json({ err: "Error fetching user details." });
+    }
+  } catch (error) {
+    res.json({ err: "Deleting program sales page failed." });
   }
 };

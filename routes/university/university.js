@@ -23,6 +23,7 @@ const {
   updateProgram,
   updateSalesPage,
   getProgramSales,
+  deleteProgramSales,
 } = require("../../controllers/university/program");
 const {
   generateAuthToken,
@@ -94,6 +95,12 @@ router.put(
   "/university/update-sales/:progid",
   uniLogAuthCheck,
   updateSalesPage
+);
+
+router.delete(
+  "/university/delete-sales/:progid/:saleid",
+  uniLogAuthCheck,
+  deleteProgramSales
 );
 
 module.exports = router;
