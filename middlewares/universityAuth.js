@@ -28,7 +28,7 @@ exports.uniRegAuthCheck = async (req, res, next) => {
     const jwtDecode = jwt_decode(req.headers.authtoken);
     const user = await UniUser.findOne({ email: jwtDecode.email }).exec();
     if (user) {
-      res.json({ err: "Token email already exist. Use another email." });
+      res.json({ err: "Email Address already exist. Please login using it.", exist: true });
     } else {
       req.user = jwtDecode;
       next();
