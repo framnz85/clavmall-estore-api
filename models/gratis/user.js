@@ -53,6 +53,10 @@ const userSchema = new mongoose.Schema(
     },
     addInstruct: String,
     verifyCode: String,
+    nextSteps: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
