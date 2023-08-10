@@ -10,6 +10,7 @@ const {
   forgotPassword,
   deleteUser,
   sendEmail,
+  userEndPoint,
 } = require("../../controllers/gratis/user");
 const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
 
@@ -21,6 +22,7 @@ router.put("/gratis/user-update", authCheck, updateUser);
 router.put("/gratis/user-verify", authCheck, verifyUserEmail);
 router.put("/gratis/change-password", authCheck, changePassword);
 router.put("/gratis/forgot-password", forgotPassword);
+router.put("/gratis/user-endpoint", authCheck, userEndPoint);
 router.delete(
   "/gratis/user-delete/:userid",
   authCheck,

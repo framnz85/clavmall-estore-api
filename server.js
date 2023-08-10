@@ -4,11 +4,13 @@ const cors = require("cors");
 const { readdirSync } = require("fs");
 require("dotenv").config();
 
-const { rewardDailyCheck } = require("./controllers/university/rewards");
+// const { rewardDailyCheck } = require("./controllers/university/rewards");
+const { biDailyCheck } = require("./controllers/gratis/webpush");
 
 const app = express();
 
-rewardDailyCheck();
+// rewardDailyCheck();
+biDailyCheck();
 
 app.use(morgan("dev"));
 app.use(express.json({ limit: "2mb" }));

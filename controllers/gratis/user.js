@@ -5,6 +5,9 @@ const SibApiV3Sdk = require("sib-api-v3-sdk");
 
 const User = require("../../models/gratis/user");
 const Estore = require("../../models/gratis/estore");
+const Notification = require("../../models/authority/notification");
+
+const { sendPushNotification } = require("../../notification/webpush");
 
 exports.getAllUsers = async (req, res) => {
   const estoreid = req.headers.estoreid;
@@ -260,5 +263,34 @@ exports.deleteUser = async (req, res) => {
     res.json(user);
   } catch (error) {
     res.json({ err: "Deleting user fails. " + error.message });
+  }
+};
+
+exports.userEndPoint = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const email = req.user.email;
+  const endPoint = req.body.endPoint;
+
+  try {
+    const user = await User.findOneAndUpdate(
+      { email, estoreid: ObjectId(estoreid) },
+      { endPoint },
+      {
+        new: true,
+      }
+    )
+      .populate("estoreid")
+      .select("-password -showPass -verifyCode");
+
+    if (user) {
+      const dataText = await Notification.findOne({ type: "intro" }).exec();
+      endPoint.forEach((endP) => {
+        sendPushNotification(JSON.parse(endP), dataText);
+      });
+
+      res.json(user);
+    }
+  } catch (error) {
+    res.json({ err: "Creating new user fails. " + error.message });
   }
 };
