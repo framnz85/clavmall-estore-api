@@ -231,6 +231,7 @@ exports.deleteProduct = async (req, res) => {
 };
 
 exports.checkImageUser = async (req, res) => {
+  const estoreid = req.headers.estoreid;
   const publicid = req.params.publicid;
   const defaultestore = req.params.defaultestore;
 
@@ -243,7 +244,11 @@ exports.checkImageUser = async (req, res) => {
     }).exec();
 
     if (product) {
-      res.json({ delete: false });
+      if (estoreid === defaultestore) {
+        res.json({ delete: true });
+      } else {
+        res.json({ delete: false });
+      }
     } else {
       res.json({ delete: true });
     }

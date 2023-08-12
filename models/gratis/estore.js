@@ -64,6 +64,10 @@ const estoreSchema = new mongoose.Schema(
       type: Number,
       default: 20,
     },
+    notify: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
