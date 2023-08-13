@@ -6,20 +6,43 @@ const Notification = require("../../models/authority/notification");
 const { sendPushNotification } = require("../../notification/webpush");
 
 exports.biDailyCheck = () => {
+  let cycleNotify = true;
   setInterval(async () => {
     const users = await User.find(
       {
         $nor: [{ endPoint: { $exists: false } }, { endPoint: { $size: 0 } }],
         role: "admin",
       },
-      { endPoint: 1, estoreid: 1, emailConfirm: 1 }
+      { endPoint: 1, estoreid: 1, emailConfirm: 1, dayNotify: 1 }
     );
 
     const dataText = await Notification.findOne({ type: "cycle" }).exec();
 
     users.forEach(async (user) => {
       user.endPoint.forEach(async (endP) => {
-        sendPushNotification(JSON.parse(endP), dataText);
+        if (cycleNotify) {
+          sendPushNotification(JSON.parse(endP), dataText);
+        } else {
+          const day = user.dayNotify
+            ? user.dayNotify === 0
+              ? 1
+              : user.dayNotify
+            : 1;
+          const dailyText = await Notification.findOne({
+            type: "daily",
+            day,
+          }).exec();
+          if (dailyText) {
+            sendPushNotification(JSON.parse(endP), dailyText);
+            await User.findOneAndUpdate(
+              { _id: user._id },
+              { dayNotify: day + 1 },
+              {
+                new: true,
+              }
+            );
+          }
+        }
         if (!user.emailConfirm) {
           const estore = await Estore.findOne({
             _id: ObjectId(user.estoreid),
@@ -39,6 +62,7 @@ exports.biDailyCheck = () => {
           }
         }
       });
+      cycleNotify = !cycleNotify;
     });
   }, 172800000);
 };
