@@ -64,7 +64,7 @@ exports.biDailyCheck = () => {
       });
       cycleNotify = !cycleNotify;
     });
-  }, 172800000);
+  }, 86400000);
 };
 
 // 172800000
