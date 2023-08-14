@@ -6,23 +6,23 @@ const Notification = require("../../models/authority/notification");
 const { sendPushNotification } = require("../../notification/webpush");
 
 exports.biDailyCheck = () => {
-  let cycleNotify = true;
+  let cycleNotify = 1;
   setInterval(async () => {
     const users = await User.find(
       {
         $nor: [{ endPoint: { $exists: false } }, { endPoint: { $size: 0 } }],
         role: "admin",
       },
-      { endPoint: 1, estoreid: 1, emailConfirm: 1, dayNotify: 1 }
+      { endPoint: 1, estoreid: 1, emailConfirm: 1, dayNotify: 1, daySales: 1 }
     );
 
     const dataText = await Notification.findOne({ type: "cycle" }).exec();
 
     users.forEach(async (user) => {
       user.endPoint.forEach(async (endP) => {
-        if (cycleNotify) {
+        if (cycleNotify === 1) {
           sendPushNotification(JSON.parse(endP), dataText);
-        } else {
+        } else if (cycleNotify === 2) {
           const day = user.dayNotify
             ? user.dayNotify === 0
               ? 1
@@ -37,6 +37,26 @@ exports.biDailyCheck = () => {
             await User.findOneAndUpdate(
               { _id: user._id },
               { dayNotify: day + 1 },
+              {
+                new: true,
+              }
+            );
+          }
+        } else {
+          const day = user.daySales
+            ? user.daySales === 0
+              ? 1
+              : user.daySales
+            : 1;
+          const dailyText = await Notification.findOne({
+            type: "sales",
+            day,
+          }).exec();
+          if (dailyText) {
+            sendPushNotification(JSON.parse(endP), dailyText);
+            await User.findOneAndUpdate(
+              { _id: user._id },
+              { daySales: day + 1 },
               {
                 new: true,
               }
@@ -62,9 +82,15 @@ exports.biDailyCheck = () => {
           }
         }
       });
-      cycleNotify = !cycleNotify;
+      if (cycleNotify === 3) {
+        cycleNotify = 1;
+      } else {
+        cycleNotify++;
+      }
     });
-  }, 86400000);
+  }, 64800000);
 };
 
 // 172800000
+// 86400000
+// 64800000

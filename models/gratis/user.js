@@ -66,6 +66,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    daySales: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
