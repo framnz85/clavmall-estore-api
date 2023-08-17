@@ -132,6 +132,13 @@ exports.updateUser = async (req, res) => {
   }
 
   try {
+    const checkUser = await User.findOne({
+      email,
+      estoreid: ObjectId(estoreid),
+    });
+    if (checkUser.verifyCode && checkUser.verifyCode.length > 0) {
+      objValues = { ...req.body, verifyCode: checkUser.verifyCode };
+    }
     const user = await User.findOneAndUpdate(
       { email, estoreid: ObjectId(estoreid) },
       objValues,
@@ -140,7 +147,7 @@ exports.updateUser = async (req, res) => {
       }
     )
       .populate("estoreid")
-      .select("-password -showPass -verifyCode");
+      .select("-password -showPass");
     res.json(user);
   } catch (error) {
     res.json({ err: "Creating new user fails. " + error.message });
