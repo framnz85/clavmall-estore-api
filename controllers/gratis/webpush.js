@@ -5,7 +5,43 @@ const Notification = require("../../models/authority/notification");
 
 const { sendPushNotification } = require("../../notification/webpush");
 
-exports.biDailyCheck = () => {
+const sendDailyNotif = async (endP, user) => {
+  const day = user.dayNotify ? (user.dayNotify === 0 ? 1 : user.dayNotify) : 1;
+  const dailyText = await Notification.findOne({
+    type: "daily",
+    day,
+  }).exec();
+  if (dailyText) {
+    sendPushNotification(JSON.parse(endP), dailyText);
+    await User.findOneAndUpdate(
+      { _id: user._id },
+      { dayNotify: day + 1 },
+      {
+        new: true,
+      }
+    );
+  }
+};
+
+const sendSalesNotif = async (endP, user) => {
+  const day = user.daySales ? (user.daySales === 0 ? 1 : user.daySales) : 1;
+  const dailyText = await Notification.findOne({
+    type: "sales",
+    day,
+  }).exec();
+  if (dailyText) {
+    sendPushNotification(JSON.parse(endP), dailyText);
+    await User.findOneAndUpdate(
+      { _id: user._id },
+      { daySales: day + 1 },
+      {
+        new: true,
+      }
+    );
+  }
+};
+
+exports.gratisWebPush = () => {
   let cycleNotify = 1;
   setInterval(async () => {
     const users = await User.find(
@@ -16,51 +52,20 @@ exports.biDailyCheck = () => {
       { endPoint: 1, estoreid: 1, emailConfirm: 1, dayNotify: 1, daySales: 1 }
     );
 
-    const dataText = await Notification.findOne({ type: "cycle" }).exec();
-
     users.forEach(async (user) => {
       user.endPoint.forEach(async (endP) => {
         if (cycleNotify === 1) {
+          const dataText = await Notification.findOne({ type: "cycle" }).exec();
+          const randomNum = Math.floor(Math.random() * 100);
+          dataText.tag = dataText.tag + randomNum;
           sendPushNotification(JSON.parse(endP), dataText);
         } else if (cycleNotify === 2) {
-          const day = user.dayNotify
-            ? user.dayNotify === 0
-              ? 1
-              : user.dayNotify
-            : 1;
-          const dailyText = await Notification.findOne({
-            type: "daily",
-            day,
-          }).exec();
-          if (dailyText) {
-            sendPushNotification(JSON.parse(endP), dailyText);
-            await User.findOneAndUpdate(
-              { _id: user._id },
-              { dayNotify: day + 1 },
-              {
-                new: true,
-              }
-            );
-          }
+          sendDailyNotif(endP, user);
         } else {
-          const day = user.daySales
-            ? user.daySales === 0
-              ? 1
-              : user.daySales
-            : 1;
-          const dailyText = await Notification.findOne({
-            type: "sales",
-            day,
-          }).exec();
-          if (dailyText) {
-            sendPushNotification(JSON.parse(endP), dailyText);
-            await User.findOneAndUpdate(
-              { _id: user._id },
-              { daySales: day + 1 },
-              {
-                new: true,
-              }
-            );
+          if (user.dayNotify < 5) {
+            sendDailyNotif(endP, user);
+          } else {
+            sendSalesNotif(endP, user);
           }
         }
         if (!user.emailConfirm) {
@@ -68,11 +73,12 @@ exports.biDailyCheck = () => {
             _id: ObjectId(user.estoreid),
           }).exec();
           if (estore) {
+            const randomNum = Math.floor(Math.random() * 100);
             const confirmText = {
               title: "Needs To Verify Your Account",
               body: "Please be reminded in order to fully use Gratis Clavstore, you need to verify your email address first",
               icon: "https://clavstoreimages.etnants.com/estore_images/gratis.png",
-              tag: "verify-email",
+              tag: "verify-email" + randomNum,
               actions: [{ action: "access", title: "Verify Email" }],
               data: {
                 url: "/" + estore.slug + "/user/account",
@@ -82,7 +88,7 @@ exports.biDailyCheck = () => {
           }
         }
       });
-      if (cycleNotify === 3) {
+      if (cycleNotify >= 3) {
         cycleNotify = 1;
       } else {
         cycleNotify++;
