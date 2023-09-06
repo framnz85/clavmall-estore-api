@@ -43,6 +43,24 @@ exports.singleItems = async (req, res) => {
   }
 };
 
+exports.itemsByBarcode = async (req, res) => {
+  const barcode = req.params.barcode;
+  const estoreid = req.headers.estoreid;
+
+  try {
+    let products = await Product.find({
+      barcode,
+      estoreid: ObjectId(estoreid),
+    }).exec();
+
+    products = await populateProduct(products);
+
+    res.json(products);
+  } catch (error) {
+    res.json({ err: "Getting a product failed." + error.message });
+  }
+};
+
 exports.loadInitProducts = async (req, res) => {
   const estoreidFrom = Object("613216389261e003d696cc65");
   const estoreid = ObjectId(req.headers.estoreid);

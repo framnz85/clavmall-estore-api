@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   randomItems,
   singleItems,
+  itemsByBarcode,
   loadInitProducts,
   getAdminItems,
   addProduct,
@@ -15,6 +16,7 @@ const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
 
 router.get("/gratis/products/random/:count", randomItems);
 router.get("/gratis/get-product/:slug", singleItems);
+router.get("/gratis/get-product-by-barcode/:barcode", itemsByBarcode);
 router.get(
   "/gratis/init-product",
   authCheck,

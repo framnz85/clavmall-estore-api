@@ -42,6 +42,11 @@ const productSchema = new mongoose.Schema(
       type: ObjectId,
       ref: "GratisCategory",
     },
+    barcode: {
+      type: String,
+      maxlength: 32,
+      unique: true,
+    },
     quantity: Number,
     sold: {
       type: Number,
