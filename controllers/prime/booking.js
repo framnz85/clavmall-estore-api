@@ -6,7 +6,19 @@ exports.addBooking = async (req, res) => {
   try {
     const result = await Booking.findOne({ email });
     if (result) {
-      res.json({ ...result._doc, month: result.month + 1 });
+      if (result.month < month) {
+        await Booking.findOneAndUpdate(
+          { email },
+          { phone, muncity: ques1, incomeGoal: ques4, investment: ques5, month }
+        );
+        res.json({ ...result._doc, month });
+      } else {
+        await Booking.findOneAndUpdate(
+          { email },
+          { phone, muncity: ques1, incomeGoal: ques4, investment: ques5 }
+        );
+        res.json({ ...result._doc, month: result.month + 1 });
+      }
     } else {
       const booking = new Booking({
         name,
