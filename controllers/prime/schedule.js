@@ -1,9 +1,9 @@
 const Schedule = require("../../models/prime/schedule");
 
 exports.getSchedule = async (req, res) => {
-  const month = req.params.month;
+  const schedType = req.params.schedType;
   try {
-    const schedule = await Schedule.findOne({ month });
+    const schedule = await Schedule.findOne({ schedType });
     res.json(schedule);
   } catch (error) {
     res.json({ err: "Getting schedule fails. " + error.message });

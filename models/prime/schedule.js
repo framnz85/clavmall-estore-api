@@ -7,23 +7,11 @@ const scheduleSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    email: {
-      type: String,
-    },
-    phone: {
-      type: String,
-    },
-    muncity: {
-      type: String,
-    },
-    incomeGoal: {
-      type: String,
-    },
-    investment: {
-      type: String,
-    },
-    month: {
+    schedType: {
       type: Number,
+    },
+    src: {
+      type: String,
     },
   },
   { timestamps: true }

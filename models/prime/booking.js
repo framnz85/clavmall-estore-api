@@ -13,6 +13,9 @@ const bookingSchema = new mongoose.Schema(
     phone: {
       type: String,
     },
+    province: {
+      type: String,
+    },
     muncity: {
       type: String,
     },
@@ -22,7 +25,13 @@ const bookingSchema = new mongoose.Schema(
     investment: {
       type: String,
     },
-    month: {
+    hasStore: {
+      type: Boolean,
+    },
+    isSupermarket: {
+      type: Boolean,
+    },
+    schedType: {
       type: Number,
     },
   },
