@@ -105,7 +105,7 @@ exports.sendEmail = async (req, res) => {
         name,
       },
     ],
-    templateId: 92,
+    templateId: 179,
     headers: {
       "X-Mailin-custom":
         "custom_header_1:custom_value_1|custom_header_2:custom_value_2",
