@@ -6,7 +6,9 @@ const User = require("../../models/gratis/user");
 
 exports.getEstore = async (req, res) => {
   try {
-    const estore = await Estore.findOne({ slug: req.params.slug }).exec();
+    const estore = await Estore.findOne({ slug: req.params.slug })
+      .populate("country")
+      .exec();
     res.json(estore);
   } catch (error) {
     res.json({ err: "Fetching store information fails. " + error.message });
@@ -18,6 +20,7 @@ exports.getEstoreCounters = async (req, res) => {
     const estore = await Estore.findOne({
       _id: ObjectId(req.params.estoreid),
     })
+      .populate("country")
       .select("estoreChange productChange categoryChange paymentChange")
       .exec();
     res.json(estore);
@@ -41,7 +44,9 @@ exports.updateEstore = async (req, res) => {
   try {
     const estore = await Estore.findByIdAndUpdate(estoreid, values, {
       new: true,
-    }).exec();
+    })
+      .populate("country")
+      .exec();
     if (!estore) {
       res.json({ err: "No eStore exist under ID: " + estoreid });
       return;

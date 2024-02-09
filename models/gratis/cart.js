@@ -5,6 +5,11 @@ const conn = require("../../dbconnect/gratis");
 const cartSchema = new mongoose.Schema(
   {
     estoreid: ObjectId,
+    orderType: {
+      type: String,
+      default: "checkout",
+      enum: ["checkout", "pos"],
+    },
     products: [
       {
         product: {
@@ -16,7 +21,6 @@ const cartSchema = new mongoose.Schema(
       },
     ],
     cartTotal: Number,
-    delfee: Number,
     discount: Number,
     servefee: Number,
     grandTotal: Number,

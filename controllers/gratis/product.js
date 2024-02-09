@@ -108,8 +108,15 @@ exports.loadInitProducts = async (req, res) => {
 exports.getAdminItems = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
-    const { sortkey, sort, currentPage, pageSize, searchQuery, category } =
-      req.body;
+    const {
+      sortkey,
+      sort,
+      currentPage,
+      pageSize,
+      searchQuery,
+      category,
+      barcode,
+    } = req.body;
 
     let searchObj = searchQuery
       ? { $text: { $search: searchQuery }, estoreid: ObjectId(estoreid) }
@@ -119,6 +126,13 @@ exports.getAdminItems = async (req, res) => {
       searchObj = {
         ...searchObj,
         category: ObjectId(category),
+      };
+    }
+
+    if (barcode) {
+      searchObj = {
+        ...searchObj,
+        barcode: { $ne: null },
       };
     }
 

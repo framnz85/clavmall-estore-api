@@ -8,6 +8,11 @@ const orderSchema = new mongoose.Schema(
       type: String,
       index: true,
     },
+    orderType: {
+      type: String,
+      default: "web",
+      enum: ["web", "pos"],
+    },
     products: [
       {
         product: {
@@ -38,6 +43,7 @@ const orderSchema = new mongoose.Schema(
     cartTotal: Number,
     delfee: Number,
     grandTotal: Number,
+    cash: Number,
     orderedBy: { type: ObjectId, ref: "GratisUser" },
     estoreid: ObjectId,
     delAddress: String,

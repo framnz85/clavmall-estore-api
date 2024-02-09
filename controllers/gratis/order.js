@@ -35,31 +35,6 @@ exports.userOrder = async (req, res) => {
   }
 };
 
-exports.userOrders = async (req, res) => {
-  const estoreid = req.headers.estoreid;
-  const email = req.user.email;
-
-  try {
-    const user = await User.findOne({ email }).exec();
-    if (user) {
-      const orders = await Order.find({
-        orderedBy: user._id,
-        estoreid: Object(estoreid),
-      })
-        .sort({ createdAt: -1 })
-        .populate("products.product")
-        .populate("orderedBy")
-        .populate("paymentOption")
-        .exec();
-      res.json(orders);
-    } else {
-      res.json({ err: "Cannot fetch user orders." });
-    }
-  } catch (error) {
-    res.json({ err: "Fetching orders failed. " + error.message });
-  }
-};
-
 exports.adminOrder = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const orderid = req.params.orderid;
@@ -83,19 +58,120 @@ exports.adminOrder = async (req, res) => {
   }
 };
 
+exports.userOrders = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const email = req.user.email;
+
+  try {
+    const { sortkey, sort, currentPage, pageSize } = req.body;
+
+    const user = await User.findOne({ email }).exec();
+    if (user) {
+      const orders = await Order.find({
+        orderedBy: user._id,
+        estoreid: Object(estoreid),
+      })
+        .skip((currentPage - 1) * pageSize)
+        .sort({ [sortkey]: sort })
+        .limit(pageSize)
+        .populate("products.product")
+        .populate("orderedBy")
+        .populate("paymentOption")
+        .exec();
+
+      const countOrder = await Order.find({
+        orderedBy: user._id,
+        estoreid: Object(estoreid),
+      }).exec();
+
+      res.json({ orders, count: countOrder.length });
+    } else {
+      res.json({ err: "Cannot fetch user orders." });
+    }
+  } catch (error) {
+    res.json({ err: "Fetching orders failed. " + error.message });
+  }
+};
+
 exports.adminOrders = async (req, res) => {
   const estoreid = req.headers.estoreid;
 
   try {
+    const { sortkey, sort, currentPage, pageSize } = req.body;
+
     const orders = await Order.find({
       estoreid: Object(estoreid),
     })
-      .sort({ createdAt: -1 })
+      .skip((currentPage - 1) * pageSize)
+      .sort({ [sortkey]: sort })
+      .limit(pageSize)
       .populate("products.product")
       .populate("orderedBy")
       .populate("paymentOption")
       .exec();
-    res.json(orders);
+
+    const countOrder = await Order.find({
+      estoreid: Object(estoreid),
+    }).exec();
+
+    res.json({ orders, count: countOrder.length });
+  } catch (error) {
+    res.json({ err: "Fetching orders failed. " + error.message });
+  }
+};
+
+exports.adminDaySale = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const dates = req.body.dates;
+
+  try {
+    const orders = await Order.find({
+      estoreid: Object(estoreid),
+      createdAt: {
+        $gte: new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)),
+        $lt: new Date(new Date(dates.endDate).setHours(23, 59, 59)),
+      },
+    }).exec();
+
+    const cartTotal = orders.reduce((accumulator, value) => {
+      return accumulator + value.cartTotal;
+    }, 0);
+
+    const delfee = orders.reduce((accumulator, value) => {
+      return accumulator + value.delfee;
+    }, 0);
+
+    res.json({ cartTotal, delfee });
+  } catch (error) {
+    res.json({ err: "Fetching orders failed. " + error.message });
+  }
+};
+
+exports.adminDaySaleCapital = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const dates = req.body.dates;
+  let capital = 0;
+
+  try {
+    const orders = await Order.find({
+      estoreid: Object(estoreid),
+      createdAt: {
+        $gte: new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)),
+        $lt: new Date(new Date(dates.endDate).setHours(23, 59, 59)),
+      },
+    })
+      .populate("products.product")
+      .exec();
+
+    orders.forEach((order) => {
+      capital =
+        capital +
+        order.products.reduce((accumulator, value) => {
+          return accumulator + value.product.supplierPrice * value.count;
+        }, 0);
+    });
+
+    res.json({ capital });
   } catch (error) {
     res.json({ err: "Fetching orders failed. " + error.message });
   }
@@ -159,7 +235,9 @@ exports.updateCart = async (req, res) => {
 exports.saveCartOrder = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const email = req.user.email;
+  const orderType = req.body.orderType;
   const delfee = req.body.delfee;
+  const cash = req.body.cash;
   const paymentOption = req.body.paymentOption;
   const delAddress = req.body.delAddress;
 
@@ -173,11 +251,14 @@ exports.saveCartOrder = async (req, res) => {
 
       const newOrder = new Order({
         orderCode: cart._id.toString().slice(-12),
+        orderType,
         products: cart.products,
         paymentOption: ObjectId(paymentOption),
+        orderStatus: orderType === "pos" ? "Completed" : "Not Processed",
         cartTotal: cart.cartTotal,
         delfee,
         grandTotal: cart.grandTotal,
+        cash,
         orderedBy: user._id,
         estoreid: ObjectId(estoreid),
         delAddress,
@@ -221,6 +302,28 @@ exports.updateOrderStatus = async (req, res) => {
       );
       if (order) {
         res.json(order);
+        if (orderStatus === "Completed") {
+          order.products.forEach(async (prod) => {
+            const result = await Product.findOneAndUpdate(
+              {
+                _id: ObjectId(prod.product),
+                estoreid: Object(estoreid),
+              },
+              { $inc: { quantity: -prod.count, sold: prod.count } },
+              { new: true }
+            );
+            if (result.quantity < 0) {
+              await Product.findOneAndUpdate(
+                {
+                  _id: ObjectId(prod.product),
+                  estoreid: Object(estoreid),
+                },
+                { quantity: 0 },
+                { new: true }
+              );
+            }
+          });
+        }
       } else {
         res.json({ err: "Order does not exist." });
       }

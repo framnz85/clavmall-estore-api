@@ -5,6 +5,8 @@ const {
   userOrders,
   adminOrder,
   adminOrders,
+  adminDaySale,
+  adminDaySaleCapital,
   updateCart,
   saveCartOrder,
   updateOrderStatus,
@@ -14,16 +16,28 @@ const {
 const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
 
 router.get("/gratis/user-order/:orderid", authCheck, userOrder);
-router.get("/gratis/user-orders", authCheck, userOrders);
 router.get(
   "/gratis/admin-order/:orderid",
   authCheck,
   adminGratisCheck,
   adminOrder
 );
-router.get("/gratis/admin-orders", authCheck, adminGratisCheck, adminOrders);
+router.post("/gratis/user-orders", authCheck, userOrders);
+router.post("/gratis/admin-orders", authCheck, adminGratisCheck, adminOrders);
 router.post("/gratis/update-cart", authCheck, updateCart);
 router.post("/gratis/save-cart-order", authCheck, saveCartOrder);
+router.post(
+  "/gratis/admin-day-sale",
+  authCheck,
+  adminGratisCheck,
+  adminDaySale
+);
+router.post(
+  "/gratis/admin-day-sale-capital",
+  authCheck,
+  adminGratisCheck,
+  adminDaySaleCapital
+);
 router.put(
   "/gratis/update-order-status",
   authCheck,

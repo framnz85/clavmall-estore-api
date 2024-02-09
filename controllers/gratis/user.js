@@ -26,7 +26,12 @@ exports.getUserDetails = async (req, res) => {
 
   try {
     const user = await User.findOne({ email, estoreid: ObjectId(estoreid) })
-      .populate("estoreid")
+      .populate({
+        path: "estoreid",
+        populate: {
+          path: "country",
+        },
+      })
       .select("-password -showPass -verifyCode")
       .exec();
     if (user) {
@@ -35,7 +40,12 @@ exports.getUserDetails = async (req, res) => {
       const userWithEmail = await User.findOne({
         email,
       })
-        .populate("estoreid")
+        .populate({
+          path: "estoreid",
+          populate: {
+            path: "country",
+          },
+        })
         .select("-password -showPass -verifyCode")
         .exec();
       if (userWithEmail) {
@@ -146,7 +156,12 @@ exports.updateUser = async (req, res) => {
         new: true,
       }
     )
-      .populate("estoreid")
+      .populate({
+        path: "estoreid",
+        populate: {
+          path: "country",
+        },
+      })
       .select("-password -showPass");
     res.json(user);
   } catch (error) {
@@ -167,7 +182,12 @@ exports.verifyUserEmail = async (req, res) => {
         new: true,
       }
     )
-      .populate("estoreid")
+      .populate({
+        path: "estoreid",
+        populate: {
+          path: "country",
+        },
+      })
       .select("-password -showPass -verifyCode");
     if (user) {
       if (user.role === "admin") {
@@ -286,7 +306,12 @@ exports.userEndPoint = async (req, res) => {
         new: true,
       }
     )
-      .populate("estoreid")
+      .populate({
+        path: "estoreid",
+        populate: {
+          path: "country",
+        },
+      })
       .select("-password -showPass -verifyCode");
 
     if (user) {
