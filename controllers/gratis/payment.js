@@ -29,19 +29,9 @@ exports.getPayments = async (req, res) => {
 exports.addPayment = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
-    const paymentCount = await Payment.countDocuments({
-      estoreid: ObjectId(estoreid),
-    }).exec();
-
-    if (paymentCount < 5) {
-      const payment = new Payment({ ...req.body, estoreid });
-      await payment.save();
-      res.json(payment);
-    } else {
-      res.json({
-        err: `Sorry, you already added 5 payment options on this account. Go to Upgrades to increase your limit.`,
-      });
-    }
+    const payment = new Payment({ ...req.body, estoreid });
+    await payment.save();
+    res.json(payment);
   } catch (error) {
     res.json({ err: "Adding payment fails. " + error.message });
   }

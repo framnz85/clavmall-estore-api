@@ -154,6 +154,7 @@ exports.getAdminItems = async (req, res) => {
 
 exports.addProduct = async (req, res) => {
   const estoreid = req.headers.estoreid;
+  const platform = req.headers.platform;
   try {
     const estore = await Estore.findOne({
       _id: ObjectId(estoreid),
@@ -165,7 +166,7 @@ exports.addProduct = async (req, res) => {
       estoreid: ObjectId(estoreid),
     }).exec();
 
-    if (productCount < estore.productLimit) {
+    if (productCount < estore.productLimit || platform === "store") {
       const checkExist = await Product.findOne({
         slug: slugify(req.body.title.toString().toLowerCase()),
         estoreid: ObjectId(estoreid),

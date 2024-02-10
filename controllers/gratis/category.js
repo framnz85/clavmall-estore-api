@@ -32,6 +32,7 @@ exports.getCategories = async (req, res) => {
 
 exports.addCategory = async (req, res) => {
   const estoreid = req.headers.estoreid;
+  const platform = req.headers.platform;
   const name = req.body.name;
   const slug = slugify(req.body.name.toString().toLowerCase());
 
@@ -46,7 +47,7 @@ exports.addCategory = async (req, res) => {
       estoreid: ObjectId(estoreid),
     }).exec();
 
-    if (categoryCount < estore.categoryLimit) {
+    if (categoryCount < estore.categoryLimit || platform === "store") {
       const category = new Category({ name, slug, estoreid });
       await category.save();
       res.json(category);
