@@ -68,6 +68,10 @@ const estoreSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    scannerType: {
+      type: String,
+      enum: ["webcam", "barScan"],
+    },
   },
   { timestamps: true }
 );
