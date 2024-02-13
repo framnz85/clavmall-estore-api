@@ -85,7 +85,12 @@ exports.createEstore = async (req, res) => {
           await Estore.findOneAndUpdate(
             { _id: user.estoreid },
             {
-              $inc: { productLimit: 10, categoryLimit: 1, userLimit: 5 },
+              $inc: {
+                productLimit: 10,
+                categoryLimit: 1,
+                userLimit: 5,
+                invites: 1,
+              },
             }
           );
         }

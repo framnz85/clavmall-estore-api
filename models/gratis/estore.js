@@ -44,6 +44,10 @@ const estoreSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    invites: {
+      type: Number,
+      default: 0,
+    },
     imageStorage: {
       type: String,
       enum: ["clavmall", "cloudinary"],
