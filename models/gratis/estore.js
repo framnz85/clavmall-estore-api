@@ -72,6 +72,25 @@ const estoreSchema = new mongoose.Schema(
       type: String,
       enum: ["webcam", "barScan"],
     },
+    billingHistory: [
+      {
+        upgradeType: String,
+        payment: String,
+        totalPrice: String,
+        payStatus: {
+          type: String,
+          enum: ["Paid", "Pending"],
+        },
+        duration: Number,
+        referenceId: String,
+      },
+    ],
+    upgradeType: String,
+    upStatus: {
+      type: String,
+      enum: ["Active", "Pending"],
+    },
+    upEndDate: Date,
   },
   { timestamps: true }
 );
