@@ -67,6 +67,7 @@ exports.createNewUser = async (req, res) => {
         ? {
             refid: ObjectId(req.body.refid),
             name: req.body.owner,
+            phone: req.body.phone,
             email: req.body.email,
             password: md5(req.body.password),
             showPass: req.body.password,
@@ -75,6 +76,7 @@ exports.createNewUser = async (req, res) => {
           }
         : {
             name: req.body.owner,
+            phone: req.body.phone,
             email: req.body.email,
             password: md5(req.body.password),
             showPass: req.body.password,
