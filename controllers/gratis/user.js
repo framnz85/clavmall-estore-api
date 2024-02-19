@@ -237,6 +237,27 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+exports.resetPassword = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const userid = req.params.userid;
+
+  try {
+    const user = await User.findOneAndUpdate(
+      {
+        _id: ObjectId(userid),
+        estoreid: ObjectId(estoreid),
+      },
+      {
+        password: md5("Grocery@2024"),
+      },
+      { new: true }
+    );
+    res.json(user);
+  } catch (error) {
+    res.json({ err: "Reseting password for a user fails. " + error.message });
+  }
+};
+
 exports.forgotPassword = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const email = req.body.email;

@@ -7,6 +7,7 @@ const {
   updateUser,
   verifyUserEmail,
   changePassword,
+  resetPassword,
   forgotPassword,
   deleteUser,
   sendEmail,
@@ -20,6 +21,12 @@ router.post("/gratis/user-email", sendEmail);
 router.put("/gratis/user-update", authCheck, updateUser);
 router.put("/gratis/user-verify", authCheck, verifyUserEmail);
 router.put("/gratis/change-password", authCheck, changePassword);
+router.put(
+  "/gratis/reset-password/:userid",
+  authCheck,
+  adminGratisCheck,
+  resetPassword
+);
 router.put("/gratis/forgot-password", forgotPassword);
 router.delete(
   "/gratis/user-delete/:userid",
