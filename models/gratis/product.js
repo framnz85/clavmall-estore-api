@@ -47,7 +47,14 @@ const productSchema = new mongoose.Schema(
       maxlength: 32,
       unique: true,
     },
-    quantity: Number,
+    quantity: {
+      type: Number,
+      default: 0,
+    },
+    segregate: {
+      type: Boolean,
+      default: false,
+    },
     sold: {
       type: Number,
       default: 0,

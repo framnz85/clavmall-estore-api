@@ -127,6 +127,7 @@ exports.adminDaySale = async (req, res) => {
   try {
     const orders = await Order.find({
       estoreid: Object(estoreid),
+      orderStatus: "Completed",
       createdAt: {
         $gte: new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)),
         $lt: new Date(new Date(dates.endDate).setHours(23, 59, 59)),
@@ -155,6 +156,7 @@ exports.adminDaySaleCapital = async (req, res) => {
   try {
     const orders = await Order.find({
       estoreid: Object(estoreid),
+      orderStatus: "Completed",
       createdAt: {
         $gte: new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)),
         $lt: new Date(new Date(dates.endDate).setHours(23, 59, 59)),
@@ -190,6 +192,8 @@ exports.updateCart = async (req, res) => {
         orderedBy: user._id,
         estoreid: ObjectId(estoreid),
       }).exec();
+      let excessQuantity = 0;
+      let exceedProdTitle = "";
       for (let i = 0; i < cart.length; i++) {
         let object = {};
 
@@ -200,30 +204,44 @@ exports.updateCart = async (req, res) => {
           _id: ObjectId(cart[i]._id),
           estoreid: ObjectId(estoreid),
         })
-          .select("price")
+          .select("title price quantity segregate")
           .exec();
         object.price = productFromDb.price;
         cart[i] = { ...cart[i], price: productFromDb.price };
 
         products.push(object);
-      }
-      let cartTotal = 0;
-      for (let i = 0; i < products.length; i++) {
-        products[i].product = ObjectId(products[i].product);
-        cartTotal = cartTotal + products[i].price * products[i].count;
-      }
 
-      Cart.collection.insertOne({
-        estoreid: ObjectId(estoreid),
-        products,
-        cartTotal,
-        orderedBy: user._id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        __v: 0,
-      });
+        if (
+          !productFromDb.segregate &&
+          (!productFromDb.quantity || productFromDb.quantity < object.count)
+        ) {
+          excessQuantity = productFromDb.quantity;
+          exceedProdTitle = productFromDb.title;
+        }
+      }
+      if (excessQuantity === 0) {
+        let cartTotal = 0;
+        for (let i = 0; i < products.length; i++) {
+          products[i].product = ObjectId(products[i].product);
+          cartTotal = cartTotal + products[i].price * products[i].count;
+        }
 
-      res.json({ cart });
+        Cart.collection.insertOne({
+          estoreid: ObjectId(estoreid),
+          products,
+          cartTotal,
+          orderedBy: user._id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          __v: 0,
+        });
+
+        res.json({ cart });
+      } else {
+        res.json({
+          err: exceedProdTitle + " has " + excessQuantity + " in stock only",
+        });
+      }
     } else {
       res.json({ err: "Cannot fetch the cart details." });
     }
@@ -267,42 +285,13 @@ exports.saveCartOrder = async (req, res) => {
       const order = await newOrder.save();
 
       if (order) {
+        res.json(order);
         await Cart.deleteMany({
           orderedBy: user._id,
           estoreid: Object(estoreid),
         });
-      }
-      res.json(order);
-    } else {
-      res.json({ err: "Cannot fetch the cart details." });
-    }
-  } catch (error) {
-    res.json({ err: "Saving cart to order fails. " + error.message });
-  }
-};
 
-exports.updateOrderStatus = async (req, res) => {
-  const estoreid = req.headers.estoreid;
-  const email = req.user.email;
-  const { orderid, orderStatus, orderedBy } = req.body;
-
-  try {
-    const user = await User.findOne({ email }).exec();
-    if (user) {
-      const order = await Order.findOneAndUpdate(
-        {
-          _id: ObjectId(orderid),
-          orderedBy: ObjectId(orderedBy),
-          estoreid: Object(estoreid),
-        },
-        {
-          orderStatus,
-        },
-        { new: true }
-      );
-      if (order) {
-        res.json(order);
-        if (orderStatus === "Completed") {
+        if (orderType === "pos" && order.orderStatus === "Completed") {
           order.products.forEach(async (prod) => {
             const result = await Product.findOneAndUpdate(
               {
@@ -322,6 +311,77 @@ exports.updateOrderStatus = async (req, res) => {
                 { new: true }
               );
             }
+          });
+        }
+      } else {
+        res.json({ err: "Cannot save the order." });
+      }
+    } else {
+      res.json({ err: "Cannot fetch the cart details." });
+    }
+  } catch (error) {
+    res.json({ err: "Saving cart to order fails. " + error.message });
+  }
+};
+
+exports.updateOrderStatus = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const email = req.user.email;
+  const { orderid, orderStatus, orderPastStat, orderType, orderedBy } =
+    req.body;
+
+  try {
+    const user = await User.findOne({ email }).exec();
+    if (user) {
+      const order = await Order.findOneAndUpdate(
+        {
+          _id: ObjectId(orderid),
+          orderedBy: ObjectId(orderedBy),
+          estoreid: Object(estoreid),
+        },
+        {
+          orderStatus,
+        },
+        { new: true }
+      );
+      if (order) {
+        res.json(order);
+        if (orderType === "web" && orderStatus === "Delivering") {
+          order.products.forEach(async (prod) => {
+            const result = await Product.findOneAndUpdate(
+              {
+                _id: ObjectId(prod.product),
+                estoreid: Object(estoreid),
+              },
+              { $inc: { quantity: -prod.count, sold: prod.count } },
+              { new: true }
+            );
+            if (result.quantity < 0) {
+              await Product.findOneAndUpdate(
+                {
+                  _id: ObjectId(prod.product),
+                  estoreid: Object(estoreid),
+                },
+                { quantity: 0 },
+                { new: true }
+              );
+            }
+          });
+        }
+        if (
+          orderType === "web" &&
+          orderStatus === "Cancelled" &&
+          orderPastStat === "Delivering"
+        ) {
+          order.products.forEach(async (prod) => {
+            await Product.findOneAndUpdate(
+              {
+                _id: ObjectId(prod.product),
+                estoreid: Object(estoreid),
+              },
+              { $inc: { quantity: prod.count, sold: -prod.count } },
+              { new: true }
+            );
           });
         }
       } else {
