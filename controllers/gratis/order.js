@@ -169,7 +169,9 @@ exports.adminDaySaleCapital = async (req, res) => {
       capital =
         capital +
         order.products.reduce((accumulator, value) => {
-          return accumulator + value.product.supplierPrice * value.count;
+          return value.product && value.product.supplierPrice
+            ? accumulator + value.product.supplierPrice * value.count
+            : 0;
         }, 0);
     });
 
