@@ -161,16 +161,14 @@ exports.adminDaySaleCapital = async (req, res) => {
         $gte: new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)),
         $lt: new Date(new Date(dates.endDate).setHours(23, 59, 59)),
       },
-    })
-      .populate("products.product")
-      .exec();
+    }).exec();
 
     orders.forEach((order) => {
       capital =
         capital +
         order.products.reduce((accumulator, value) => {
-          return value.product && value.product.supplierPrice
-            ? accumulator + value.product.supplierPrice * value.count
+          return value.supplierPrice
+            ? accumulator + value.supplierPrice * value.count
             : 0;
         }, 0);
     });
@@ -206,8 +204,9 @@ exports.updateCart = async (req, res) => {
           _id: ObjectId(cart[i]._id),
           estoreid: ObjectId(estoreid),
         })
-          .select("title price quantity segregate")
+          .select("title supplierPrice price quantity segregate")
           .exec();
+        object.supplierPrice = productFromDb.supplierPrice;
         object.price = productFromDb.price;
         cart[i] = { ...cart[i], price: productFromDb.price };
 

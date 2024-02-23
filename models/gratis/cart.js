@@ -16,6 +16,7 @@ const cartSchema = new mongoose.Schema(
           type: ObjectId,
           ref: "GratisProduct",
         },
+        supplierPrice: Number,
         price: Number,
         count: Number,
       },

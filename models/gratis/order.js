@@ -19,6 +19,7 @@ const orderSchema = new mongoose.Schema(
           type: ObjectId,
           ref: "GratisProduct",
         },
+        supplierPrice: Number,
         price: Number,
         count: Number,
         variant: ObjectId,
