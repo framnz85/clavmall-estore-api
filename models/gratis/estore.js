@@ -91,6 +91,9 @@ const estoreSchema = new mongoose.Schema(
       enum: ["Active", "Pending"],
     },
     upEndDate: Date,
+    raffleActivation: Boolean,
+    raffleEntryAmount: Number,
+    raffleDate: Date,
   },
   { timestamps: true }
 );
