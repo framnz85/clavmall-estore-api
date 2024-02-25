@@ -166,7 +166,7 @@ exports.addProduct = async (req, res) => {
       estoreid: ObjectId(estoreid),
     }).exec();
 
-    if (productCount < estore.productLimit || platform === "store") {
+    if (productCount < estore.productLimit || platform === "cosmic") {
       const checkExist = await Product.findOne({
         slug: slugify(req.body.title.toString().toLowerCase()),
         estoreid: ObjectId(estoreid),

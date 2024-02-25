@@ -47,7 +47,7 @@ exports.addCategory = async (req, res) => {
       estoreid: ObjectId(estoreid),
     }).exec();
 
-    if (categoryCount < estore.categoryLimit || platform === "store") {
+    if (categoryCount < estore.categoryLimit || platform === "cosmic") {
       const category = new Category({ name, slug, estoreid });
       await category.save();
       res.json(category);
