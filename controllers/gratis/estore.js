@@ -1,5 +1,6 @@
 const ObjectId = require("mongoose").Types.ObjectId;
 const slugify = require("slugify");
+const SibApiV3Sdk = require("sib-api-v3-sdk");
 
 const Estore = require("../../models/gratis/estore");
 const User = require("../../models/gratis/user");
@@ -108,5 +109,77 @@ exports.createEstore = async (req, res) => {
     }
   } catch (error) {
     res.json({ err: "Creating store fails. " + error.message });
+  }
+};
+
+exports.checkCosmic = async (req, res) => {
+  const email = req.body.email;
+  const slug = req.body.slug;
+
+  try {
+    const estore = await Estore.findOne({
+      $or: [{ slug }, { email }],
+      upStatus: "Pending",
+    }).exec();
+    if (estore) {
+      const owner = await User.findOne({
+        estoreid: estore._id,
+        role: "admin",
+      }).exec();
+      res.json({ estore, owner });
+    } else {
+      res.json({ err: "No pending store exist with this parameters" });
+    }
+  } catch (error) {
+    res.json({ err: "Fetching store information fails. " + error.message });
+  }
+};
+
+exports.approveCosmic = async (req, res) => {
+  try {
+    const estore = await Estore.findByIdAndUpdate(req.body._id, req.body, {
+      new: true,
+    });
+    if (estore) {
+      const email = req.body.email;
+      const name = req.body.name;
+      const defaultClient = SibApiV3Sdk.ApiClient.instance;
+
+      let apiKey = defaultClient.authentications["api-key"];
+      apiKey.apiKey = process.env.BREVO_APIKEY;
+
+      let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+      let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail(); // SendSmtpEmail | Values to send a transactional email
+
+      sendSmtpEmail = {
+        to: [
+          {
+            email,
+            name,
+          },
+        ],
+        templateId: 208,
+        headers: {
+          "X-Mailin-custom":
+            "custom_header_1:custom_value_1|custom_header_2:custom_value_2",
+        },
+      };
+
+      apiInstance.sendTransacEmail(sendSmtpEmail).then(
+        function (data) {
+          //
+        },
+        function (error) {
+          res.json({ err: "Sending welcome email fails. " + error.message });
+        }
+      );
+
+      res.json({ ok: true });
+    } else {
+      res.json({ err: "Updating was not successful" });
+    }
+  } catch (error) {
+    res.json({ err: "Fetching store information fails. " + error.message });
   }
 };
