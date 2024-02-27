@@ -98,6 +98,7 @@ exports.createNewUser = async (req, res) => {
 exports.sendEmail = async (req, res) => {
   const email = req.body.email;
   const name = req.body.name;
+  const templateId = req.body.templateId;
   const defaultClient = SibApiV3Sdk.ApiClient.instance;
 
   let apiKey = defaultClient.authentications["api-key"];
@@ -114,7 +115,7 @@ exports.sendEmail = async (req, res) => {
         name,
       },
     ],
-    templateId: 179,
+    templateId,
     headers: {
       "X-Mailin-custom":
         "custom_header_1:custom_value_1|custom_header_2:custom_value_2",
