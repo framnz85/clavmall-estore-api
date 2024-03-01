@@ -92,8 +92,20 @@ const estoreSchema = new mongoose.Schema(
     },
     upEndDate: Date,
     raffleActivation: Boolean,
+    raffleTitle: String,
+    rafflePrize: String,
     raffleEntryAmount: Number,
+    raffleEntryCount: Number,
+    unlimitedEntry: Boolean,
     raffleDate: Date,
+    raffleHistory: [
+      {
+        winner: String,
+        raffleTitle: String,
+        rafflePrize: String,
+        raffleDate: String,
+      },
+    ],
   },
   { timestamps: true }
 );

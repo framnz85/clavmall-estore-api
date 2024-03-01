@@ -5,6 +5,9 @@ const SibApiV3Sdk = require("sib-api-v3-sdk");
 
 const User = require("../../models/gratis/user");
 const Estore = require("../../models/gratis/estore");
+const Raffle = require("../../models/gratis/raffle");
+
+const { populateRaffle } = require("./common");
 
 exports.getAllUsers = async (req, res) => {
   const estoreid = req.headers.estoreid;
@@ -55,6 +58,43 @@ exports.getUserDetails = async (req, res) => {
     }
   } catch (error) {
     res.json({ err: "Fetching user information fails. " + error.message });
+  }
+};
+
+exports.getRaffleEntries = async (req, res) => {
+  const email = req.user.email;
+  const estoreid = req.headers.estoreid;
+
+  try {
+    const user = await User.findOne({
+      email,
+      estoreid: ObjectId(estoreid),
+    }).exec();
+    const raffles = await Raffle.find({
+      owner: user._id,
+      estoreid: ObjectId(estoreid),
+    })
+      .populate("orderid")
+      .exec();
+    res.json(raffles);
+  } catch (error) {
+    res.json({ err: "Fetching raffle entries fails. " + error.message });
+  }
+};
+
+exports.getTopEntries = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const count = req.params.count;
+
+  try {
+    let entries = await Raffle.aggregate([
+      { $match: { estoreid: ObjectId(estoreid) } },
+      { $sample: { size: parseInt(count) } },
+    ]).exec();
+    entries = await populateRaffle(entries);
+    res.json(entries);
+  } catch (error) {
+    res.json({ err: "Fetching top raffle entries fails. " + error.message });
   }
 };
 
@@ -311,5 +351,18 @@ exports.deleteUser = async (req, res) => {
     res.json(user);
   } catch (error) {
     res.json({ err: "Deleting user fails. " + error.message });
+  }
+};
+
+exports.deleteAllRaffles = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+
+  try {
+    const raffles = await Raffle.remove({
+      estoreid: ObjectId(estoreid),
+    });
+    res.json(raffles);
+  } catch (error) {
+    res.json({ err: "Deleting all raffles fails. " + error.message });
   }
 };

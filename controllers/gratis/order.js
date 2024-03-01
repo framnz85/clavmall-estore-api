@@ -1,9 +1,12 @@
 const ObjectId = require("mongoose").Types.ObjectId;
+const md5 = require("md5");
 
 const User = require("../../models/gratis/user");
 const Cart = require("../../models/gratis/cart");
 const Product = require("../../models/gratis/product");
 const Order = require("../../models/gratis/order");
+const Estore = require("../../models/gratis/estore");
+const { createRaffle } = require("./common");
 
 exports.userOrder = async (req, res) => {
   const estoreid = req.headers.estoreid;
@@ -260,11 +263,47 @@ exports.saveCartOrder = async (req, res) => {
   const paymentOption = req.body.paymentOption;
   const delAddress = req.body.delAddress;
 
+  const customerName = req.body.customerName;
+  const customerPhone = req.body.customerPhone;
+  const customerEmail = req.body.customerEmail;
+
   try {
-    const user = await User.findOne({ email }).exec();
+    let user = await User.findOne({ email }).exec();
+    const origUser = user;
+
+    if (customerName) {
+      let checkUser = {};
+      if (customerPhone) {
+        checkUser = await User.findOne({
+          phone: customerPhone,
+          estoreid: ObjectId(estoreid),
+        });
+      }
+      if (customerEmail) {
+        checkUser = await User.findOne({
+          email: customerEmail,
+          estoreid: ObjectId(estoreid),
+        });
+      }
+      if (checkUser) {
+        user = checkUser;
+      } else {
+        const newUser = new User({
+          name: customerName,
+          phone: customerPhone ? customerPhone : "09100000001",
+          email: customerEmail ? customerEmail : "abc@xyz.com",
+          password: md5("Grocery@1234"),
+          showPass: "Grocery@1234",
+          role: "customer",
+          estoreid: ObjectId(estoreid),
+        });
+        user = await newUser.save();
+      }
+    }
+
     if (user) {
       const cart = await Cart.findOne({
-        orderedBy: user._id,
+        orderedBy: origUser._id,
         estoreid: Object(estoreid),
       });
 
@@ -291,7 +330,6 @@ exports.saveCartOrder = async (req, res) => {
           orderedBy: user._id,
           estoreid: Object(estoreid),
         });
-
         if (orderType === "pos" && order.orderStatus === "Completed") {
           order.products.forEach(async (prod) => {
             const result = await Product.findOneAndUpdate(
@@ -313,6 +351,32 @@ exports.saveCartOrder = async (req, res) => {
               );
             }
           });
+
+          const estore = await Estore.findOne({
+            _id: ObjectId(estoreid),
+          }).exec();
+
+          const date1 = new Date(estore.raffleDate);
+          const date2 = new Date();
+          const timeDifference = date1.getTime() - date2.getTime();
+          const daysDifference = Math.round(
+            timeDifference / (1000 * 3600 * 24)
+          );
+
+          if (
+            user.role !== "admin" &&
+            estore.raffleActivation &&
+            daysDifference > 0
+          ) {
+            createRaffle(
+              estoreid,
+              user._id,
+              order._id,
+              estore.raffleDate,
+              estore.raffleEntryAmount,
+              order.cartTotal
+            );
+          }
         }
       } else {
         res.json({ err: "Cannot save the order." });
@@ -368,6 +432,29 @@ exports.updateOrderStatus = async (req, res) => {
               );
             }
           });
+        }
+        if (orderType === "web" && order.orderStatus === "Completed") {
+          const estore = await Estore.findOne({
+            _id: ObjectId(estoreid),
+          }).exec();
+
+          const date1 = new Date(estore.raffleDate);
+          const date2 = new Date();
+          const timeDifference = date1.getTime() - date2.getTime();
+          const daysDifference = Math.round(
+            timeDifference / (1000 * 3600 * 24)
+          );
+
+          if (estore.raffleActivation && daysDifference > 0) {
+            createRaffle(
+              estoreid,
+              order.orderedBy,
+              order._id,
+              estore.raffleDate,
+              estore.raffleEntryAmount,
+              order.cartTotal
+            );
+          }
         }
         if (
           orderType === "web" &&
