@@ -69,9 +69,10 @@ exports.loadInitProducts = async (req, res) => {
   try {
     const user = await User.findOne({ email }).exec();
     if (user) {
-      const products = await Product.find({ estoreid: estoreidFrom }).select(
-        "-_id -createdAt -updatedAt -__v"
-      );
+      const products = await Product.find({
+        estoreid: estoreidFrom,
+        initial: 1,
+      }).select("-_id -createdAt -updatedAt -__v");
       const copyingProducts = products.map((product) => {
         return { ...product._doc, estoreid };
       });
@@ -80,6 +81,7 @@ exports.loadInitProducts = async (req, res) => {
       if (newProducts.length) {
         const categories = await Category.find({
           estoreid: estoreidFrom,
+          initial: 1,
         });
 
         categories.forEach(async (category) => {
