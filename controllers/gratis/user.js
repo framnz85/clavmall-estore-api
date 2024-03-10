@@ -332,10 +332,10 @@ exports.forgotPassword = async (req, res) => {
     if (user._id) {
       res.json(user);
     } else {
-      res.json({ err: "Recovering user fails. No user was found" });
+      res.json({ err: "Change user password fails. No user was found" });
     }
   } catch (error) {
-    res.json({ err: "Deleting user fails. " + error.message });
+    res.json({ err: "Change user password fails. " + error.message });
   }
 };
 

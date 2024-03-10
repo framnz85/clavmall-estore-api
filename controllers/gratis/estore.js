@@ -119,7 +119,6 @@ exports.checkCosmic = async (req, res) => {
   try {
     const estore = await Estore.findOne({
       $or: [{ slug }, { email }],
-      upStatus: "Pending",
     }).exec();
     if (estore) {
       const owner = await User.findOne({

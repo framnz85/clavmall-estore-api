@@ -32,11 +32,12 @@ exports.loginUser = async (req, res) => {
 
 exports.checkEmailExist = async (req, res) => {
   const email = req.body.email;
+  const slug = req.body.slug;
   const estoreid = req.headers.estoreid;
   let user = {};
 
   try {
-    if (estoreid) {
+    if (estoreid && slug) {
       user = await User.findOne({ email, estoreid: ObjectId(estoreid) }).exec();
       if (user && user._id) {
         res.json({ ok: true });
