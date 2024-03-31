@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       default: "customer",
-      enum: ["admin", "moderator", "customer"],
+      enum: ["admin", "moderator", "cashier", "customer"],
     },
     address: {
       details: String,
@@ -74,6 +74,8 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    superAdmin: Boolean,
+    resellid: ObjectId,
   },
   { timestamps: true }
 );

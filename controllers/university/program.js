@@ -86,7 +86,6 @@ exports.updateProgram = async (req, res) => {
       res.json({ err: "Error fetching user details." });
     }
   } catch (error) {
-    console.log(error);
     res.json({ err: "Updating program failed." });
   }
 };

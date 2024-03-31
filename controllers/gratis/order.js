@@ -98,20 +98,37 @@ exports.userOrders = async (req, res) => {
 
 exports.adminOrders = async (req, res) => {
   const estoreid = req.headers.estoreid;
+  const email = req.user.email;
+  let orders = [];
 
   try {
     const { sortkey, sort, currentPage, pageSize } = req.body;
+    const user = await User.findOne({ email }).exec();
 
-    const orders = await Order.find({
-      estoreid: Object(estoreid),
-    })
-      .skip((currentPage - 1) * pageSize)
-      .sort({ [sortkey]: sort })
-      .limit(pageSize)
-      .populate("products.product")
-      .populate("orderedBy")
-      .populate("paymentOption")
-      .exec();
+    if (user.role === "cashier") {
+      orders = await Order.find({
+        estoreid: Object(estoreid),
+        orderedBy: user._id,
+      })
+        .skip((currentPage - 1) * pageSize)
+        .sort({ [sortkey]: sort })
+        .limit(pageSize)
+        .populate("products.product")
+        .populate("orderedBy")
+        .populate("paymentOption")
+        .exec();
+    } else {
+      orders = await Order.find({
+        estoreid: Object(estoreid),
+      })
+        .skip((currentPage - 1) * pageSize)
+        .sort({ [sortkey]: sort })
+        .limit(pageSize)
+        .populate("products.product")
+        .populate("orderedBy")
+        .populate("paymentOption")
+        .exec();
+    }
 
     const countOrder = await Order.find({
       estoreid: Object(estoreid),
@@ -207,11 +224,21 @@ exports.updateCart = async (req, res) => {
           _id: ObjectId(cart[i]._id),
           estoreid: ObjectId(estoreid),
         })
-          .select("title supplierPrice price quantity segregate")
+          .select("title supplierPrice price wprice wcount quantity segregate")
           .exec();
         object.supplierPrice = productFromDb.supplierPrice;
-        object.price = productFromDb.price;
-        cart[i] = { ...cart[i], price: productFromDb.price };
+        let price = 0;
+        if (
+          productFromDb.wprice &&
+          productFromDb.wprice > 0 &&
+          cart[i].count >= productFromDb.wcount
+        ) {
+          price = productFromDb.wprice;
+        } else {
+          price = productFromDb.price;
+        }
+        object.price = price;
+        cart[i] = { ...cart[i], price };
 
         products.push(object);
 

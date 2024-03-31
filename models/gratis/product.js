@@ -1,10 +1,14 @@
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 const conn = require("../../dbconnect/gratis");
+const Estore = require("../../models/gratis/estore");
 
 const productSchema = new mongoose.Schema(
   {
-    estoreid: ObjectId,
+    estoreid: {
+      type: ObjectId,
+      ref: Estore,
+    },
     title: {
       type: String,
       trim: true,
@@ -38,6 +42,8 @@ const productSchema = new mongoose.Schema(
       trim: true,
       maxlength: 32,
     },
+    wprice: Number,
+    wcount: Number,
     category: {
       type: ObjectId,
       ref: "GratisCategory",

@@ -10,6 +10,7 @@ const estoreSchema = new mongoose.Schema(
       required: true,
     },
     email: String,
+    image: Object,
     slug: {
       type: String,
       unique: true,
@@ -26,7 +27,7 @@ const estoreSchema = new mongoose.Schema(
       ref: Country,
       required: true,
     },
-    headerColor: String,
+    headerColor: { type: String, default: "#009A57" },
     carouselColor: String,
     paymentChange: {
       type: Number,
@@ -52,7 +53,6 @@ const estoreSchema = new mongoose.Schema(
       type: String,
       enum: ["clavmall", "cloudinary"],
     },
-    openaiAPI: String,
     delfee: String,
     deltime: String,
     delloc: String,
@@ -90,6 +90,26 @@ const estoreSchema = new mongoose.Schema(
       type: String,
       enum: ["Active", "Pending"],
     },
+    approval: {
+      type: String,
+      enum: ["Approved", "Pending"],
+    },
+    upStatus2: {
+      type: String,
+      enum: ["Active", "Pending"],
+    },
+    approval2: {
+      type: String,
+      enum: ["Approved", "Pending"],
+    },
+    upStatus3: {
+      type: String,
+      enum: ["Active", "Pending"],
+    },
+    approval3: {
+      type: String,
+      enum: ["Approved", "Pending"],
+    },
     upEndDate: Date,
     raffleActivation: Boolean,
     raffleTitle: String,
@@ -106,8 +126,65 @@ const estoreSchema = new mongoose.Schema(
         raffleDate: String,
       },
     ],
+    resellid: ObjectId,
+    reseller: {
+      appName: String,
+      homeImage: Object,
+      pack1Name: String,
+      pack1Price: Number,
+      annual1: Number,
+      affComm1: Number,
+      pack2Name: String,
+      pack2Price: Number,
+      annual2: Number,
+      affComm2: Number,
+      pack3Name: String,
+      pack3Price: Number,
+      annual3: Number,
+      affComm3: Number,
+      domain: String,
+      status: { type: Boolean, default: false },
+    },
+    accessibility: {
+      moderator: {
+        type: Array,
+        default: [
+          "dashboard",
+          "category",
+          "product",
+          "payment",
+          "products",
+          "raffle",
+          "manageuser",
+          "insights",
+          "setting",
+          "guide",
+          "training",
+        ],
+      },
+      cashier: {
+        type: Array,
+        default: [
+          "dashboard",
+          "category",
+          "product",
+          "payment",
+          "products",
+          "raffle",
+          "manageuser",
+          "insights",
+          "setting",
+          "guide",
+          "training",
+        ],
+      },
+    },
   },
   { timestamps: true }
 );
 
-module.exports = conn.model("GratisEstore", estoreSchema);
+estoreSchema.index({ name: "text" });
+
+const Estore = conn.model("GratisEstore", estoreSchema);
+
+module.exports = Estore;

@@ -46,12 +46,26 @@ exports.singleItems = async (req, res) => {
 exports.itemsByBarcode = async (req, res) => {
   const barcode = req.params.barcode;
   const estoreid = req.headers.estoreid;
+  const purpose = req.headers.purpose;
 
   try {
-    let products = await Product.find({
-      barcode,
-      estoreid: ObjectId(estoreid),
-    }).exec();
+    let products = [];
+
+    if (purpose === "read" || purpose === "inventory") {
+      products = await Product.find({
+        barcode,
+        estoreid: ObjectId(estoreid),
+      })
+        .limit(10)
+        .exec();
+    } else {
+      products = await Product.find({
+        barcode,
+      })
+        .populate("estoreid")
+        .limit(10)
+        .exec();
+    }
 
     products = await populateProduct(products);
 
@@ -74,7 +88,10 @@ exports.loadInitProducts = async (req, res) => {
         initial: 1,
       }).select("-_id -createdAt -updatedAt -__v");
       const copyingProducts = products.map((product) => {
-        return { ...product._doc, estoreid };
+        const images = product.images.map((img) => {
+          return { ...img, fromid: estoreidFrom };
+        });
+        return { ...product._doc, images, estoreid };
       });
       const newProducts = await Product.insertMany(copyingProducts);
 
@@ -144,6 +161,17 @@ exports.getAdminItems = async (req, res) => {
       .limit(pageSize)
       .exec();
 
+    if (products.length < 1 && searchQuery) {
+      products = await Product.find({
+        title: { $regex: searchQuery, $options: "i" },
+        estoreid: ObjectId(estoreid),
+      })
+        .skip((currentPage - 1) * pageSize)
+        .sort({ [sortkey]: sort })
+        .limit(pageSize)
+        .exec();
+    }
+
     products = await populateProduct(products);
 
     const countProduct = await Product.find(searchObj).exec();
@@ -200,13 +228,15 @@ exports.searchProduct = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const text = req.body.text;
   const catSlug = req.body.catSlug;
+  const price = req.body.price;
   let querySearch = {};
+  let products = [];
 
   if (text) {
     querySearch = { ...querySearch, $text: { $search: text } };
   }
 
-  if (catSlug) {
+  if (catSlug && catSlug !== "all") {
     const category = await Category.findOne({
       slug: catSlug,
       estoreid: ObjectId(estoreid),
@@ -215,19 +245,30 @@ exports.searchProduct = async (req, res) => {
       querySearch = { ...querySearch, category: ObjectId(category._id) };
   }
 
+  if (price)
+    querySearch = { ...querySearch, price: { $gt: price[0], $lt: price[1] } };
+
   try {
     if (Object.keys(querySearch).length) {
-      let products = await Product.find({
+      products = await Product.find({
         ...querySearch,
         estoreid: ObjectId(estoreid),
       }).exec();
 
-      products = await populateProduct(products);
+      if (products.length < 1 && text) {
+        products = await Product.find({
+          title: { $regex: text, $options: "i" },
+          estoreid: ObjectId(estoreid),
+        }).exec();
+      }
 
-      res.json(products);
+      products = await populateProduct(products);
     } else {
-      res.json([]);
+      products = await Product.find({
+        estoreid: ObjectId(estoreid),
+      }).exec();
     }
+    res.json(products);
   } catch (error) {
     res.json({ err: "Searching products failed. " + error.message });
   }
@@ -271,7 +312,7 @@ exports.checkImageUser = async (req, res) => {
   const defaultestore = req.params.defaultestore;
 
   try {
-    const product = await Product.findOne({
+    let product = await Product.findOne({
       images: {
         $elemMatch: { public_id: publicid },
       },
@@ -285,7 +326,22 @@ exports.checkImageUser = async (req, res) => {
         res.json({ delete: false });
       }
     } else {
-      res.json({ delete: true });
+      product = await Product.findOne({
+        images: {
+          $elemMatch: { public_id: publicid },
+        },
+        estoreid: ObjectId(estoreid),
+      }).exec();
+
+      if (product && product.images[0] && product.images[0].fromid) {
+        if (product.images[0].fromid === estoreid) {
+          res.json({ delete: true });
+        } else {
+          res.json({ delete: false });
+        }
+      } else {
+        res.json({ delete: true });
+      }
     }
   } catch (error) {
     res.status(400).send("Checking image user failed.");

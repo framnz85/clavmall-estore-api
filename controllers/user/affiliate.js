@@ -96,7 +96,6 @@ exports.update = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
     const { values } = req.body;
-    console.log(values);
     await Withdrawal.findOneAndUpdate(
       { _id: values.withid },
       {

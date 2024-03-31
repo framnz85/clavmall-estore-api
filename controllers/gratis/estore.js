@@ -4,15 +4,128 @@ const SibApiV3Sdk = require("sib-api-v3-sdk");
 
 const Estore = require("../../models/gratis/estore");
 const User = require("../../models/gratis/user");
+const Payment = require("../../models/gratis/payment");
+const { populateEstore } = require("./common");
 
 exports.getEstore = async (req, res) => {
+  const resellid = req.headers.resellid;
   try {
-    const estore = await Estore.findOne({ slug: req.params.slug })
+    const estore = await Estore.findOne({ slug: req.params.slug, resellid })
       .populate("country")
       .exec();
     res.json(estore);
   } catch (error) {
     res.json({ err: "Fetching store information fails. " + error.message });
+  }
+};
+
+exports.getReseller = async (req, res) => {
+  try {
+    const estore = await Estore.findOne({ _id: req.params.id })
+      .populate("country")
+      .exec();
+    if (estore && estore.reseller) {
+      const payments = await Payment.find({
+        estoreid: ObjectId(req.params.id),
+      });
+      res.json({
+        reseller: estore.reseller,
+        currency: estore.country.currency,
+        estoreChange: estore.estoreChange,
+        resellid: estore.resellid,
+        payments,
+      });
+    } else {
+      res.json({ err: "The website is temporarily offline." });
+    }
+  } catch (error) {
+    res.json({ err: "Fetching reseller information fails. " + error.message });
+  }
+};
+
+exports.getEstores = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  try {
+    const { sortkey, sort, currentPage, pageSize, searchQuery, masterUser } =
+      req.body;
+
+    let searchObj = searchQuery
+      ? masterUser
+        ? { $text: { $search: searchQuery } }
+        : { $text: { $search: searchQuery }, resellid: ObjectId(estoreid) }
+      : masterUser
+      ? {}
+      : { resellid: ObjectId(estoreid) };
+
+    let estores = await Estore.find(searchObj)
+      .skip((currentPage - 1) * pageSize)
+      .sort({ [sortkey]: sort })
+      .limit(pageSize)
+      .exec();
+
+    let countEstores = {};
+
+    if (estores.length === 0 && searchQuery) {
+      estores = await Estore.find(
+        masterUser
+          ? {
+              email: searchQuery,
+            }
+          : {
+              email: searchQuery,
+              resellid: ObjectId(estoreid),
+            }
+      )
+        .skip((currentPage - 1) * pageSize)
+        .sort({ [sortkey]: sort })
+        .limit(pageSize)
+        .exec();
+      countEstores = await Estore.find(
+        masterUser
+          ? {
+              email: searchQuery,
+            }
+          : {
+              email: searchQuery,
+              resellid: ObjectId(estoreid),
+            }
+      ).exec();
+    }
+
+    if (estores.length === 0 && searchQuery) {
+      estores = await Estore.find(
+        masterUser
+          ? {
+              _id: ObjectId(searchQuery),
+            }
+          : {
+              _id: ObjectId(searchQuery),
+              resellid: ObjectId(estoreid),
+            }
+      )
+        .skip((currentPage - 1) * pageSize)
+        .sort({ [sortkey]: sort })
+        .limit(pageSize)
+        .exec();
+      countEstores = await Estore.find(
+        masterUser
+          ? {
+              _id: ObjectId(searchQuery),
+            }
+          : {
+              _id: ObjectId(searchQuery),
+              resellid: ObjectId(estoreid),
+            }
+      ).exec();
+    } else {
+      countEstores = await Estore.find(searchObj).exec();
+    }
+
+    estores = await populateEstore(estores);
+
+    res.json({ estores, count: countEstores.length });
+  } catch (error) {
+    res.json({ err: "Fetching stores fails. " + error.message });
   }
 };
 
@@ -59,6 +172,7 @@ exports.updateEstore = async (req, res) => {
 };
 
 exports.createEstore = async (req, res) => {
+  const resellid = req.params.resellid;
   const refid = req.body.refid;
   try {
     const checkStoreExist = await Estore.findOne({
@@ -74,6 +188,7 @@ exports.createEstore = async (req, res) => {
           email: req.body.email,
           slug: slugify(req.body.name.toString().toLowerCase()),
           country: ObjectId(req.body.country),
+          resellid: ObjectId(resellid),
         });
         await estore.save();
 
@@ -109,28 +224,6 @@ exports.createEstore = async (req, res) => {
     }
   } catch (error) {
     res.json({ err: "Creating store fails. " + error.message });
-  }
-};
-
-exports.checkCosmic = async (req, res) => {
-  const email = req.body.email;
-  const slug = req.body.slug;
-
-  try {
-    const estore = await Estore.findOne({
-      $or: [{ slug }, { email }],
-    }).exec();
-    if (estore) {
-      const owner = await User.findOne({
-        estoreid: estore._id,
-        role: "admin",
-      }).exec();
-      res.json({ estore, owner });
-    } else {
-      res.json({ err: "No pending store exist with this parameters" });
-    }
-  } catch (error) {
-    res.json({ err: "Fetching store information fails. " + error.message });
   }
 };
 
@@ -178,6 +271,26 @@ exports.approveCosmic = async (req, res) => {
     } else {
       res.json({ err: "Updating was not successful" });
     }
+  } catch (error) {
+    res.json({ err: "Fetching store information fails. " + error.message });
+  }
+};
+
+exports.updateEstoreReseller = async (req, res) => {
+  const upestoreid = req.headers.upestoreid;
+  let values = req.body;
+
+  try {
+    const estore = await Estore.findByIdAndUpdate(upestoreid, values, {
+      new: true,
+    })
+      .populate("country")
+      .exec();
+    if (!estore) {
+      res.json({ err: "No store exist under ID: " + upestoreid });
+      return;
+    }
+    res.json(estore);
   } catch (error) {
     res.json({ err: "Fetching store information fails. " + error.message });
   }

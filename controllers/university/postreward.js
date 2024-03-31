@@ -21,13 +21,15 @@ exports.getPostRewards = async (req, res) => {
         .skip((current - 1) * pageSize)
         .sort({ confirmed: -1, [sortkey]: sort })
         .limit(pageSize);
-      const postRewardsTotal = await Postreward.find({ owner: ObjectId(result._id) }).exec();
+      const postRewardsTotal = await Postreward.find({
+        owner: ObjectId(result._id),
+      }).exec();
       res.json({ postRewards, postRewardsTotal: postRewardsTotal.length });
     } else {
-      res.json({err: "Error fetching post reward details."});
+      res.json({ err: "Error fetching post reward details." });
     }
   } catch (error) {
-    res.json({err: "Fetching post rewards failed."});
+    res.json({ err: "Fetching post rewards failed." });
   }
 };
 
@@ -40,11 +42,11 @@ exports.checkPostToday = async (req, res) => {
     const result = await User.findOne({ email, password });
     const postToday = await Postreward.findOne({
       owner: ObjectId(result._id),
-      rewardDate: dateToday.toDateString()
+      rewardDate: dateToday.toDateString(),
     }).exec();
-    res.json({postToday});
-  } catch (error) {console.log(error)
-    res.json({err: "Checking post today failed."});
+    res.json({ postToday });
+  } catch (error) {
+    res.json({ err: "Checking post today failed." });
   }
 };
 
@@ -58,36 +60,42 @@ exports.createPostReward = async (req, res) => {
     const result = await User.findOne({ email, password });
     const postToday = await Postreward.findOne({
       owner: ObjectId(result._id),
-      rewardDate: dateToday.toDateString()
+      rewardDate: dateToday.toDateString(),
     }).exec();
 
     if (postToday) {
-      res.json({err: "You already submitted a link. Post reward for today was already given."});
+      res.json({
+        err: "You already submitted a link. Post reward for today was already given.",
+      });
     } else {
       const checkExistPost = await Postreward.findOne({
         owner: ObjectId(result._id),
         postLink: promoteLink,
       }).exec();
-      
+
       if (checkExistPost) {
-        res.json({err: "The link you have provided has already been submitted. Try another promote post then submit it again here.."});
+        res.json({
+          err: "The link you have provided has already been submitted. Try another promote post then submit it again here..",
+        });
       } else {
         const reward = await new Postreward({
           owner: ObjectId(result._id),
           rewardDate: dateToday.toDateString(),
           postLink: promoteLink,
-          amount: result.premium && result.premium === 2 ? postReward2 : postReward1,
-          commission: result.premium && result.premium === 2 ? postReward2 : postReward1,
+          amount:
+            result.premium && result.premium === 2 ? postReward2 : postReward1,
+          commission:
+            result.premium && result.premium === 2 ? postReward2 : postReward1,
           status: true,
         }).save();
         if (reward) {
           res.json({ reward });
         } else {
-          res.json({err: "Creating post reward unsuccessful."});
+          res.json({ err: "Creating post reward unsuccessful." });
         }
       }
     }
   } catch (error) {
-    res.json({err: "Creating post reward failed."});
+    res.json({ err: "Creating post reward failed." });
   }
 };

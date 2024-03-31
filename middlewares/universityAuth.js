@@ -72,7 +72,6 @@ exports.uniLogAuthCheck = async (req, res, next) => {
       }
     }
   } catch (error) {
-    console.log(error);
     res.json({ err: "Invalid or expired token" });
   }
 };

@@ -65,7 +65,11 @@ exports.removePayment = async (req, res) => {
       _id: ObjectId(payid),
       estoreid: ObjectId(estoreid),
     }).exec();
-    res.json(payment);
+    if (payment) {
+      res.json(payment);
+    } else {
+      res.json({ ok: true });
+    }
   } catch (error) {
     res.json({ err: "Deleting payment fails. " + error.message });
   }

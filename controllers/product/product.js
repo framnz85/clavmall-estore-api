@@ -615,7 +615,6 @@ exports.bulkDeleteProduct = async (req, res) => {
   if (category) querySearch = { ...querySearch, category: ObjectId(category) };
   if (subcat) querySearch = { ...querySearch, subcats: ObjectId(subcat) };
   if (parent) querySearch = { ...querySearch, parent: ObjectId(parent) };
-  console.log(querySearch);
   try {
     const products = await Product(estoreid).find(querySearch).exec();
     products.map(async (product) => {

@@ -63,3 +63,28 @@ exports.populateRaffle = async (entries) => {
 
   return entries;
 };
+
+exports.populateEstore = async (estores) => {
+  let estoreids = [];
+
+  estores = estores.map((estore) => {
+    estoreids.push(estore._id);
+    return estore;
+  });
+
+  const ownerList = await User.find({
+    estoreid: { $in: estoreids },
+    role: "admin",
+  }).exec();
+
+  estores = estores.map((estore) => {
+    return {
+      ...(estore._doc ? estore._doc : estore),
+      owner: ownerList.find(
+        (owner) => owner.estoreid.toString() === estore._id.toString()
+      ),
+    };
+  });
+
+  return estores;
+};

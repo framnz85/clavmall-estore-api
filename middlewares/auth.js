@@ -44,11 +44,11 @@ exports.adminGratisCheck = async (req, res, next) => {
     estoreid: ObjectId(estoreid),
   }).exec();
 
-  if (adminUser.role !== "admin") {
+  if (["admin", "moderator", "cashier"].includes(adminUser.role)) {
+    next();
+  } else {
     res.status(403).json({
       error: "Admin resource. Access denied.",
     });
-  } else {
-    next();
   }
 };

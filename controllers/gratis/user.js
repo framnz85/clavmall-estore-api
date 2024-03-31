@@ -13,8 +13,23 @@ exports.getAllUsers = async (req, res) => {
   const estoreid = req.headers.estoreid;
 
   try {
-    const users = await User.find({ estoreid: ObjectId(estoreid) }).exec();
-    res.json(users);
+    const admins = await User.find({
+      estoreid: ObjectId(estoreid),
+      role: "admin",
+    }).exec();
+    const moderators = await User.find({
+      estoreid: ObjectId(estoreid),
+      role: "moderator",
+    }).exec();
+    const cashiers = await User.find({
+      estoreid: ObjectId(estoreid),
+      role: "cashier",
+    }).exec();
+    const customers = await User.find({
+      estoreid: ObjectId(estoreid),
+      role: "customer",
+    }).exec();
+    res.json({ admins, moderators, cashiers, customers });
   } catch (error) {
     res.json({ err: "Fetching users fails. " + error.message });
   }
@@ -23,9 +38,14 @@ exports.getAllUsers = async (req, res) => {
 exports.getUserDetails = async (req, res) => {
   const email = req.user.email;
   const estoreid = req.headers.estoreid;
+  const resellid = req.params.resellid;
 
   try {
-    const user = await User.findOne({ email, estoreid: ObjectId(estoreid) })
+    const user = await User.findOne({
+      email,
+      estoreid: ObjectId(estoreid),
+      resellid: ObjectId(resellid),
+    })
       .populate({
         path: "estoreid",
         populate: {
@@ -39,6 +59,7 @@ exports.getUserDetails = async (req, res) => {
     } else {
       const userWithEmail = await User.findOne({
         email,
+        resellid: ObjectId(resellid),
       })
         .populate({
           path: "estoreid",
@@ -100,6 +121,7 @@ exports.getTopEntries = async (req, res) => {
 
 exports.createNewUser = async (req, res) => {
   const estoreid = req.headers.estoreid;
+  const resellid = req.params.resellid;
 
   try {
     const user = new User(
@@ -113,6 +135,7 @@ exports.createNewUser = async (req, res) => {
             showPass: req.body.password,
             role: req.body.role,
             estoreid: ObjectId(estoreid),
+            resellid: ObjectId(resellid),
           }
         : {
             name: req.body.owner,
@@ -122,6 +145,7 @@ exports.createNewUser = async (req, res) => {
             showPass: req.body.password,
             role: req.body.role,
             estoreid: ObjectId(estoreid),
+            resellid: ObjectId(resellid),
           }
     );
     await user.save();
@@ -131,7 +155,84 @@ exports.createNewUser = async (req, res) => {
     );
     res.json({ user, token });
   } catch (error) {
-    res.json({ err: "Creating new user fails. " + error.message });
+    if (error.code === 11000) {
+      res.json({
+        err: `The email ${req.body.email} or phone ${req.body.phone} is already existing`,
+      });
+    } else {
+      res.json({ err: "Creating new user fails. " + error.message });
+    }
+  }
+};
+
+exports.getResellerUsers = async (req, res) => {
+  const resellid = req.params.resellid;
+
+  try {
+    const { sortkey, sort, currentPage, pageSize, searchQuery, masterUser } =
+      req.body;
+
+    let searchObj = searchQuery
+      ? masterUser
+        ? {
+            $text: { $search: searchQuery },
+            role: "admin",
+          }
+        : {
+            $text: { $search: searchQuery },
+            role: "admin",
+            resellid: ObjectId(resellid),
+          }
+      : masterUser
+      ? { role: "admin" }
+      : { role: "admin", resellid: ObjectId(resellid) };
+
+    let owners = await User.find(searchObj)
+      .populate("estoreid")
+      .skip((currentPage - 1) * pageSize)
+      .sort({ [sortkey]: sort })
+      .limit(pageSize)
+      .exec();
+
+    let countOwners = {};
+
+    if (owners.length === 0 && searchQuery) {
+      owners = await User.find(
+        masterUser
+          ? {
+              email: searchQuery,
+              role: "admin",
+            }
+          : {
+              email: searchQuery,
+              role: "admin",
+              resellid: ObjectId(resellid),
+            }
+      )
+        .populate("estoreid")
+        .skip((currentPage - 1) * pageSize)
+        .sort({ [sortkey]: sort })
+        .limit(pageSize)
+        .exec();
+      countOwners = await User.find(
+        masterUser
+          ? {
+              email: searchQuery,
+              role: "admin",
+            }
+          : {
+              email: searchQuery,
+              role: "admin",
+              resellid: ObjectId(resellid),
+            }
+      ).exec();
+    } else {
+      countOwners = await User.find(searchObj).exec();
+    }
+
+    res.json({ owners, count: countOwners.length });
+  } catch (error) {
+    res.json({ err: "Fetching users fails. " + error.message });
   }
 };
 
@@ -204,6 +305,25 @@ exports.updateUser = async (req, res) => {
       })
       .select("-password -showPass");
     res.json(user);
+  } catch (error) {
+    res.json({ err: "Creating new user fails. " + error.message });
+  }
+};
+
+exports.updateCustomer = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const userid = req.params.userid;
+
+  try {
+    await User.findOneAndUpdate(
+      { _id: ObjectId(userid), estoreid: ObjectId(estoreid) },
+      req.body,
+      {
+        new: true,
+      }
+    );
+
+    res.json({ ok: true });
   } catch (error) {
     res.json({ err: "Creating new user fails. " + error.message });
   }
@@ -289,7 +409,7 @@ exports.resetPassword = async (req, res) => {
         estoreid: ObjectId(estoreid),
       },
       {
-        password: md5("Grocery@2024"),
+        password: md5("Grocery@2000"),
       },
       { new: true }
     );

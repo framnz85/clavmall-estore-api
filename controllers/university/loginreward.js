@@ -17,17 +17,21 @@ exports.getLoginRewards = async (req, res) => {
   try {
     const result = await User.findOne({ email, password });
     if (result) {
-      const loginRewards = await Loginreward.find({ owner: ObjectId(result._id) })
+      const loginRewards = await Loginreward.find({
+        owner: ObjectId(result._id),
+      })
         .skip((current - 1) * pageSize)
         .sort({ confirmed: -1, [sortkey]: sort })
         .limit(pageSize);
-      const loginRewardsTotal = await Loginreward.find({ owner: ObjectId(result._id) }).exec();
+      const loginRewardsTotal = await Loginreward.find({
+        owner: ObjectId(result._id),
+      }).exec();
       res.json({ loginRewards, loginRewardsTotal: loginRewardsTotal.length });
     } else {
-      res.json({err: "Error fetching login reward details."});
+      res.json({ err: "Error fetching login reward details." });
     }
   } catch (error) {
-    res.json({err: "Fetching login rewards failed."});
+    res.json({ err: "Fetching login rewards failed." });
   }
 };
 
@@ -40,11 +44,11 @@ exports.checkLoginToday = async (req, res) => {
     const result = await User.findOne({ email, password });
     const loginToday = await Loginreward.findOne({
       owner: ObjectId(result._id),
-      rewardDate: dateToday.toDateString()
+      rewardDate: dateToday.toDateString(),
     }).exec();
-    res.json({loginToday});
-  } catch (error) {console.log(error)
-    res.json({err: "Checking login today failed."});
+    res.json({ loginToday });
+  } catch (error) {
+    res.json({ err: "Checking login today failed." });
   }
 };
 
@@ -57,26 +61,28 @@ exports.createLoginReward = async (req, res) => {
     const result = await User.findOne({ email, password });
     const loginToday = await Loginreward.findOne({
       owner: ObjectId(result._id),
-      rewardDate: dateToday.toDateString()
+      rewardDate: dateToday.toDateString(),
     }).exec();
 
     if (loginToday) {
-      res.json({err: "Login reward for today was already given."});
+      res.json({ err: "Login reward for today was already given." });
     } else {
       const reward = await new Loginreward({
         owner: ObjectId(result._id),
         rewardDate: dateToday.toDateString(),
-        amount: result.premium && result.premium === 2 ? loginReward2 : loginReward1,
-        commission: result.premium && result.premium === 2 ? loginReward2 : loginReward1,
+        amount:
+          result.premium && result.premium === 2 ? loginReward2 : loginReward1,
+        commission:
+          result.premium && result.premium === 2 ? loginReward2 : loginReward1,
         status: true,
       }).save();
       if (reward) {
         res.json({ reward });
       } else {
-        res.json({err: "Creating login reward unsuccessful."});
+        res.json({ err: "Creating login reward unsuccessful." });
       }
     }
   } catch (error) {
-    res.json({err: "Creating login reward failed."});
+    res.json({ err: "Creating login reward failed." });
   }
 };

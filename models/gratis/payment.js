@@ -9,6 +9,7 @@ const paymentSchema = new mongoose.Schema(
     accName: String,
     accNumber: String,
     accDetails: String,
+    images: Array,
   },
   { timestamps: true }
 );
