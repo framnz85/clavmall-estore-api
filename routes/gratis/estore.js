@@ -4,6 +4,7 @@ const {
   getEstore,
   getReseller,
   getEstores,
+  getEstoresBilling,
   getEstoreCounters,
   updateEstore,
   createEstore,
@@ -15,6 +16,12 @@ const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
 router.get("/gratis/estore/:slug", getEstore);
 router.get("/gratis/reseller/:id", getReseller);
 router.post("/gratis/estores", authCheck, adminGratisCheck, getEstores);
+router.post(
+  "/gratis/estores-billing",
+  authCheck,
+  adminGratisCheck,
+  getEstoresBilling
+);
 router.get("/gratis/estore-counters/:estoreid", getEstoreCounters);
 router.post("/gratis/estore-update", authCheck, adminGratisCheck, updateEstore);
 router.post("/gratis/estore-create/:resellid", createEstore);

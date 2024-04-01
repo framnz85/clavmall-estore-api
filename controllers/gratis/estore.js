@@ -129,6 +129,42 @@ exports.getEstores = async (req, res) => {
   }
 };
 
+exports.getEstoresBilling = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+
+  try {
+    const { sortkey, sort, currentPage, pageSize } = req.body;
+
+    let estores = await Estore.find({
+      resellid: ObjectId(estoreid),
+      $or: [
+        { approval: "Pending" },
+        { approval2: "Pending" },
+        { approval3: "Pending" },
+      ],
+    })
+      .skip((currentPage - 1) * pageSize)
+      .sort({ [sortkey]: sort })
+      .limit(pageSize)
+      .exec();
+
+    estores = await populateEstore(estores);
+
+    countEstores = await Estore.find({
+      resellid: ObjectId(estoreid),
+      $or: [
+        { approval: "Pending" },
+        { approval2: "Pending" },
+        { approval3: "Pending" },
+      ],
+    }).exec();
+
+    res.json({ estores, count: countEstores.length });
+  } catch (error) {
+    res.json({ err: "Fetching stores fails. " + error.message });
+  }
+};
+
 exports.getEstoreCounters = async (req, res) => {
   try {
     const estore = await Estore.findOne({
