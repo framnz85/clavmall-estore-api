@@ -228,14 +228,18 @@ exports.updateCart = async (req, res) => {
           .exec();
         object.supplierPrice = productFromDb.supplierPrice;
         let price = 0;
-        if (
-          productFromDb.wprice &&
-          productFromDb.wprice > 0 &&
-          cart[i].count >= productFromDb.wcount
-        ) {
-          price = productFromDb.wprice;
+        if (cart[i].priceChange) {
+          price = cart[i].price;
         } else {
-          price = productFromDb.price;
+          if (
+            productFromDb.wprice &&
+            productFromDb.wprice > 0 &&
+            cart[i].count >= productFromDb.wcount
+          ) {
+            price = productFromDb.wprice;
+          } else {
+            price = productFromDb.price;
+          }
         }
         object.price = price;
         cart[i] = { ...cart[i], price };

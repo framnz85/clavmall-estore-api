@@ -160,6 +160,7 @@ const estoreSchema = new mongoose.Schema(
           "setting",
           "guide",
           "training",
+          "cartprice",
         ],
       },
       cashier: {
@@ -176,6 +177,7 @@ const estoreSchema = new mongoose.Schema(
           "setting",
           "guide",
           "training",
+          "cartprice",
         ],
       },
     },

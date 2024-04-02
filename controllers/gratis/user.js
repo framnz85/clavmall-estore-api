@@ -59,7 +59,7 @@ exports.getUserDetails = async (req, res) => {
     } else {
       const userWithEmail = await User.findOne({
         email,
-        resellid: ObjectId(resellid),
+        estoreid: ObjectId(estoreid),
       })
         .populate({
           path: "estoreid",
