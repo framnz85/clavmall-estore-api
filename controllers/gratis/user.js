@@ -57,9 +57,9 @@ exports.getUserDetails = async (req, res) => {
     if (user) {
       res.json(user);
     } else {
-      const userWithEmail = await User.findOne({
+      const userWithReseller = await User.findOne({
         email,
-        estoreid: ObjectId(estoreid),
+        resellid: ObjectId(resellid),
       })
         .populate({
           path: "estoreid",
@@ -69,12 +69,28 @@ exports.getUserDetails = async (req, res) => {
         })
         .select("-password -showPass -verifyCode")
         .exec();
-      if (userWithEmail) {
-        res.json(userWithEmail);
+      if (userWithReseller) {
+        res.json(userWithReseller);
       } else {
-        res.json({
-          err: "Cannot fetch the user details or the user doesn't exist in this store.",
-        });
+        const userWithEmail = await User.findOne({
+          email,
+          estoreid: ObjectId(estoreid),
+        })
+          .populate({
+            path: "estoreid",
+            populate: {
+              path: "country",
+            },
+          })
+          .select("-password -showPass -verifyCode")
+          .exec();
+        if (userWithEmail) {
+          res.json(userWithEmail);
+        } else {
+          res.json({
+            err: "Cannot fetch the user details or the user doesn't exist in this store.",
+          });
+        }
       }
     }
   } catch (error) {
