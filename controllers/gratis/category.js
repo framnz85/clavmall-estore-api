@@ -3,6 +3,7 @@ const slugify = require("slugify");
 
 const Category = require("../../models/gratis/category");
 const Estore = require("../../models/gratis/estore");
+const Product = require("../../models/gratis/product");
 
 exports.getCategory = async (req, res) => {
   const slug = req.params.slug;
@@ -25,6 +26,32 @@ exports.getCategories = async (req, res) => {
       estoreid: ObjectId(estoreid),
     }).exec();
     res.json(categories);
+  } catch (error) {
+    res.json({ err: "Fetching categories fails. " + error.message });
+  }
+};
+
+exports.getAdminCategories = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  try {
+    let categories = await Category.find({
+      estoreid: ObjectId(estoreid),
+    }).exec();
+
+    let updatedCategories = [];
+
+    for (let i = 0; i < categories.length; i++) {
+      const countProduct = await Product.find({
+        category: ObjectId(categories[i]._id),
+        estoreid: ObjectId(estoreid),
+      }).exec();
+      updatedCategories.push({
+        ...categories[i]._doc,
+        itemcount: countProduct.length,
+      });
+    }
+
+    res.json(updatedCategories);
   } catch (error) {
     res.json({ err: "Fetching categories fails. " + error.message });
   }

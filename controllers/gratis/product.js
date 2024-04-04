@@ -4,7 +4,6 @@ const slugify = require("slugify");
 const Product = require("../../models/gratis/product");
 const User = require("../../models/gratis/user");
 const Category = require("../../models/gratis/category");
-const Estore = require("../../models/gratis/estore");
 const { populateProduct } = require("./common");
 
 exports.randomItems = async (req, res) => {
@@ -141,7 +140,7 @@ exports.getAdminItems = async (req, res) => {
       ? { $text: { $search: searchQuery }, estoreid: ObjectId(estoreid) }
       : { estoreid: ObjectId(estoreid) };
 
-    if (category) {
+    if (category && category !== "1") {
       searchObj = {
         ...searchObj,
         category: ObjectId(category),
@@ -186,17 +185,7 @@ exports.addProduct = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const platform = req.headers.platform;
   try {
-    const estore = await Estore.findOne({
-      _id: ObjectId(estoreid),
-    })
-      .select("productLimit")
-      .exec();
-
-    const productCount = await Product.countDocuments({
-      estoreid: ObjectId(estoreid),
-    }).exec();
-
-    if (productCount < estore.productLimit || platform === "cosmic") {
+    if (platform === "cosmic") {
       const checkExist = await Product.findOne({
         slug: slugify(req.body.title.toString().toLowerCase()),
         estoreid: ObjectId(estoreid),
@@ -216,11 +205,11 @@ exports.addProduct = async (req, res) => {
       }
     } else {
       res.json({
-        err: `Sorry, you already uploaded ${estore.productLimit} products on this account. Go to Upgrades to increase your limit.`,
+        err: `Sorry, your account is not from cosmic.`,
       });
     }
   } catch (error) {
-    res.json({ err: "Listing product failed. " + error.message });
+    res.json({ err: "Adding product failed. " + error.message });
   }
 };
 
