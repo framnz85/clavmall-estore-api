@@ -11,6 +11,9 @@ const paymentSchema = new mongoose.Schema(
     accDetails: String,
     msgLink: String,
     images: Array,
+    allowPackA: { type: Boolean, default: true },
+    allowPackB: { type: Boolean, default: true },
+    allowPackC: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
