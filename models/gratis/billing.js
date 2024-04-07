@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 const conn = require("../../dbconnect/gratis");
 
 const billingSchema = new mongoose.Schema(
@@ -9,6 +11,7 @@ const billingSchema = new mongoose.Schema(
       enum: ["For Approval", "Approved"],
       default: "For Approval",
     },
+    estoreid: ObjectId,
   },
   { timestamps: true }
 );

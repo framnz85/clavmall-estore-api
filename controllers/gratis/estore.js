@@ -92,7 +92,7 @@ exports.getEstores = async (req, res) => {
       ).exec();
     }
 
-    if (estores.length === 0 && searchQuery) {
+    if (estores.length === 0 && searchQuery && ObjectId(searchQuery)) {
       estores = await Estore.find(
         masterUser
           ? {

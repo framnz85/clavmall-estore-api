@@ -54,8 +54,19 @@ const estoreSchema = new mongoose.Schema(
       enum: ["clavmall", "cloudinary"],
     },
     delfee: String,
+    delfeeType: {
+      type: String,
+      enum: ["percent", "number"],
+      default: "percent",
+    },
     deltime: String,
     delloc: String,
+    discount: String,
+    discountType: {
+      type: String,
+      enum: ["percent", "number"],
+      default: "percent",
+    },
     productLimit: {
       type: Number,
       default: 50,
@@ -92,7 +103,7 @@ const estoreSchema = new mongoose.Schema(
     },
     approval: {
       type: String,
-      enum: ["Approved", "Pending"],
+      enum: ["Approved", "For Approval", "Pending"],
     },
     upStatus2: {
       type: String,
@@ -100,7 +111,7 @@ const estoreSchema = new mongoose.Schema(
     },
     approval2: {
       type: String,
-      enum: ["Approved", "Pending"],
+      enum: ["Approved", "For Approval", "Pending"],
     },
     upStatus3: {
       type: String,
@@ -108,7 +119,7 @@ const estoreSchema = new mongoose.Schema(
     },
     approval3: {
       type: String,
-      enum: ["Approved", "Pending"],
+      enum: ["Approved", "For Approval", "Pending"],
     },
     upEndDate: Date,
     raffleActivation: Boolean,
@@ -185,7 +196,7 @@ const estoreSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-estoreSchema.index({ name: "text" });
+estoreSchema.index({ name: "text", email: "text" });
 
 const Estore = conn.model("GratisEstore", estoreSchema);
 

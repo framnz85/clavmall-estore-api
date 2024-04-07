@@ -43,11 +43,15 @@ const orderSchema = new mongoose.Schema(
     },
     cartTotal: Number,
     delfee: Number,
+    discount: Number,
+    addDiscount: Number,
     grandTotal: Number,
     cash: Number,
     orderedBy: { type: ObjectId, ref: "GratisUser" },
+    orderedName: String,
     estoreid: ObjectId,
     delAddress: String,
+    orderNotes: String,
   },
   { timestamps: true }
 );

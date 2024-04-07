@@ -290,9 +290,12 @@ exports.saveCartOrder = async (req, res) => {
   const email = req.user.email;
   const orderType = req.body.orderType;
   const delfee = req.body.delfee;
+  const discount = req.body.discount;
+  const addDiscount = req.body.addDiscount;
   const cash = req.body.cash;
   const paymentOption = req.body.paymentOption;
   const delAddress = req.body.delAddress;
+  const orderNotes = req.body.orderNotes;
 
   const customerName = req.body.customerName;
   const customerPhone = req.body.customerPhone;
@@ -319,16 +322,18 @@ exports.saveCartOrder = async (req, res) => {
       if (checkUser) {
         user = checkUser;
       } else {
-        const newUser = new User({
-          name: customerName,
-          phone: customerPhone ? customerPhone : "09100000001",
-          email: customerEmail ? customerEmail : "abc@xyz.com",
-          password: md5("Grocery@1234"),
-          showPass: "Grocery@1234",
-          role: "customer",
-          estoreid: ObjectId(estoreid),
-        });
-        user = await newUser.save();
+        if (customerPhone || customerEmail) {
+          const newUser = new User({
+            name: customerName,
+            phone: customerPhone ? customerPhone : "09100000001",
+            email: customerEmail ? customerEmail : "abc@xyz.com",
+            password: md5("Grocery@2000"),
+            showPass: "Grocery@2000",
+            role: "customer",
+            estoreid: ObjectId(estoreid),
+          });
+          user = await newUser.save();
+        }
       }
     }
 
@@ -346,11 +351,14 @@ exports.saveCartOrder = async (req, res) => {
         orderStatus: orderType === "pos" ? "Completed" : "Not Processed",
         cartTotal: cart.cartTotal,
         delfee,
-        grandTotal: cart.grandTotal,
+        discount,
+        addDiscount,
         cash,
         orderedBy: user._id,
+        orderedName: customerName || user.name,
         estoreid: ObjectId(estoreid),
         delAddress,
+        orderNotes,
       });
 
       const order = await newOrder.save();
@@ -395,7 +403,7 @@ exports.saveCartOrder = async (req, res) => {
           );
 
           if (
-            user.role !== "admin" &&
+            user.role === "customer" &&
             estore.raffleActivation &&
             daysDifference > 0
           ) {
