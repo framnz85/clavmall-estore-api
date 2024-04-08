@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const {
-  getAllUsers,
   getUserDetails,
   getRaffleEntries,
   getTopEntries,
+  getAffiliates,
+  getAllUsers,
   createNewUser,
   getResellerUsers,
   updateUser,
@@ -19,7 +20,6 @@ const {
 } = require("../../controllers/gratis/user");
 const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
 
-router.get("/gratis/all-users", authCheck, adminGratisCheck, getAllUsers);
 router.get("/gratis/user-details/:resellid", authCheck, getUserDetails);
 router.get("/gratis/raffle-entries", authCheck, getRaffleEntries);
 router.get(
@@ -28,6 +28,13 @@ router.get(
   adminGratisCheck,
   getTopEntries
 );
+router.get(
+  "/gratis/get-affiliates",
+  authCheck,
+  adminGratisCheck,
+  getAffiliates
+);
+router.post("/gratis/all-users", authCheck, adminGratisCheck, getAllUsers);
 router.post("/gratis/user-create/:resellid", createNewUser);
 router.post("/gratis/owner-users/:resellid", authCheck, getResellerUsers);
 router.post("/gratis/user-email", sendEmail);

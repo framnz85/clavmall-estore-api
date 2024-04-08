@@ -6,6 +6,7 @@ const Estore = require("../../models/gratis/estore");
 const userSchema = new mongoose.Schema(
   {
     refid: ObjectId,
+    refCommission: Number,
     estoreid: {
       type: ObjectId,
       ref: Estore,

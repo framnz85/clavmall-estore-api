@@ -9,32 +9,6 @@ const Raffle = require("../../models/gratis/raffle");
 
 const { populateRaffle } = require("./common");
 
-exports.getAllUsers = async (req, res) => {
-  const estoreid = req.headers.estoreid;
-
-  try {
-    const admins = await User.find({
-      estoreid: ObjectId(estoreid),
-      role: "admin",
-    }).exec();
-    const moderators = await User.find({
-      estoreid: ObjectId(estoreid),
-      role: "moderator",
-    }).exec();
-    const cashiers = await User.find({
-      estoreid: ObjectId(estoreid),
-      role: "cashier",
-    }).exec();
-    const customers = await User.find({
-      estoreid: ObjectId(estoreid),
-      role: "customer",
-    }).exec();
-    res.json({ admins, moderators, cashiers, customers });
-  } catch (error) {
-    res.json({ err: "Fetching users fails. " + error.message });
-  }
-};
-
 exports.getUserDetails = async (req, res) => {
   const email = req.user.email;
   const estoreid = req.headers.estoreid;
@@ -132,6 +106,84 @@ exports.getTopEntries = async (req, res) => {
     res.json(entries);
   } catch (error) {
     res.json({ err: "Fetching top raffle entries fails. " + error.message });
+  }
+};
+
+exports.getAffiliates = async (req, res) => {
+  const email = req.user.email;
+  const estoreid = req.headers.estoreid;
+
+  try {
+    const user = await User.findOne({
+      email,
+      estoreid: ObjectId(estoreid),
+    }).exec();
+    const affiliates = await User.find({
+      refid: ObjectId(user._id),
+    }).exec();
+    res.json(affiliates);
+  } catch (error) {
+    res.json({ err: "Fetching top raffle entries fails. " + error.message });
+  }
+};
+
+exports.getAllUsers = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+
+  try {
+    const { sortkey, sort, currentPage, pageSize, searchQuery } = req.body;
+
+    let searchObj = searchQuery
+      ? { $text: { $search: searchQuery }, estoreid: ObjectId(estoreid) }
+      : { estoreid: ObjectId(estoreid) };
+
+    const admins = await User.find({
+      estoreid: ObjectId(estoreid),
+      role: "admin",
+    }).exec();
+    const moderators = await User.find({
+      estoreid: ObjectId(estoreid),
+      role: "moderator",
+    }).exec();
+    const cashiers = await User.find({
+      estoreid: ObjectId(estoreid),
+      role: "cashier",
+    }).exec();
+
+    let customers = await User.find({
+      ...searchObj,
+      role: "customer",
+    })
+      .skip((currentPage - 1) * pageSize)
+      .sort({ [sortkey]: sort })
+      .limit(pageSize)
+      .exec();
+
+    if (customers.length < 1 && searchQuery) {
+      customers = await User.find({
+        name: { $regex: searchQuery, $options: "i" },
+        estoreid: ObjectId(estoreid),
+      })
+        .skip((currentPage - 1) * pageSize)
+        .sort({ [sortkey]: sort })
+        .limit(pageSize)
+        .exec();
+    }
+
+    const countCustomers = await User.find({
+      ...searchObj,
+      role: "customer",
+    }).exec();
+
+    res.json({
+      admins,
+      moderators,
+      cashiers,
+      customers,
+      count: countCustomers.length,
+    });
+  } catch (error) {
+    res.json({ err: "Fetching users fails. " + error.message });
   }
 };
 
