@@ -18,7 +18,9 @@ exports.randomItems = async (req, res) => {
 
     products = await populateProduct(products);
 
-    res.json(products);
+    const countProduct = await Product.find({}).exec();
+
+    res.json({ products, count: countProduct.length });
   } catch (error) {
     res.json({ err: "Listing product failed." + error.message });
   }

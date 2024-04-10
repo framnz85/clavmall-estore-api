@@ -53,6 +53,8 @@ const estoreSchema = new mongoose.Schema(
       type: String,
       enum: ["clavmall", "cloudinary"],
     },
+    storeAddress: String,
+    storeContact: String,
     delfee: String,
     delfeeType: {
       type: String,

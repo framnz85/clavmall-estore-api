@@ -6,11 +6,11 @@ const Estore = require("../../models/gratis/estore");
 const Product = require("../../models/gratis/product");
 
 exports.getCategory = async (req, res) => {
-  const slug = req.params.slug;
+  const catid = req.params.catid;
   const estoreid = req.headers.estoreid;
   try {
     const category = await Category.findOne({
-      slug,
+      _id: ObjectId(catid),
       estoreid: ObjectId(estoreid),
     });
     res.json(category);
@@ -20,18 +20,6 @@ exports.getCategory = async (req, res) => {
 };
 
 exports.getCategories = async (req, res) => {
-  const estoreid = req.headers.estoreid;
-  try {
-    const categories = await Category.find({
-      estoreid: ObjectId(estoreid),
-    }).exec();
-    res.json(categories);
-  } catch (error) {
-    res.json({ err: "Fetching categories fails. " + error.message });
-  }
-};
-
-exports.getAdminCategories = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
     let categories = await Category.find({
@@ -89,14 +77,14 @@ exports.addCategory = async (req, res) => {
 };
 
 exports.updateCategory = async (req, res) => {
-  const reqSlug = req.params.slug;
+  const catid = req.params.catid;
   const estoreid = req.headers.estoreid;
   const name = req.body.name;
   const slug = slugify(req.body.name.toString().toLowerCase());
   try {
     const category = await Category.findOneAndUpdate(
       {
-        slug: reqSlug,
+        _id: ObjectId(catid),
         estoreid: ObjectId(estoreid),
       },
       { name, slug },
@@ -104,7 +92,13 @@ exports.updateCategory = async (req, res) => {
         new: true,
       }
     ).exec();
-    res.json(category);
+
+    const countProduct = await Product.find({
+      category: ObjectId(catid),
+      estoreid: ObjectId(estoreid),
+    }).exec();
+
+    res.json({ ...category._doc, itemcount: countProduct.length });
   } catch (error) {
     res.json({ err: "Updating category fails. " + error.message });
   }
