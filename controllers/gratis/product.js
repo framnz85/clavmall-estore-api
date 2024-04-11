@@ -18,29 +18,49 @@ exports.randomItems = async (req, res) => {
 
     products = await populateProduct(products);
 
-    const countProduct = await Product.find({}).exec();
+    const countProduct = await Product.find({
+      estoreid: ObjectId(estoreid),
+    }).exec();
 
     res.json({ products, count: countProduct.length });
   } catch (error) {
-    res.json({ err: "Listing product failed." + error.message });
+    res.json({ err: "Getting random product failed." + error.message });
   }
 };
 
-exports.singleItems = async (req, res) => {
+exports.getProductBySlug = async (req, res) => {
   const slug = req.params.slug;
   const estoreid = req.headers.estoreid;
 
   try {
-    let products = await Product.find({
+    let product = await Product.find({
       slug,
       estoreid: ObjectId(estoreid),
     }).exec();
 
-    products = await populateProduct(products);
+    product = await populateProduct(product);
 
-    res.json(products);
+    res.json(product);
   } catch (error) {
-    res.json({ err: "Getting a product failed." + error.message });
+    res.json({ err: "Getting a single product failed." + error.message });
+  }
+};
+
+exports.getProductById = async (req, res) => {
+  const prodid = req.params.prodid;
+  const estoreid = req.headers.estoreid;
+
+  try {
+    let product = await Product.find({
+      _id: ObjectId(prodid),
+      estoreid: ObjectId(estoreid),
+    }).exec();
+
+    product = await populateProduct(product);
+
+    res.json(product);
+  } catch (error) {
+    res.json({ err: "Getting a single product failed." + error.message });
   }
 };
 
@@ -72,7 +92,7 @@ exports.itemsByBarcode = async (req, res) => {
 
     res.json(products);
   } catch (error) {
-    res.json({ err: "Getting a product failed." + error.message });
+    res.json({ err: "Getting a product by barcode failed." + error.message });
   }
 };
 
@@ -121,7 +141,7 @@ exports.loadInitProducts = async (req, res) => {
       res.json({ err: "Cannot fetch this order." });
     }
   } catch (error) {
-    res.json({ err: "Getting a product failed." + error.message });
+    res.json({ err: "Getting products failed." + error.message });
   }
 };
 
@@ -207,7 +227,7 @@ exports.addProduct = async (req, res) => {
       }
     } else {
       res.json({
-        err: `Sorry, your account is not from cosmic.`,
+        err: `Sorry, your account is not a valid account.`,
       });
     }
   } catch (error) {
@@ -268,13 +288,23 @@ exports.searchProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   const prodid = req.params.prodid;
   const estoreid = req.headers.estoreid;
+  let values = req.body;
+  const title = req.body.title;
+
+  if (title) {
+    values = {
+      ...values,
+      slug: slugify(title.toString().toLowerCase()),
+    };
+  }
+
   try {
     const product = await Product.findOneAndUpdate(
       {
         _id: ObjectId(prodid),
         estoreid: ObjectId(estoreid),
       },
-      req.body,
+      values,
       { new: true }
     );
     res.json(product);
@@ -293,7 +323,7 @@ exports.deleteProduct = async (req, res) => {
     }).exec();
     res.json(product);
   } catch (error) {
-    res.json({ err: "Updating product failed. " + error.message });
+    res.json({ err: "Deleting product failed. " + error.message });
   }
 };
 
