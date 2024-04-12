@@ -333,3 +333,31 @@ exports.updateEstoreReseller = async (req, res) => {
     res.json({ err: "Fetching store information fails. " + error.message });
   }
 };
+
+exports.updateEstoreCounters = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const orderChange = req.body.orderChange;
+  const paymentChange = req.body.paymentChange;
+  const categoryChange = req.body.categoryChange;
+  const productChange = req.body.productChange;
+  const estoreChange = req.body.estoreChange;
+
+  try {
+    const estore = await Estore.findByIdAndUpdate(
+      estoreid,
+      {
+        orderChange,
+        paymentChange,
+        categoryChange,
+        productChange,
+        estoreChange,
+      },
+      {
+        new: true,
+      }
+    ).exec();
+    res.json(estore);
+  } catch (error) {
+    res.json({ err: "Updating estore counters fails. " + error.message });
+  }
+};

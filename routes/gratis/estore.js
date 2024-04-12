@@ -10,6 +10,7 @@ const {
   createEstore,
   approveCosmic,
   updateEstoreReseller,
+  updateEstoreCounters,
 } = require("../../controllers/gratis/estore");
 const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
 
@@ -37,5 +38,6 @@ router.put(
   adminGratisCheck,
   updateEstoreReseller
 );
+router.put("/gratis/update-estore-counters", updateEstoreCounters);
 
 module.exports = router;
