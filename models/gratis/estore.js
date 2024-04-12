@@ -29,6 +29,10 @@ const estoreSchema = new mongoose.Schema(
     },
     headerColor: { type: String, default: "#009A57" },
     carouselColor: String,
+    orderChange: {
+      type: Number,
+      default: 0,
+    },
     paymentChange: {
       type: Number,
       default: 0,

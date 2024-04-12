@@ -299,7 +299,7 @@ exports.updateProduct = async (req, res) => {
   }
 
   try {
-    const product = await Product.findOneAndUpdate(
+    let product = await Product.findOneAndUpdate(
       {
         _id: ObjectId(prodid),
         estoreid: ObjectId(estoreid),
@@ -307,7 +307,10 @@ exports.updateProduct = async (req, res) => {
       values,
       { new: true }
     );
-    res.json(product);
+
+    product = await populateProduct([product]);
+
+    res.json(product[0]);
   } catch (error) {
     res.json({ err: "Updating product failed. " + error.message });
   }
@@ -321,7 +324,11 @@ exports.deleteProduct = async (req, res) => {
       _id: ObjectId(prodid),
       estoreid: ObjectId(estoreid),
     }).exec();
-    res.json(product);
+    if (product) {
+      res.json(product);
+    } else {
+      res.json({ err: "Product does not exist in the system." });
+    }
   } catch (error) {
     res.json({ err: "Deleting product failed. " + error.message });
   }
