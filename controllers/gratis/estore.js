@@ -171,7 +171,9 @@ exports.getEstoreCounters = async (req, res) => {
       _id: ObjectId(req.params.estoreid),
     })
       .populate("country")
-      .select("estoreChange productChange categoryChange paymentChange")
+      .select(
+        "estoreChange productChange categoryChange paymentChange orderChange"
+      )
       .exec();
     res.json(estore);
   } catch (error) {
