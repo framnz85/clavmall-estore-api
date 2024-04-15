@@ -531,6 +531,21 @@ exports.deleteAdminOrder = async (req, res) => {
       _id: ObjectId(orderid),
       estoreid: Object(estoreid),
     });
+    if (
+      order.orderStatus === "Delivering" ||
+      order.orderStatus === "Completed"
+    ) {
+      order.products.forEach(async (prod) => {
+        await Product.findOneAndUpdate(
+          {
+            _id: ObjectId(prod.product),
+            estoreid: Object(estoreid),
+          },
+          { $inc: { quantity: prod.count, sold: -prod.count } },
+          { new: true }
+        );
+      });
+    }
     res.json(order);
   } catch (error) {
     res.json({ err: "Deleting order fails. " + error.message });
