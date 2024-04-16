@@ -213,6 +213,7 @@ exports.updateCart = async (req, res) => {
         estoreid: ObjectId(estoreid),
       }).exec();
       let excessQuantity = 0;
+      let remainingQuantity = 0;
       let exceedProdTitle = "";
       for (let i = 0; i < cart.length; i++) {
         let object = {};
@@ -246,6 +247,8 @@ exports.updateCart = async (req, res) => {
 
         products.push(object);
 
+        remainingQuantity = productFromDb.quantity;
+
         if (
           !productFromDb.segregate &&
           (!productFromDb.quantity || productFromDb.quantity < object.count)
@@ -254,7 +257,7 @@ exports.updateCart = async (req, res) => {
           exceedProdTitle = productFromDb.title;
         }
       }
-      if (excessQuantity === 0) {
+      if (excessQuantity === 0 && remainingQuantity > 0) {
         let cartTotal = 0;
         for (let i = 0; i < products.length; i++) {
           products[i].product = ObjectId(products[i].product);
