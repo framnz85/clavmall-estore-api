@@ -77,14 +77,16 @@ exports.itemsByBarcode = async (req, res) => {
         barcode,
         estoreid: ObjectId(estoreid),
       })
-        .limit(10)
+        .sort({ updatedAt: -1 })
+        .limit(5)
         .exec();
     } else {
       products = await Product.find({
         barcode,
       })
+        .sort({ updatedAt: -1 })
         .populate("estoreid")
-        .limit(10)
+        .limit(5)
         .exec();
     }
 
