@@ -77,6 +77,15 @@ const userSchema = new mongoose.Schema(
     },
     superAdmin: Boolean,
     resellid: ObjectId,
+    withdraw: [
+      {
+        bank: String,
+        accountName: String,
+        accountNumber: String,
+        amount: Number,
+        date: Date,
+      },
+    ],
   },
   { timestamps: true }
 );

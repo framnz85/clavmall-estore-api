@@ -28,7 +28,7 @@ router.get(
   adminGratisCheck,
   getTopEntries
 );
-router.get(
+router.post(
   "/gratis/get-affiliates",
   authCheck,
   adminGratisCheck,

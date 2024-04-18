@@ -114,14 +114,30 @@ exports.getAffiliates = async (req, res) => {
   const estoreid = req.headers.estoreid;
 
   try {
+    const { sortkey, sort, currentPage, pageSize } = req.body;
+
     const user = await User.findOne({
       email,
       estoreid: ObjectId(estoreid),
     }).exec();
-    const affiliates = await User.find({
+    const referrals = await User.find({
       refid: ObjectId(user._id),
+      role: "admin",
+    })
+      .skip((currentPage - 1) * pageSize)
+      .sort({ [sortkey]: sort })
+      .limit(pageSize)
+      .exec();
+    const countReferral = await User.find({
+      refid: ObjectId(user._id),
+      role: "admin",
     }).exec();
-    res.json(affiliates);
+    const earnings = await User.aggregate([
+      { $match: { refid: ObjectId(user._id) } },
+      { $group: { _id: null, amount: { $sum: "$refCommission" } } },
+    ]);
+    const withdraw = 0;
+    res.json({ referrals, earnings, withdraw, count: countReferral.length });
   } catch (error) {
     res.json({ err: "Fetching top raffle entries fails. " + error.message });
   }
