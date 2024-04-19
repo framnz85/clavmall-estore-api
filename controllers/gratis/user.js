@@ -288,7 +288,16 @@ exports.createNewUser = async (req, res) => {
       { email: req.body.email },
       process.env.JWT_PRIVATE_KEY
     );
-    res.json({ user, token });
+
+    let refUser = {};
+    if (req.body.refid) {
+      refUser = await User.findOne({
+        _id: ObjectId(req.body.refid),
+        role: "admin",
+      }).exec();
+    }
+
+    res.json({ user, token, refUser });
   } catch (error) {
     if (error.code === 11000) {
       res.json({

@@ -172,7 +172,7 @@ exports.getEstoreCounters = async (req, res) => {
     })
       .populate("country")
       .select(
-        "estoreChange productChange categoryChange paymentChange orderChange"
+        "estoreChange userChange productChange categoryChange paymentChange orderChange"
       )
       .exec();
     res.json(estore);
@@ -340,6 +340,7 @@ exports.updateEstoreCounters = async (req, res) => {
   const paymentChange = req.body.paymentChange;
   const categoryChange = req.body.categoryChange;
   const productChange = req.body.productChange;
+  const userChange = req.body.userChange;
   const estoreChange = req.body.estoreChange;
 
   try {
@@ -350,6 +351,7 @@ exports.updateEstoreCounters = async (req, res) => {
         paymentChange,
         categoryChange,
         productChange,
+        userChange,
         estoreChange,
       },
       {

@@ -45,6 +45,10 @@ const estoreSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    userChange: {
+      type: Number,
+      default: 0,
+    },
     estoreChange: {
       type: Number,
       default: 0,
