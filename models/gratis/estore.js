@@ -29,6 +29,18 @@ const estoreSchema = new mongoose.Schema(
     },
     headerColor: { type: String, default: "#009A57" },
     carouselColor: String,
+    showRandomItems: {
+      type: Boolean,
+      default: true,
+    },
+    showCategories: {
+      type: Boolean,
+      default: true,
+    },
+    showItemsForYou: {
+      type: Boolean,
+      default: true,
+    },
     orderChange: {
       type: Number,
       default: 0,

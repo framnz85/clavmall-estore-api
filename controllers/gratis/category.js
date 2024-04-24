@@ -49,6 +49,7 @@ exports.addCategory = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const platform = req.headers.platform;
   const name = req.body.name;
+  const images = req.body.images;
   const slug = slugify(req.body.name.toString().toLowerCase());
 
   try {
@@ -63,7 +64,7 @@ exports.addCategory = async (req, res) => {
     }).exec();
 
     if (categoryCount < estore.categoryLimit || platform === "cosmic") {
-      const category = new Category({ name, slug, estoreid });
+      const category = new Category({ name, slug, images, estoreid });
       await category.save();
       res.json(category);
     } else {
@@ -80,14 +81,22 @@ exports.updateCategory = async (req, res) => {
   const catid = req.params.catid;
   const estoreid = req.headers.estoreid;
   const name = req.body.name;
-  const slug = slugify(req.body.name.toString().toLowerCase());
+  let values = req.body;
+
+  if (name) {
+    values = {
+      ...values,
+      slug: slugify(name.toString().toLowerCase()),
+    };
+  }
+
   try {
     const category = await Category.findOneAndUpdate(
       {
         _id: ObjectId(catid),
         estoreid: ObjectId(estoreid),
       },
-      { name, slug },
+      values,
       {
         new: true,
       }
