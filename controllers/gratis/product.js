@@ -16,7 +16,7 @@ exports.randomItems = async (req, res) => {
       { $sample: { size: parseInt(count) } },
     ]).exec();
 
-    products = await populateProduct(products);
+    products = await populateProduct(products, estoreid);
 
     const countProduct = await Product.find({
       estoreid: ObjectId(estoreid),
@@ -38,7 +38,7 @@ exports.getProductBySlug = async (req, res) => {
       estoreid: ObjectId(estoreid),
     }).exec();
 
-    product = await populateProduct(product);
+    product = await populateProduct(product, estoreid);
 
     res.json(product);
   } catch (error) {
@@ -56,7 +56,7 @@ exports.getProductById = async (req, res) => {
       estoreid: ObjectId(estoreid),
     }).exec();
 
-    product = await populateProduct(product);
+    product = await populateProduct(product, estoreid);
 
     res.json(product);
   } catch (error) {
@@ -90,7 +90,7 @@ exports.itemsByBarcode = async (req, res) => {
         .exec();
     }
 
-    products = await populateProduct(products);
+    products = await populateProduct(products, estoreid);
 
     res.json(products);
   } catch (error) {
@@ -147,6 +147,29 @@ exports.loadInitProducts = async (req, res) => {
   }
 };
 
+exports.getWaitingProducts = async (req, res) => {
+  const estoreid = ObjectId(req.headers.estoreid);
+  const email = req.user.email;
+
+  try {
+    const user = await User.findOne({ email }).exec();
+    if (user) {
+      const products = await Product.find({
+        estoreid: ObjectId(estoreid),
+        "waiting._id": { $exists: true },
+      })
+        .select("waiting")
+        .exec();
+
+      res.json(products);
+    } else {
+      res.json({ err: "Cannot fetch the user details." });
+    }
+  } catch (error) {
+    res.json({ err: "Getting waiting products failed." + error.message });
+  }
+};
+
 exports.getAdminItems = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
@@ -195,7 +218,7 @@ exports.getAdminItems = async (req, res) => {
         .exec();
     }
 
-    products = await populateProduct(products);
+    products = await populateProduct(products, estoreid);
 
     const countProduct = await Product.find(searchObj).exec();
 
@@ -219,13 +242,14 @@ exports.addProduct = async (req, res) => {
           err: "Sorry, this product is already existing. Choose another tittle for the product.",
         });
       } else {
-        const product = new Product({
+        let product = new Product({
           ...req.body,
           slug: slugify(req.body.title.toString().toLowerCase()),
           estoreid: ObjectId(estoreid),
         });
         await product.save();
-        res.json(product);
+        product = await populateProduct([product], estoreid);
+        res.json(product[0]);
       }
     } else {
       res.json({
@@ -275,7 +299,7 @@ exports.searchProduct = async (req, res) => {
         }).exec();
       }
 
-      products = await populateProduct(products);
+      products = await populateProduct(products, estoreid);
     } else {
       products = await Product.find({
         estoreid: ObjectId(estoreid),
@@ -310,7 +334,7 @@ exports.updateProduct = async (req, res) => {
       { new: true }
     );
 
-    product = await populateProduct([product]);
+    product = await populateProduct([product], estoreid);
 
     res.json(product[0]);
   } catch (error) {
@@ -318,16 +342,49 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
+exports.receiveProducts = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const products = req.body;
+
+  try {
+    for (let i = 0; i < products.length; i++) {
+      if (products[i].supplierPrice === products[i].newSupplierPrice) {
+        await Product.findOneAndUpdate(
+          {
+            _id: ObjectId(products[i]._id),
+            estoreid: ObjectId(estoreid),
+          },
+          { $inc: { quantity: products[i].newQuantity } },
+          { new: true }
+        );
+      } else {
+        await Product.findOneAndUpdate(
+          {
+            _id: ObjectId(products[i]._id),
+            estoreid: ObjectId(estoreid),
+          },
+          { waiting: products[i] },
+          { new: true }
+        );
+      }
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    res.json({ err: "Receiving product failed. " + error.message });
+  }
+};
+
 exports.deleteProduct = async (req, res) => {
   const prodid = req.params.prodid;
   const estoreid = req.headers.estoreid;
   try {
-    const product = await Product.findOneAndDelete({
+    let product = await Product.findOneAndDelete({
       _id: ObjectId(prodid),
       estoreid: ObjectId(estoreid),
     }).exec();
     if (product) {
-      res.json(product);
+      product = await populateProduct([product], estoreid);
+      res.json(product[0]);
     } else {
       res.json({ err: "Product does not exist in the system." });
     }

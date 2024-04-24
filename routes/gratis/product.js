@@ -6,10 +6,12 @@ const {
   getProductById,
   itemsByBarcode,
   loadInitProducts,
+  getWaitingProducts,
   getAdminItems,
   addProduct,
   searchProduct,
   updateProduct,
+  receiveProducts,
   deleteProduct,
   checkImageUser,
 } = require("../../controllers/gratis/product");
@@ -30,6 +32,12 @@ router.get(
   adminGratisCheck,
   loadInitProducts
 );
+router.get(
+  "/gratis/get-waiting-products",
+  authCheck,
+  adminGratisCheck,
+  getWaitingProducts
+);
 router.post(
   "/gratis/get-admin-products",
   authCheck,
@@ -43,6 +51,12 @@ router.put(
   authCheck,
   adminGratisCheck,
   updateProduct
+);
+router.put(
+  "/gratis/receive-product",
+  authCheck,
+  adminGratisCheck,
+  receiveProducts
 );
 router.delete(
   "/gratis/delete-product/:prodid",

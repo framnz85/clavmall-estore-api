@@ -1,8 +1,9 @@
+const ObjectId = require("mongoose").Types.ObjectId;
 const Category = require("../../models/gratis/category");
 const Raffle = require("../../models/gratis/raffle");
 const User = require("../../models/gratis/user");
 
-exports.populateProduct = async (products) => {
+exports.populateProduct = async (products, estoreid) => {
   let categories = [];
 
   products = products.map((product) => {
@@ -10,7 +11,10 @@ exports.populateProduct = async (products) => {
     return product;
   });
 
-  const categoryList = await Category.find({ _id: { $in: categories } }).exec();
+  const categoryList = await Category.find({
+    _id: { $in: categories },
+    estoreid: ObjectId(estoreid),
+  }).exec();
 
   products = products.map((product) => {
     return {

@@ -382,13 +382,31 @@ exports.saveCartOrder = async (req, res) => {
               { $inc: { quantity: -prod.count, sold: prod.count } },
               { new: true }
             );
-            if (result.quantity < 0) {
+            if (result.quantity <= 0) {
+              const newQuantity =
+                result && result.waiting && result.waiting.newQuantity
+                  ? result.waiting.newQuantity
+                  : 0;
+
+              const newSupplierPrice =
+                result && result.waiting && result.waiting.newSupplierPrice
+                  ? result.waiting.newSupplierPrice
+                  : result.supplierPrice;
+
+              const newPrice =
+                newSupplierPrice + (newSupplierPrice * result.markup) / 100;
+
               await Product.findOneAndUpdate(
                 {
                   _id: ObjectId(prod.product),
                   estoreid: Object(estoreid),
                 },
-                { quantity: 0 },
+                {
+                  quantity: newQuantity,
+                  supplierPrice: newSupplierPrice,
+                  price: newPrice,
+                  waiting: {},
+                },
                 { new: true }
               );
             }
@@ -463,13 +481,31 @@ exports.updateOrderStatus = async (req, res) => {
               { $inc: { quantity: -prod.count, sold: prod.count } },
               { new: true }
             );
-            if (result.quantity < 0) {
+            if (result.quantity <= 0) {
+              const newQuantity =
+                result && result.waiting && result.waiting.newQuantity
+                  ? result.waiting.newQuantity
+                  : 0;
+
+              const newSupplierPrice =
+                result && result.waiting && result.waiting.newSupplierPrice
+                  ? result.waiting.newSupplierPrice
+                  : result.supplierPrice;
+
+              const newPrice =
+                newSupplierPrice + (newSupplierPrice * result.markup) / 100;
+
               await Product.findOneAndUpdate(
                 {
                   _id: ObjectId(prod.product),
                   estoreid: Object(estoreid),
                 },
-                { quantity: 0 },
+                {
+                  quantity: newQuantity,
+                  supplierPrice: newSupplierPrice,
+                  price: newPrice,
+                  waiting: {},
+                },
                 { new: true }
               );
             }
