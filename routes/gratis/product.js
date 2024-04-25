@@ -44,6 +44,7 @@ router.post(
   adminGratisCheck,
   getAdminItems
 );
+router.post("/gratis/get-best-seller", getAdminItems);
 router.post("/gratis/add-product", authCheck, adminGratisCheck, addProduct);
 router.post("/gratis/search-product", searchProduct);
 router.put(
