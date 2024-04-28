@@ -101,6 +101,7 @@ exports.itemsByBarcode = async (req, res) => {
 exports.loadInitProducts = async (req, res) => {
   const estoreidFrom = Object("613216389261e003d696cc65");
   const estoreid = ObjectId(req.headers.estoreid);
+  const count = req.params.count;
   const email = req.user.email;
 
   try {
@@ -110,7 +111,13 @@ exports.loadInitProducts = async (req, res) => {
         estoreid: estoreidFrom,
         initial: 1,
       }).select("-_id -createdAt -updatedAt -__v");
-      const copyingProducts = products.map((product) => {
+
+      for (let i = products.length; i; i--) {
+        let j = Math.floor(Math.random() * i);
+        [products[i - 1], products[j]] = [products[j], products[i - 1]];
+      }
+
+      const copyingProducts = products.slice(0, count).map((product) => {
         const images = product.images.map((img) => {
           return { ...img, fromid: estoreidFrom };
         });
@@ -118,16 +125,23 @@ exports.loadInitProducts = async (req, res) => {
       });
       const newProducts = await Product.insertMany(copyingProducts);
 
+      const categoryIds = copyingProducts.map((prod) => prod.category);
+
       if (newProducts.length) {
         const categories = await Category.find({
+          _id: { $in: categoryIds },
           estoreid: estoreidFrom,
           initial: 1,
         });
 
         categories.forEach(async (category) => {
+          const images = category.images.map((img) => {
+            return { ...img, fromid: estoreidFrom };
+          });
           const newCategory = new Category({
             name: category.name,
             slug: category.slug,
+            images,
             estoreid,
           });
           await newCategory.save();

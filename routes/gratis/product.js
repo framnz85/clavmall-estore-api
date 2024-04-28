@@ -27,7 +27,7 @@ router.get(
 );
 router.get("/gratis/get-product-by-barcode/:barcode", itemsByBarcode);
 router.get(
-  "/gratis/init-product",
+  "/gratis/init-product/:count",
   authCheck,
   adminGratisCheck,
   loadInitProducts
