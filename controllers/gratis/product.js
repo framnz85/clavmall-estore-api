@@ -281,6 +281,7 @@ exports.searchProduct = async (req, res) => {
   const catSlug = req.body.catSlug;
   const price = req.body.price;
   let querySearch = {};
+  let noResultSearch = {};
   let products = [];
 
   if (text) {
@@ -292,24 +293,33 @@ exports.searchProduct = async (req, res) => {
       slug: catSlug,
       estoreid: ObjectId(estoreid),
     });
-    if (category)
+    if (category) {
       querySearch = { ...querySearch, category: ObjectId(category._id) };
+      noResultSearch = { ...noResultSearch, category: ObjectId(category._id) };
+    }
   }
 
-  if (price)
+  if (price) {
     querySearch = { ...querySearch, price: { $gt: price[0], $lt: price[1] } };
-
+    noResultSearch = {
+      ...noResultSearch,
+      price: { $gt: price[0], $lt: price[1] },
+    };
+  }
   try {
     if (Object.keys(querySearch).length) {
       products = await Product.find({
         ...querySearch,
         estoreid: ObjectId(estoreid),
-      }).exec();
+      })
+        .limit(30)
+        .exec();
 
-      if (products.length < 1 && text) {
+      if (products.length < 31 && text) {
         products = await Product.find({
           title: { $regex: text, $options: "i" },
           estoreid: ObjectId(estoreid),
+          ...noResultSearch,
         }).exec();
       }
 
@@ -317,7 +327,9 @@ exports.searchProduct = async (req, res) => {
     } else {
       products = await Product.find({
         estoreid: ObjectId(estoreid),
-      }).exec();
+      })
+        .limit(30)
+        .exec();
     }
     res.json(products);
   } catch (error) {
