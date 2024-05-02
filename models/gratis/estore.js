@@ -189,6 +189,15 @@ const estoreSchema = new mongoose.Schema(
       yearStart3: Number,
       affComm3: Number,
       domain: String,
+      allowGuide: { type: Boolean, default: true },
+      trainTitle: String,
+      allowTraining: Boolean,
+      training: [
+        {
+          title: String,
+          lessons: Array,
+        },
+      ],
       status: { type: Boolean, default: false },
     },
     accessibility: {
