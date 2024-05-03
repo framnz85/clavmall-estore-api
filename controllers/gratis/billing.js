@@ -1,8 +1,23 @@
 const ObjectId = require("mongoose").Types.ObjectId;
-const slugify = require("slugify");
-
 const Billing = require("../../models/gratis/billing");
 const Estore = require("../../models/gratis/estore");
+
+exports.getBillings = async (req, res) => {
+  const resellid = req.headers.resellid;
+  try {
+    const billings = await Billing.find({
+      resellid: ObjectId(resellid),
+    }).exec();
+
+    const countBillings = await Billing.estimatedDocumentCount({
+      resellid: ObjectId(resellid),
+    });
+
+    res.json({ billings, countBillings });
+  } catch (error) {
+    res.json({ err: "Fetching billings fails. " + error.message });
+  }
+};
 
 exports.createBilling = async (req, res) => {
   const resellid = req.headers.resellid;

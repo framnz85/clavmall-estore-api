@@ -11,7 +11,7 @@ const billingSchema = new mongoose.Schema(
       enum: ["For Approval", "Approved"],
       default: "For Approval",
     },
-    estoreid: ObjectId,
+    resellid: ObjectId,
   },
   { timestamps: true }
 );
