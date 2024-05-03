@@ -80,7 +80,7 @@ exports.getEstores = async (req, res) => {
         .sort({ [sortkey]: sort })
         .limit(pageSize)
         .exec();
-      countEstores = await Estore.find(
+      countEstores = await Estore.estimatedDocumentCount(
         masterUser
           ? {
               email: searchQuery,
@@ -89,7 +89,7 @@ exports.getEstores = async (req, res) => {
               email: searchQuery,
               resellid: ObjectId(estoreid),
             }
-      ).exec();
+      );
     }
 
     if (estores.length === 0 && searchQuery && ObjectId(searchQuery)) {
@@ -107,7 +107,7 @@ exports.getEstores = async (req, res) => {
         .sort({ [sortkey]: sort })
         .limit(pageSize)
         .exec();
-      countEstores = await Estore.find(
+      countEstores = await Estore.estimatedDocumentCount(
         masterUser
           ? {
               _id: ObjectId(searchQuery),
@@ -116,14 +116,14 @@ exports.getEstores = async (req, res) => {
               _id: ObjectId(searchQuery),
               resellid: ObjectId(estoreid),
             }
-      ).exec();
+      );
     } else {
-      countEstores = await Estore.find(searchObj).exec();
+      countEstores = await Estore.estimatedDocumentCount(searchObj);
     }
 
     estores = await populateEstore(estores);
 
-    res.json({ estores, count: countEstores.length });
+    res.json({ estores, count: countEstores });
   } catch (error) {
     res.json({ err: "Fetching stores fails. " + error.message });
   }
@@ -161,7 +161,7 @@ exports.getEstoresBilling = async (req, res) => {
 
     res.json({ estores, count: countEstores.length });
   } catch (error) {
-    res.json({ err: "Fetching stores fails. " + error.message });
+    res.json({ err: "Fetching store counters fails. " + error.message });
   }
 };
 
