@@ -45,6 +45,48 @@ exports.getCategories = async (req, res) => {
   }
 };
 
+exports.checkImageUser = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const publicid = req.params.publicid;
+  const defaultestore = req.params.defaultestore;
+
+  try {
+    let category = await Category.findOne({
+      images: {
+        $elemMatch: { public_id: publicid },
+      },
+      estoreid: ObjectId(defaultestore),
+    }).exec();
+
+    if (category) {
+      if (estoreid === defaultestore) {
+        res.json({ delete: true });
+      } else {
+        res.json({ delete: false });
+      }
+    } else {
+      category = await Category.findOne({
+        images: {
+          $elemMatch: { public_id: publicid },
+        },
+        estoreid: ObjectId(estoreid),
+      }).exec();
+
+      if (category && category.images[0] && category.images[0].fromid) {
+        if (category.images[0].fromid === estoreid) {
+          res.json({ delete: true });
+        } else {
+          res.json({ delete: false });
+        }
+      } else {
+        res.json({ delete: true });
+      }
+    }
+  } catch (error) {
+    res.status(400).send("Checking image user failed.");
+  }
+};
+
 exports.addCategory = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const platform = req.headers.platform;

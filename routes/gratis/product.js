@@ -38,6 +38,12 @@ router.get(
   adminGratisCheck,
   getWaitingProducts
 );
+router.get(
+  "/gratis/check-image-owner-product/:publicid/:defaultestore",
+  authCheck,
+  adminGratisCheck,
+  checkImageUser
+);
 router.post(
   "/gratis/get-admin-products",
   authCheck,
@@ -64,12 +70,6 @@ router.delete(
   authCheck,
   adminGratisCheck,
   deleteProduct
-);
-router.get(
-  "/gratis/check-image-user/:publicid/:defaultestore",
-  authCheck,
-  adminGratisCheck,
-  checkImageUser
 );
 
 module.exports = router;
