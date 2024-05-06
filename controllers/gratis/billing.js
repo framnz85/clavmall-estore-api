@@ -5,9 +5,11 @@ const Estore = require("../../models/gratis/estore");
 exports.getBillings = async (req, res) => {
   const resellid = req.headers.resellid;
   try {
-    const billings = await Billing.find({
-      resellid: ObjectId(resellid),
-    }).exec();
+    const filterObj =
+      resellid === "613216389261e003d696cc65"
+        ? {}
+        : { resellid: ObjectId(resellid) };
+    const billings = await Billing.find(filterObj).exec();
 
     const countBillings = await Billing.estimatedDocumentCount({
       resellid: ObjectId(resellid),
@@ -47,5 +49,47 @@ exports.createBilling = async (req, res) => {
     res.json(billing);
   } catch (error) {
     res.json({ err: "Creating billing fails. " + error.message });
+  }
+};
+
+exports.updateBilling = async (req, res) => {
+  const billingId = req.body.billingId;
+  const resellid = req.body.resellid;
+
+  try {
+    const billing = await Billing.findOne({
+      _id: Object(billingId),
+      resellid: ObjectId(resellid),
+    }).exec();
+    if (billing) {
+      const estoreList = billing.estoreList ? billing.estoreList : [];
+      for (i = 0; i < estoreList.length; i++) {
+        if (estoreList[i].product === "Package A") {
+          updateObj = { approval: "Approved" };
+        }
+        if (estoreList[i].product === "Package B") {
+          updateObj = { approval2: "Approved" };
+        }
+        if (estoreList[i].product === "Package C") {
+          updateObj = { approval3: "Approved" };
+        }
+
+        await Estore.findByIdAndUpdate(estoreList[i].estoreid, updateObj, {
+          new: true,
+        }).exec();
+      }
+      await Billing.findOneAndUpdate(
+        {
+          _id: Object(billingId),
+          resellid: ObjectId(resellid),
+        },
+        { status: "Approved" }
+      ).exec();
+      res.json(billing);
+    } else {
+      res.json({ err: "No billing exist under ID: " + billing });
+    }
+  } catch (error) {
+    res.json({ err: "Fetching billing information fails. " + error.message });
   }
 };
