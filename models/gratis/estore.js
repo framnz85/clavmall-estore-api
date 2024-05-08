@@ -19,7 +19,7 @@ const estoreSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      default: "pending",
+      default: "active",
       enum: ["pending", "pause", "stop", "active"],
     },
     country: {
