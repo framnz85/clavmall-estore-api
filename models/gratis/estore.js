@@ -127,6 +127,7 @@ const estoreSchema = new mongoose.Schema(
       type: String,
       enum: ["Active", "Pending"],
     },
+    recurring1: Number,
     approval: {
       type: String,
       enum: ["Approved", "For Approval", "Pending"],
@@ -135,6 +136,7 @@ const estoreSchema = new mongoose.Schema(
       type: String,
       enum: ["Active", "Pending"],
     },
+    recurring2: Number,
     approval2: {
       type: String,
       enum: ["Approved", "For Approval", "Pending"],
@@ -143,6 +145,7 @@ const estoreSchema = new mongoose.Schema(
       type: String,
       enum: ["Active", "Pending"],
     },
+    recurring3: Number,
     approval3: {
       type: String,
       enum: ["Approved", "For Approval", "Pending"],
