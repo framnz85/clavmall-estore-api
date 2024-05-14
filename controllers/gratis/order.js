@@ -140,35 +140,7 @@ exports.adminOrders = async (req, res) => {
   }
 };
 
-exports.adminDaySale = async (req, res) => {
-  const estoreid = req.headers.estoreid;
-  const dates = req.body.dates;
-
-  try {
-    const orders = await Order.find({
-      estoreid: Object(estoreid),
-      orderStatus: "Completed",
-      createdAt: {
-        $gte: new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)),
-        $lt: new Date(new Date(dates.endDate).setHours(23, 59, 59)),
-      },
-    }).exec();
-
-    const cartTotal = orders.reduce((accumulator, value) => {
-      return accumulator + value.cartTotal;
-    }, 0);
-
-    const delfee = orders.reduce((accumulator, value) => {
-      return accumulator + value.delfee;
-    }, 0);
-
-    res.json({ cartTotal, delfee });
-  } catch (error) {
-    res.json({ err: "Fetching orders failed. " + error.message });
-  }
-};
-
-exports.adminDaySaleCapital = async (req, res) => {
+exports.adminSales = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const dates = req.body.dates;
   let capital = 0;
@@ -193,7 +165,23 @@ exports.adminDaySaleCapital = async (req, res) => {
         }, 0);
     });
 
-    res.json({ capital });
+    const cartTotals = orders.reduce((accumulator, value) => {
+      const cartTotal = value.cartTotal ? value.cartTotal : 0;
+      return accumulator + cartTotal;
+    }, 0);
+
+    const delfees = orders.reduce((accumulator, value) => {
+      const delfee = value.delfee ? value.delfee : 0;
+      return accumulator + delfee;
+    }, 0);
+
+    const discounts = orders.reduce((accumulator, value) => {
+      const discount = value.discount ? value.discount : 0;
+      const addDiscount = value.addDiscount ? value.addDiscount : 0;
+      return accumulator + discount + addDiscount;
+    }, 0);
+
+    res.json({ capital, cartTotals, delfees, discounts });
   } catch (error) {
     res.json({ err: "Fetching orders failed. " + error.message });
   }
