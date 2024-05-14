@@ -4,6 +4,7 @@ const slugify = require("slugify");
 const Product = require("../../models/gratis/product");
 const User = require("../../models/gratis/user");
 const Category = require("../../models/gratis/category");
+const Order = require("../../models/gratis/order");
 const { populateProduct } = require("./common");
 
 exports.randomItems = async (req, res) => {
@@ -195,6 +196,7 @@ exports.getAdminItems = async (req, res) => {
       searchQuery,
       category,
       barcode,
+      sales,
     } = req.body;
 
     let searchObj = searchQuery
@@ -235,6 +237,34 @@ exports.getAdminItems = async (req, res) => {
     products = await populateProduct(products, estoreid);
 
     const countProduct = await Product.find(searchObj).exec();
+
+    if (sales && sales.type && sales.type === "sales") {
+      const newProdSold = [];
+      for (i = 0; i < products.length; i++) {
+        const result = await Order.find({
+          estoreid: Object(estoreid),
+          "products.product": ObjectId(products[i]._id),
+          createdAt: {
+            $gte: new Date(new Date(sales.dateStart).setHours(0o0, 0o0, 0o0)),
+            $lt: new Date(new Date(sales.endDate).setHours(23, 59, 59)),
+          },
+        })
+          .select("products")
+          .exec();
+        if (result.length > 0) {
+          let totalSold = 0;
+          for (j = 0; j < result.length; j++) {
+            for (k = 0; k < result[j].products.length; k++) {
+              totalSold = totalSold + result[j].products[k].count;
+            }
+          }
+          newProdSold.push({ ...products[i], sold: totalSold });
+        } else {
+          newProdSold.push({ ...products[i], sold: 0 });
+        }
+      }
+      products = [...newProdSold];
+    }
 
     res.json({ products, count: countProduct.length });
   } catch (error) {
