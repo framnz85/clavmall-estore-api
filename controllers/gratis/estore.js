@@ -212,6 +212,7 @@ exports.updateEstore = async (req, res) => {
 exports.createEstore = async (req, res) => {
   const resellid = req.params.resellid;
   const refid = req.body.refid;
+  const reseller = req.body.reseller;
   try {
     const checkStoreExist = await Estore.findOne({
       slug: slugify(req.body.name.toString().toLowerCase()),
@@ -221,13 +222,24 @@ exports.createEstore = async (req, res) => {
         email: req.body.email,
       });
       if (!checkEmailExist) {
-        const estore = new Estore({
-          name: req.body.name,
-          email: req.body.email,
-          slug: slugify(req.body.name.toString().toLowerCase()),
-          country: ObjectId(req.body.country),
-          resellid: ObjectId(resellid),
-        });
+        const estore = new Estore(
+          reseller && reseller.type
+            ? {
+                name: req.body.name,
+                email: req.body.email,
+                slug: slugify(req.body.name.toString().toLowerCase()),
+                country: ObjectId(req.body.country),
+                resellid: ObjectId(resellid),
+                reseller,
+              }
+            : {
+                name: req.body.name,
+                email: req.body.email,
+                slug: slugify(req.body.name.toString().toLowerCase()),
+                country: ObjectId(req.body.country),
+                resellid: ObjectId(resellid),
+              }
+        );
         await estore.save();
 
         if (refid) {
@@ -250,6 +262,26 @@ exports.createEstore = async (req, res) => {
         }
 
         res.json(estore);
+      } else if (checkEmailExist && reseller && reseller.resellerType) {
+        if (checkEmailExist.reseller && checkEmailExist.reseller.status) {
+          res.json({
+            note: `Your email ${req.body.email} is already has an active reseller account. Login Now!`,
+          });
+        } else {
+          await Estore.findOneAndUpdate(
+            { _id: checkEmailExist._id },
+            {
+              reseller:
+                checkEmailExist.reseller && checkEmailExist.reseller.status
+                  ? {
+                      ...checkEmailExist.reseller,
+                      resellerType: reseller.resellerType,
+                    }
+                  : { resellerType: reseller.resellerType },
+            }
+          );
+          res.json(checkEmailExist);
+        }
       } else {
         res.json({
           err: `Store with an email ${req.body.email} is already existing. Please choose another Email Address.`,
@@ -257,7 +289,7 @@ exports.createEstore = async (req, res) => {
       }
     } else {
       res.json({
-        err: `Store with a name ${req.body.name} is already existing. Please choose another Store Name.`,
+        err: `Store or App with a name ${req.body.name} is already existing. Please choose another Store Name.`,
       });
     }
   } catch (error) {

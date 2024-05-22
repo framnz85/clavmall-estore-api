@@ -201,6 +201,7 @@ const estoreSchema = new mongoose.Schema(
           lessons: Array,
         },
       ],
+      resellerType: String,
       status: { type: Boolean, default: false },
     },
     accessibility: {

@@ -257,6 +257,7 @@ exports.getAllUsers = async (req, res) => {
 exports.createNewUser = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const resellid = req.params.resellid;
+  const reseller = req.body.reseller;
 
   try {
     const user = new User(
@@ -300,9 +301,13 @@ exports.createNewUser = async (req, res) => {
     res.json({ user, token, refUser });
   } catch (error) {
     if (error.code === 11000) {
-      res.json({
-        err: `The email ${req.body.email} or phone ${req.body.phone} is already existing`,
-      });
+      if (reseller && reseller.resellerType) {
+        res.json({ ok: true });
+      } else {
+        res.json({
+          err: `The email ${req.body.email} or phone ${req.body.phone} is already existing`,
+        });
+      }
     } else {
       res.json({ err: "Creating new user fails. " + error.message });
     }
