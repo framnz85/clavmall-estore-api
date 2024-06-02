@@ -210,7 +210,7 @@ const estoreSchema = new mongoose.Schema(
         default: [
           "dashboard",
           "orders",
-          "categories",
+          "category",
           "payment",
           "location",
           "product",
@@ -229,7 +229,7 @@ const estoreSchema = new mongoose.Schema(
         default: [
           "dashboard",
           "orders",
-          "categories",
+          "category",
           "payment",
           "location",
           "product",
