@@ -79,7 +79,7 @@ const estoreSchema = new mongoose.Schema(
     },
     storeAddress: String,
     storeContact: String,
-    delfee: String,
+    delfee: { type: String, default: "0" },
     delfeeType: {
       type: String,
       enum: ["percent", "number"],
@@ -87,7 +87,7 @@ const estoreSchema = new mongoose.Schema(
     },
     deltime: String,
     delloc: String,
-    discount: String,
+    discount: { type: String, default: "0" },
     discountType: {
       type: String,
       enum: ["percent", "number"],
@@ -243,6 +243,11 @@ const estoreSchema = new mongoose.Schema(
           "cartprice",
         ],
       },
+    },
+    allocation: {
+      admin: { type: Number, default: 100 },
+      moderator: { type: Number, default: 0 },
+      cashier: { type: Number, default: 0 },
     },
   },
   { timestamps: true }

@@ -116,7 +116,7 @@ exports.saveOrder = async (req, res) => {
               { $inc: { quantity: -prod.count, sold: prod.count } },
               { new: true }
             );
-            if (result.quantity <= 0) {
+            if (result && result.quantity <= 0) {
               const newQuantity =
                 result && result.waiting && result.waiting.newQuantity
                   ? result.waiting.newQuantity
