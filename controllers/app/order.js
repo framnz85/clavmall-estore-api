@@ -191,3 +191,89 @@ exports.saveOrder = async (req, res) => {
     res.json({ err: "Saving cart to order fails. " + error.message });
   }
 };
+exports.sendOrder = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const email = req.user.email;
+
+  const cartTotal = req.body.cartTotal;
+  const discount = req.body.discount;
+  const addDiscount = req.body.addDiscount;
+  const cash = req.body.cash;
+  const products = req.body.products;
+
+  const orderedBy = req.body.orderedBy;
+  const customerName = req.body.customerName;
+  const customerPhone = req.body.customerPhone;
+  const customerEmail = req.body.customerEmail;
+  const orderNotes = req.body.orderNotes;
+
+  try {
+    let user = await User.findOne({ email }).exec();
+    let checkUser = {};
+
+    if (customerName) {
+      if (customerPhone) {
+        checkUser = await User.findOne({
+          phone: customerPhone,
+          estoreid: ObjectId(estoreid),
+        });
+      }
+      if (customerEmail) {
+        checkUser = await User.findOne({
+          email: customerEmail,
+          estoreid: ObjectId(estoreid),
+        });
+      }
+      if (orderedBy) {
+        checkUser = await User.findOne({
+          _id: ObjectId(orderedBy),
+          estoreid: ObjectId(estoreid),
+        });
+      }
+      if (!checkUser && (customerPhone || customerEmail)) {
+        const newUser = new User({
+          name: customerName,
+          phone: customerPhone ? customerPhone : "09100000001",
+          email: customerEmail ? customerEmail : "abc@xyz.com",
+          password: md5("Grocery@2000"),
+          showPass: "Grocery@2000",
+          role: "customer",
+          estoreid: ObjectId(estoreid),
+        });
+        checkUser = await newUser.save();
+      }
+    }
+
+    const newOrder = new Order({
+      orderType: "pos",
+      orderStatus: "Completed",
+      cartTotal,
+      discount,
+      addDiscount,
+      cash,
+      createdBy: user._id,
+      orderedBy: checkUser && checkUser._id ? checkUser._id : user._id,
+      orderedName: customerName || user.name,
+      estoreid: ObjectId(estoreid),
+      orderNotes,
+      products,
+    });
+
+    const order = await newOrder.save();
+
+    if (order) {
+      await Order.findByIdAndUpdate(order._id, {
+        orderCode: order._id.toString().slice(-12),
+      }).exec();
+
+      await Estore.findByIdAndUpdate(estoreid, {
+        orderChange: new Date().valueOf(),
+        productChange: new Date().valueOf(),
+      }).exec();
+
+      res.json(order);
+    }
+  } catch (error) {
+    res.json({ err: "Saving cart to order fails. " + error.message });
+  }
+};

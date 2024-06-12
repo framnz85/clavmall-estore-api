@@ -35,7 +35,7 @@ exports.getProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const prodid = req.body.prodid;
-  const quantity = req.body.quantity;
+  const count = req.body.quantity;
   let product = {};
 
   try {
@@ -44,7 +44,7 @@ exports.updateProduct = async (req, res) => {
         _id: ObjectId(prodid),
         estoreid: ObjectId(estoreid),
       },
-      { $inc: { quantity: -quantity, sold: quantity } },
+      { $inc: { quantity: -count, sold: count } },
       { new: true }
     );
 
