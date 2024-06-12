@@ -31,3 +31,54 @@ exports.getProduct = async (req, res) => {
     res.json({ err: "Getting a product details failed." + error.message });
   }
 };
+
+exports.updateProduct = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const prodid = req.body.prodid;
+  const quantity = req.body.quantity;
+  let product = {};
+
+  try {
+    product = await Product.findOneAndUpdate(
+      {
+        _id: ObjectId(prodid),
+        estoreid: ObjectId(estoreid),
+      },
+      { $inc: { quantity: -quantity, sold: quantity } },
+      { new: true }
+    );
+
+    if (product.quantity <= 0) {
+      const newQuantity =
+        product && product.waiting && product.waiting.newQuantity
+          ? product.waiting.newQuantity
+          : 0;
+
+      const newSupplierPrice =
+        product && product.waiting && product.waiting.newSupplierPrice
+          ? product.waiting.newSupplierPrice
+          : product.supplierPrice;
+
+      const newPrice =
+        newSupplierPrice + (newSupplierPrice * product.markup) / 100;
+
+      product = await Product.findOneAndUpdate(
+        {
+          _id: ObjectId(prodid),
+          estoreid: Object(estoreid),
+        },
+        {
+          quantity: newQuantity,
+          supplierPrice: newSupplierPrice,
+          price: newPrice,
+          waiting: {},
+        },
+        { new: true }
+      );
+    }
+
+    res.json(product);
+  } catch (error) {
+    res.json({ err: "Updating a product details failed." + error.message });
+  }
+};

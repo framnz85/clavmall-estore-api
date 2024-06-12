@@ -47,6 +47,7 @@ const orderSchema = new mongoose.Schema(
     addDiscount: Number,
     grandTotal: Number,
     cash: Number,
+    createdBy: { type: ObjectId, ref: "GratisUser" },
     orderedBy: { type: ObjectId, ref: "GratisUser" },
     orderedName: String,
     estoreid: ObjectId,
