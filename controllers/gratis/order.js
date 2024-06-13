@@ -108,7 +108,7 @@ exports.adminOrders = async (req, res) => {
     if (user.role === "cashier") {
       orders = await Order.find({
         estoreid: Object(estoreid),
-        orderedBy: user._id,
+        createdBy: user._id,
       })
         .skip((currentPage - 1) * pageSize)
         .sort({ [sortkey]: sort })
@@ -279,6 +279,7 @@ exports.updateCart = async (req, res) => {
 exports.saveCartOrder = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const email = req.user.email;
+
   const orderType = req.body.orderType;
   const delfee = req.body.delfee;
   const discount = req.body.discount;
@@ -288,16 +289,16 @@ exports.saveCartOrder = async (req, res) => {
   const delAddress = req.body.delAddress;
   const orderNotes = req.body.orderNotes;
 
+  const orderedBy = req.body.orderedBy;
   const customerName = req.body.customerName;
   const customerPhone = req.body.customerPhone;
   const customerEmail = req.body.customerEmail;
 
   try {
     let user = await User.findOne({ email }).exec();
-    const origUser = user;
+    let checkUser = {};
 
     if (customerName) {
-      let checkUser = {};
       if (customerPhone) {
         checkUser = await User.findOne({
           phone: customerPhone,
@@ -310,127 +311,124 @@ exports.saveCartOrder = async (req, res) => {
           estoreid: ObjectId(estoreid),
         });
       }
-      if (checkUser) {
-        user = checkUser;
-      } else {
-        if (customerPhone || customerEmail) {
-          const newUser = new User({
-            name: customerName,
-            phone: customerPhone ? customerPhone : "09100000001",
-            email: customerEmail ? customerEmail : "abc@xyz.com",
-            password: md5("Grocery@2000"),
-            showPass: "Grocery@2000",
-            role: "customer",
-            estoreid: ObjectId(estoreid),
-          });
-          user = await newUser.save();
-        }
+      if (orderedBy) {
+        checkUser = await User.findOne({
+          _id: ObjectId(orderedBy),
+          estoreid: ObjectId(estoreid),
+        });
+      }
+      if (!checkUser && (customerPhone || customerEmail)) {
+        const newUser = new User({
+          name: customerName,
+          phone: customerPhone ? customerPhone : "09100000001",
+          email: customerEmail ? customerEmail : "abc@xyz.com",
+          password: md5("Grocery@2000"),
+          showPass: "Grocery@2000",
+          role: "customer",
+          estoreid: ObjectId(estoreid),
+        });
+        checkUser = await newUser.save();
       }
     }
 
-    if (user) {
-      const cart = await Cart.findOne({
-        orderedBy: origUser._id,
+    const cart = await Cart.findOne({
+      orderedBy: user._id,
+      estoreid: Object(estoreid),
+    });
+
+    const newOrder = new Order({
+      orderCode: cart._id.toString().slice(-12),
+      orderType,
+      products: cart.products,
+      paymentOption: ObjectId(paymentOption),
+      orderStatus: orderType === "pos" ? "Completed" : "Not Processed",
+      cartTotal: cart.cartTotal,
+      delfee,
+      discount,
+      addDiscount,
+      cash,
+      createdBy: user._id,
+      orderedBy: checkUser && checkUser._id ? checkUser._id : user._id,
+      orderedName: customerName || user.name,
+      estoreid: ObjectId(estoreid),
+      delAddress,
+      orderNotes,
+    });
+
+    const order = await newOrder.save();
+
+    if (order) {
+      res.json(order);
+      await Cart.deleteMany({
+        orderedBy: user._id,
         estoreid: Object(estoreid),
       });
+      if (orderType === "pos" && order.orderStatus === "Completed") {
+        order.products.forEach(async (prod) => {
+          const result = await Product.findOneAndUpdate(
+            {
+              _id: ObjectId(prod.product),
+              estoreid: Object(estoreid),
+            },
+            { $inc: { quantity: -prod.count, sold: prod.count } },
+            { new: true }
+          );
+          if (result.quantity <= 0) {
+            const newQuantity =
+              result && result.waiting && result.waiting.newQuantity
+                ? result.waiting.newQuantity
+                : 0;
 
-      const newOrder = new Order({
-        orderCode: cart._id.toString().slice(-12),
-        orderType,
-        products: cart.products,
-        paymentOption: ObjectId(paymentOption),
-        orderStatus: orderType === "pos" ? "Completed" : "Not Processed",
-        cartTotal: cart.cartTotal,
-        delfee,
-        discount,
-        addDiscount,
-        cash,
-        orderedBy: user._id,
-        orderedName: customerName || user.name,
-        estoreid: ObjectId(estoreid),
-        delAddress,
-        orderNotes,
-      });
+            const newSupplierPrice =
+              result && result.waiting && result.waiting.newSupplierPrice
+                ? result.waiting.newSupplierPrice
+                : result.supplierPrice;
 
-      const order = await newOrder.save();
+            const newPrice =
+              newSupplierPrice + (newSupplierPrice * result.markup) / 100;
 
-      if (order) {
-        res.json(order);
-        await Cart.deleteMany({
-          orderedBy: user._id,
-          estoreid: Object(estoreid),
-        });
-        if (orderType === "pos" && order.orderStatus === "Completed") {
-          order.products.forEach(async (prod) => {
-            const result = await Product.findOneAndUpdate(
+            await Product.findOneAndUpdate(
               {
                 _id: ObjectId(prod.product),
                 estoreid: Object(estoreid),
               },
-              { $inc: { quantity: -prod.count, sold: prod.count } },
+              {
+                quantity: newQuantity,
+                supplierPrice: newSupplierPrice,
+                price: newPrice,
+                waiting: {},
+              },
               { new: true }
             );
-            if (result.quantity <= 0) {
-              const newQuantity =
-                result && result.waiting && result.waiting.newQuantity
-                  ? result.waiting.newQuantity
-                  : 0;
-
-              const newSupplierPrice =
-                result && result.waiting && result.waiting.newSupplierPrice
-                  ? result.waiting.newSupplierPrice
-                  : result.supplierPrice;
-
-              const newPrice =
-                newSupplierPrice + (newSupplierPrice * result.markup) / 100;
-
-              await Product.findOneAndUpdate(
-                {
-                  _id: ObjectId(prod.product),
-                  estoreid: Object(estoreid),
-                },
-                {
-                  quantity: newQuantity,
-                  supplierPrice: newSupplierPrice,
-                  price: newPrice,
-                  waiting: {},
-                },
-                { new: true }
-              );
-            }
-          });
-
-          const estore = await Estore.findOne({
-            _id: ObjectId(estoreid),
-          }).exec();
-
-          const date1 = new Date(estore.raffleDate);
-          const date2 = new Date();
-          const timeDifference = date1.getTime() - date2.getTime();
-          const daysDifference = Math.round(
-            timeDifference / (1000 * 3600 * 24)
-          );
-
-          if (
-            user.role === "customer" &&
-            estore.raffleActivation &&
-            daysDifference > 0
-          ) {
-            createRaffle(
-              estoreid,
-              user._id,
-              order._id,
-              estore.raffleDate,
-              estore.raffleEntryAmount,
-              order.cartTotal
-            );
           }
+        });
+
+        const estore = await Estore.findOne({
+          _id: ObjectId(estoreid),
+        }).exec();
+
+        const date1 = new Date(estore.raffleDate);
+        const date2 = new Date();
+        const timeDifference = date1.getTime() - date2.getTime();
+        const daysDifference = Math.round(timeDifference / (1000 * 3600 * 24));
+
+        if (
+          user.role === "customer" &&
+          estore.raffleActivation &&
+          daysDifference > 0
+        ) {
+          createRaffle(
+            estoreid,
+            user._id,
+            order._id,
+            estore.raffleDate,
+            estore.raffleEntryAmount,
+            order.cartTotal
+          );
         }
-      } else {
-        res.json({ err: "Cannot save the order." });
       }
     } else {
-      res.json({ err: "Cannot fetch the cart details." });
+      res.json({ err: "Cannot save the order." });
     }
   } catch (error) {
     res.json({ err: "Saving cart to order fails. " + error.message });
