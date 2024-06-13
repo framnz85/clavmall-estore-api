@@ -66,14 +66,23 @@ exports.userOrders = async (req, res) => {
   const email = req.user.email;
 
   try {
-    const { sortkey, sort, currentPage, pageSize } = req.body;
+    const { sortkey, sort, currentPage, pageSize, searchQuery } = req.body;
 
     const user = await User.findOne({ email }).exec();
+
     if (user) {
-      const orders = await Order.find({
-        orderedBy: user._id,
-        estoreid: Object(estoreid),
-      })
+      const searchObj = searchQuery
+        ? {
+            $or: [
+              { orderCode: searchQuery },
+              { $text: { $search: searchQuery } },
+            ],
+            estoreid: ObjectId(estoreid),
+            orderedBy: user._id,
+          }
+        : { estoreid: ObjectId(estoreid), orderedBy: user._id };
+
+      const orders = await Order.find(searchObj)
         .skip((currentPage - 1) * pageSize)
         .sort({ [sortkey]: sort })
         .limit(pageSize)
@@ -82,10 +91,7 @@ exports.userOrders = async (req, res) => {
         .populate("paymentOption")
         .exec();
 
-      const countOrder = await Order.find({
-        orderedBy: user._id,
-        estoreid: Object(estoreid),
-      }).exec();
+      const countOrder = await Order.find(searchObj).exec();
 
       res.json({ orders, count: countOrder.length });
     } else {
@@ -102,14 +108,24 @@ exports.adminOrders = async (req, res) => {
   let orders = [];
 
   try {
-    const { sortkey, sort, currentPage, pageSize } = req.body;
+    const { sortkey, sort, currentPage, pageSize, searchQuery } = req.body;
+
     const user = await User.findOne({ email }).exec();
 
+    let searchObj = {};
+
     if (user.role === "cashier") {
-      orders = await Order.find({
-        estoreid: Object(estoreid),
-        createdBy: user._id,
-      })
+      searchObj = searchQuery
+        ? {
+            $or: [
+              { orderCode: searchQuery },
+              { $text: { $search: searchQuery } },
+            ],
+            estoreid: ObjectId(estoreid),
+            createdBy: user._id,
+          }
+        : { estoreid: ObjectId(estoreid), createdBy: user._id };
+      orders = await Order.find(searchObj)
         .skip((currentPage - 1) * pageSize)
         .sort({ [sortkey]: sort })
         .limit(pageSize)
@@ -118,9 +134,16 @@ exports.adminOrders = async (req, res) => {
         .populate("paymentOption")
         .exec();
     } else {
-      orders = await Order.find({
-        estoreid: Object(estoreid),
-      })
+      searchObj = searchQuery
+        ? {
+            $or: [
+              { orderCode: searchQuery },
+              { $text: { $search: searchQuery } },
+            ],
+            estoreid: ObjectId(estoreid),
+          }
+        : { estoreid: ObjectId(estoreid) };
+      orders = await Order.find(searchObj)
         .skip((currentPage - 1) * pageSize)
         .sort({ [sortkey]: sort })
         .limit(pageSize)
@@ -130,9 +153,7 @@ exports.adminOrders = async (req, res) => {
         .exec();
     }
 
-    const countOrder = await Order.find({
-      estoreid: Object(estoreid),
-    }).exec();
+    const countOrder = await Order.find(searchObj).exec();
 
     res.json({ orders, count: countOrder.length });
   } catch (error) {
