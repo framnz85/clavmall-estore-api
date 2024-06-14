@@ -18,6 +18,7 @@ const {
   deleteUser,
   deleteAllRaffles,
   sendEmail,
+  deleteAccountRequest,
 } = require("../../controllers/gratis/user");
 const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
 
@@ -57,6 +58,7 @@ router.put(
 );
 router.put("/gratis/reset-password-customer/:userid", authCheck, resetPassword);
 router.put("/gratis/forgot-password", forgotPassword);
+router.put("/gratis/delete-account-request", deleteAccountRequest);
 router.delete(
   "/gratis/user-delete/:userid",
   authCheck,

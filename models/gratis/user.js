@@ -86,6 +86,7 @@ const userSchema = new mongoose.Schema(
         date: Date,
       },
     ],
+    deleteAccount: { request: Boolean, reasons: Array },
   },
   { timestamps: true }
 );

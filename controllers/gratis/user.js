@@ -608,6 +608,29 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
+exports.deleteAccountRequest = async (req, res) => {
+  const email = req.body.email;
+  const reasons = req.body.reasons;
+  try {
+    const user = await User.findOneAndUpdate(
+      {
+        email,
+      },
+      { deleteAccount: { request: true, reasons } },
+      { new: true }
+    );
+    if (user) {
+      res.json(user);
+    } else {
+      res.json({
+        err: "Sorry, there is no user registered under the email" + email,
+      });
+    }
+  } catch (error) {
+    res.json({ err: "Request for Account Deletion fails. " + error.message });
+  }
+};
+
 exports.deleteUser = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const userid = req.params.userid;
