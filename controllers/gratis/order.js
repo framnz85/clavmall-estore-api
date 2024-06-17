@@ -166,15 +166,21 @@ exports.adminSales = async (req, res) => {
   const dates = req.body.dates;
   let capital = 0;
 
+  console.log(dates);
+
   try {
     const orders = await Order.find({
       estoreid: Object(estoreid),
       orderStatus: "Completed",
       createdAt: {
-        $gt: new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)),
-        $lt: new Date(new Date(dates.endDate).setHours(23, 59, 59)),
+        $gte: new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)),
+        $lte: new Date(new Date(dates.endDate).setHours(23, 59, 59)),
       },
     }).exec();
+
+    console.log(new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)));
+
+    console.log(new Date(new Date(dates.endDate).setHours(23, 59, 59)));
 
     orders.forEach((order) => {
       capital =
