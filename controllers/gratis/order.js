@@ -171,8 +171,8 @@ exports.adminSales = async (req, res) => {
       estoreid: Object(estoreid),
       orderStatus: "Completed",
       createdAt: {
-        $gte: new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)),
-        $lt: new Date(new Date(dates.endDate).setHours(23, 59, 59)),
+        $gt: new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)),
+        $lte: new Date(new Date(dates.endDate).setHours(23, 59, 59)),
       },
     }).exec();
 
