@@ -12,6 +12,7 @@ const {
   searchProduct,
   updateProduct,
   receiveProducts,
+  voidProducts,
   deleteProduct,
   checkImageUser,
 } = require("../../controllers/gratis/product");

@@ -11,7 +11,7 @@ const orderSchema = new mongoose.Schema(
     orderType: {
       type: String,
       default: "web",
-      enum: ["web", "pos"],
+      enum: ["web", "pos", "void"],
     },
     products: [
       {
@@ -38,6 +38,7 @@ const orderSchema = new mongoose.Schema(
         "Processing",
         "Delivering",
         "Cancelled",
+        "Void",
         "Completed",
       ],
     },

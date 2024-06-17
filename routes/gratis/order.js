@@ -9,6 +9,7 @@ const {
   updateCart,
   saveCartOrder,
   updateOrderStatus,
+  voidProducts,
   deleteAdminOrder,
   deleteOrder,
 } = require("../../controllers/gratis/order");
@@ -32,6 +33,7 @@ router.put(
   adminGratisCheck,
   updateOrderStatus
 );
+router.put("/gratis/void-product", authCheck, adminGratisCheck, voidProducts);
 router.delete(
   "/gratis/delete-admin-order/:orderid",
   authCheck,

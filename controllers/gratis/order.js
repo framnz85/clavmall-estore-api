@@ -568,6 +568,63 @@ exports.updateOrderStatus = async (req, res) => {
   }
 };
 
+exports.voidProducts = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  const email = req.user.email;
+  const customer = req.body.customer;
+  const voidName = req.body.voidName;
+  const products = req.body.products;
+  const total = req.body.total;
+
+  try {
+    const user = await User.findOne({ email }).exec();
+    if (user) {
+      const newOrder = new Order({
+        orderType: "void",
+        products: products.map((prod) => ({
+          product: ObjectId(prod._id),
+          count: prod.quantity,
+          supplierPrice: prod.supplierPrice,
+          price: prod.price,
+        })),
+        orderStatus: "Void",
+        cartTotal: total,
+        createdBy: user._id,
+        orderedBy: customer && customer._id ? customer._id : user._id,
+        orderedName: customer.name || voidName || user.name,
+        estoreid: ObjectId(estoreid),
+      });
+
+      const order = await newOrder.save();
+
+      if (order) {
+        await Order.findByIdAndUpdate(order._id, {
+          orderCode: order._id.toString().slice(-12),
+        }).exec();
+
+        for (let i = 0; i < products.length; i++) {
+          await Product.findOneAndUpdate(
+            {
+              _id: ObjectId(products[i]._id),
+              estoreid: ObjectId(estoreid),
+            },
+            {
+              $inc: {
+                quantity: products[i].quantity,
+                sold: -products[i].quantity,
+              },
+            },
+            { new: true }
+          );
+        }
+      }
+      res.json({ ok: true });
+    }
+  } catch (error) {
+    res.json({ err: "Receiving product failed. " + error.message });
+  }
+};
+
 exports.deleteAdminOrder = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const orderid = req.params.orderid;
@@ -579,17 +636,29 @@ exports.deleteAdminOrder = async (req, res) => {
     });
     if (
       order.orderStatus === "Delivering" ||
-      order.orderStatus === "Completed"
+      order.orderStatus === "Completed" ||
+      order.orderStatus === "Void"
     ) {
       order.products.forEach(async (prod) => {
-        await Product.findOneAndUpdate(
-          {
-            _id: ObjectId(prod.product),
-            estoreid: Object(estoreid),
-          },
-          { $inc: { quantity: prod.count, sold: -prod.count } },
-          { new: true }
-        );
+        if (order.orderType === "void") {
+          await Product.findOneAndUpdate(
+            {
+              _id: ObjectId(prod.product),
+              estoreid: Object(estoreid),
+            },
+            { $inc: { quantity: -prod.count, sold: prod.count } },
+            { new: true }
+          );
+        } else {
+          await Product.findOneAndUpdate(
+            {
+              _id: ObjectId(prod.product),
+              estoreid: Object(estoreid),
+            },
+            { $inc: { quantity: prod.count, sold: -prod.count } },
+            { new: true }
+          );
+        }
       });
     }
     res.json(order);
