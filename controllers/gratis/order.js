@@ -172,22 +172,15 @@ exports.adminSales = async (req, res) => {
     new Date(dates.endDate).setHours(new Date(dates.endDate).getHours() + 8)
   );
 
-  console.log(startDate);
-  console.log(endDate);
-
   try {
     const orders = await Order.find({
       estoreid: Object(estoreid),
       orderStatus: "Completed",
       createdAt: {
-        $gte: new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)),
-        $lte: new Date(new Date(dates.endDate).setHours(23, 59, 59)),
+        $gte: new Date(new Date(startDate).setHours(0o0, 0o0, 0o0)),
+        $lte: new Date(new Date(endDate).setHours(23, 59, 59)),
       },
     }).exec();
-
-    console.log(new Date(new Date(dates.dateStart).setHours(0o0, 0o0, 0o0)));
-
-    console.log(new Date(new Date(dates.endDate).setHours(23, 59, 59)));
 
     orders.forEach((order) => {
       capital =
