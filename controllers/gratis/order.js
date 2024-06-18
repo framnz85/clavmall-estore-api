@@ -166,7 +166,7 @@ exports.adminSales = async (req, res) => {
   const dates = req.body.dates;
   let capital = 0;
 
-  console.log(dates.dateStart.setHours(today.getHours() + 8));
+  console.log(dates.dateStart.setHours(dates.dateStart.getHours() + 8));
 
   try {
     const orders = await Order.find({
