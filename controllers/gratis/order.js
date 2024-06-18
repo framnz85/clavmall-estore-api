@@ -165,8 +165,15 @@ exports.adminSales = async (req, res) => {
   const estoreid = req.headers.estoreid;
   const dates = req.body.dates;
   let capital = 0;
+  const startDate = new Date(dates.dateStart).setHours(
+    new Date(dates.dateStart).getHours() + 8
+  );
+  const endDate = new Date(dates.endDate).setHours(
+    new Date(dates.endDate).getHours() + 8
+  );
 
-  console.log(dates.dateStart.setHours(dates.dateStart.getHours() + 8));
+  console.log(startDate);
+  console.log(endDate);
 
   try {
     const orders = await Order.find({
