@@ -174,8 +174,6 @@ exports.adminSales = async (req, res) => {
 
   startDate.setDate(startDate.getDate() - 1);
 
-  console.log(startDate, endDate);
-
   try {
     const orders = await Order.find({
       estoreid: Object(estoreid),
@@ -185,9 +183,6 @@ exports.adminSales = async (req, res) => {
         $lte: new Date(new Date(endDate).setHours(15, 59, 59)),
       },
     }).exec();
-
-    console.log(new Date(new Date(startDate).setHours(16, 0o0, 0o0)));
-    console.log(new Date(new Date(endDate).setHours(15, 59, 59)));
 
     orders.forEach((order) => {
       capital =
