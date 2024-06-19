@@ -186,8 +186,8 @@ exports.adminSales = async (req, res) => {
       },
     }).exec();
 
-    console.log(new Date(new Date(startDate).setHours(0o0, 0o0, 0o0)));
-    console.log(new Date(new Date(endDate).setHours(23, 59, 59)));
+    console.log(new Date(new Date(startDate).setHours(16, 0o0, 0o0)));
+    console.log(new Date(new Date(endDate).setHours(15, 59, 59)));
 
     orders.forEach((order) => {
       capital =
