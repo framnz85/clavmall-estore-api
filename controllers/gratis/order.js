@@ -172,7 +172,7 @@ exports.adminSales = async (req, res) => {
     new Date(dates.endDate).setHours(new Date(dates.endDate).getHours() + 8)
   );
 
-  // startDate.setDate(startDate.getDate() - 1);
+  startDate.setDate(startDate.getDate() - 1);
 
   console.log(startDate, endDate);
 
@@ -181,8 +181,8 @@ exports.adminSales = async (req, res) => {
       estoreid: Object(estoreid),
       orderStatus: "Completed",
       createdAt: {
-        $gte: new Date(new Date(startDate).setHours(0o0, 0o0, 0o0)),
-        $lte: new Date(new Date(endDate).setHours(23, 59, 59)),
+        $gte: new Date(new Date(startDate).setHours(16, 0o0, 0o0)),
+        $lte: new Date(new Date(endDate).setHours(15, 59, 59)),
       },
     }).exec();
 
