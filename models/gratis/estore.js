@@ -253,7 +253,7 @@ const estoreSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-estoreSchema.index({ name: "text", email: "text" });
+estoreSchema.index({ name: "text" });
 
 const Estore = conn.model("GratisEstore", estoreSchema);
 
