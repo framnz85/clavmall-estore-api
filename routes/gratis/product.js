@@ -12,7 +12,7 @@ const {
   searchProduct,
   updateProduct,
   receiveProducts,
-  voidProducts,
+  updateProducts,
   deleteProduct,
   checkImageUser,
 } = require("../../controllers/gratis/product");
@@ -65,6 +65,12 @@ router.put(
   authCheck,
   adminGratisCheck,
   receiveProducts
+);
+router.put(
+  "/gratis/import-products",
+  authCheck,
+  adminGratisCheck,
+  updateProducts
 );
 router.delete(
   "/gratis/delete-product/:prodid",

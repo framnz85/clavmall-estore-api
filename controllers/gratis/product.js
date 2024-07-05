@@ -430,6 +430,23 @@ exports.receiveProducts = async (req, res) => {
   }
 };
 
+exports.updateProducts = async (req, res) => {
+  const estoreid = req.headers.estoreid;
+  try {
+    const products = req.body.products;
+    for (let i = 0; i < products.length; i++) {
+      await Product.findOneAndUpdate(
+        { _id: ObjectId(products[i]._id), estoreid: ObjectId(estoreid) },
+        products[i],
+        { new: true }
+      );
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    res.json({ err: "Receiving product failed. " + error.message });
+  }
+};
+
 exports.deleteProduct = async (req, res) => {
   const prodid = req.params.prodid;
   const estoreid = req.headers.estoreid;
