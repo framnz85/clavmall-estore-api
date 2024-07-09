@@ -6,8 +6,6 @@ try {
   conn = mongoose.createConnection(process.env.UNIVERSITY_DATABASE, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
   });
   console.log(`DB CONNECTED TO ${process.env.UNIVERSITY_DATABASE}`);
 } catch (err) {

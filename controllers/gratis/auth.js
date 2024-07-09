@@ -2,7 +2,7 @@ const ObjectId = require("mongoose").Types.ObjectId;
 const jwt = require("jsonwebtoken");
 const md5 = require("md5");
 
-const Country = require("../../models/address/country");
+const Country = require("../../models/gratis/country");
 const User = require("../../models/gratis/user");
 
 exports.loginUser = async (req, res) => {

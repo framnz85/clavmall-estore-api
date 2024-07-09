@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 const conn = require("../../dbconnect/gratis");
-const Country = require("../address/country");
+const Country = require("./country");
 
 const estoreSchema = new mongoose.Schema(
   {
@@ -79,6 +79,11 @@ const estoreSchema = new mongoose.Schema(
     },
     storeAddress: String,
     storeContact: String,
+    locationType: {
+      type: String,
+      enum: ["anywhere", "specific"],
+      default: "anywhere",
+    },
     delfee: { type: String, default: "0" },
     delfeeType: {
       type: String,
@@ -93,6 +98,10 @@ const estoreSchema = new mongoose.Schema(
       enum: ["percent", "number"],
       default: "percent",
     },
+    maxMass: { type: Number, default: 0 },
+    massPrice: { type: Number, default: 0 },
+    maxVolume: { type: Number, default: 0 },
+    volumePrice: { type: Number, default: 0 },
     productLimit: {
       type: Number,
       default: 50,
