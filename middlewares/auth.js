@@ -41,7 +41,7 @@ exports.adminGratisCheck = async (req, res, next) => {
 
   const adminUser = await GratisUser.findOne({
     email,
-    estoreid: ObjectId(estoreid),
+    estoreid: new ObjectId(estoreid),
   }).exec();
 
   if (["admin", "moderator", "cashier"].includes(adminUser.role)) {

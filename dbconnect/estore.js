@@ -7,11 +7,7 @@ estoreid.forEach((id) => {
   for (let i = 0; i < id.estore.length; i++) {
     try {
       conn[id.estore[i]] = mongoose.createConnection(
-        `${id.database}/estore-${id.estore[i]}${id.database_ext}`,
-        {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-        }
+        `${id.database}/estore-${id.estore[i]}${id.database_ext}`
       );
       console.log(
         `DB CONNECTED TO ${id.database}/estore-${id.estore[i]}${id.database_ext}`

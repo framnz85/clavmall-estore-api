@@ -64,7 +64,7 @@ exports.createOrder = async (req, res) => {
 
   paymentOption = {
     ...paymentOption,
-    payid: ObjectId(paymentOption.payid),
+    payid: new ObjectId(paymentOption.payid),
   };
 
   delete paymentOption.details;

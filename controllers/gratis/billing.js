@@ -8,11 +8,11 @@ exports.getBillings = async (req, res) => {
     const filterObj =
       resellid === "613216389261e003d696cc65"
         ? {}
-        : { resellid: ObjectId(resellid) };
+        : { resellid: new ObjectId(resellid) };
     const billings = await Billing.find(filterObj).exec();
 
     const countBillings = await Billing.estimatedDocumentCount({
-      resellid: ObjectId(resellid),
+      resellid: new ObjectId(resellid),
     });
 
     res.json({ billings, countBillings });
@@ -59,7 +59,7 @@ exports.updateBilling = async (req, res) => {
   try {
     const billing = await Billing.findOne({
       _id: Object(billingId),
-      resellid: ObjectId(resellid),
+      resellid: new ObjectId(resellid),
     }).exec();
     if (billing) {
       const estoreList = billing.estoreList ? billing.estoreList : [];
@@ -81,7 +81,7 @@ exports.updateBilling = async (req, res) => {
       await Billing.findOneAndUpdate(
         {
           _id: Object(billingId),
-          resellid: ObjectId(resellid),
+          resellid: new ObjectId(resellid),
         },
         { status: "Approved" }
       ).exec();

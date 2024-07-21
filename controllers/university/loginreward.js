@@ -18,13 +18,13 @@ exports.getLoginRewards = async (req, res) => {
     const result = await User.findOne({ email, password });
     if (result) {
       const loginRewards = await Loginreward.find({
-        owner: ObjectId(result._id),
+        owner: new ObjectId(result._id),
       })
         .skip((current - 1) * pageSize)
         .sort({ confirmed: -1, [sortkey]: sort })
         .limit(pageSize);
       const loginRewardsTotal = await Loginreward.find({
-        owner: ObjectId(result._id),
+        owner: new ObjectId(result._id),
       }).exec();
       res.json({ loginRewards, loginRewardsTotal: loginRewardsTotal.length });
     } else {
@@ -43,7 +43,7 @@ exports.checkLoginToday = async (req, res) => {
   try {
     const result = await User.findOne({ email, password });
     const loginToday = await Loginreward.findOne({
-      owner: ObjectId(result._id),
+      owner: new ObjectId(result._id),
       rewardDate: dateToday.toDateString(),
     }).exec();
     res.json({ loginToday });
@@ -60,7 +60,7 @@ exports.createLoginReward = async (req, res) => {
   try {
     const result = await User.findOne({ email, password });
     const loginToday = await Loginreward.findOne({
-      owner: ObjectId(result._id),
+      owner: new ObjectId(result._id),
       rewardDate: dateToday.toDateString(),
     }).exec();
 
@@ -68,7 +68,7 @@ exports.createLoginReward = async (req, res) => {
       res.json({ err: "Login reward for today was already given." });
     } else {
       const reward = await new Loginreward({
-        owner: ObjectId(result._id),
+        owner: new ObjectId(result._id),
         rewardDate: dateToday.toDateString(),
         amount:
           result.premium && result.premium === 2 ? loginReward2 : loginReward1,

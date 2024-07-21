@@ -12,7 +12,7 @@ exports.create = async (req, res) => {
     const { name, parent } = req.body;
     const newSubcat = await Subcat(estoreid).collection.insertOne({
       name,
-      parent: ObjectId(parent),
+      parent: new ObjectId(parent),
       slug: slugify(name.toString().toLowerCase()),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -80,7 +80,7 @@ exports.update = async (req, res) => {
       slug: req.params.parSlug,
     });
     const updated = await Subcat(estoreid).findOneAndUpdate(
-      { slug: req.params.slug, parent: ObjectId(category._id) },
+      { slug: req.params.slug, parent: new ObjectId(category._id) },
       { name, slug: slugify(name.toString().toLowerCase()), parent },
       { new: true }
     );
@@ -99,7 +99,7 @@ exports.remove = async (req, res) => {
   try {
     const subcat = await Subcat(estoreid)
       .findOne({
-        parent: ObjectId(req.params.parent),
+        parent: new ObjectId(req.params.parent),
         slug: req.params.slug,
       })
       .select("_id name");
@@ -117,7 +117,7 @@ exports.remove = async (req, res) => {
       return;
     }
     const deleted = await Subcat(estoreid).findOneAndDelete({
-      _id: ObjectId(subcat._id),
+      _id: new ObjectId(subcat._id),
     });
     if (!deleted) {
       res.status(404).send(`No sub-category ${subcat.name} exist`);
@@ -151,10 +151,10 @@ exports.getProducts = async (req, res) => {
                   {
                     $and: [
                       {
-                        "noAvail.couid": ObjectId(country._id),
+                        "noAvail.couid": new ObjectId(country._id),
                       },
                       {
-                        "noAvail.addiv1": ObjectId(addiv1._id),
+                        "noAvail.addiv1": new ObjectId(addiv1._id),
                       },
                       {
                         "noAvail.addiv2": undefined,
@@ -167,13 +167,13 @@ exports.getProducts = async (req, res) => {
                   {
                     $and: [
                       {
-                        "noAvail.couid": ObjectId(country._id),
+                        "noAvail.couid": new ObjectId(country._id),
                       },
                       {
-                        "noAvail.addiv1": ObjectId(addiv1._id),
+                        "noAvail.addiv1": new ObjectId(addiv1._id),
                       },
                       {
-                        "noAvail.addiv2": ObjectId(addiv2._id),
+                        "noAvail.addiv2": new ObjectId(addiv2._id),
                       },
                       {
                         "noAvail.addiv3": undefined,
@@ -183,16 +183,16 @@ exports.getProducts = async (req, res) => {
                   {
                     $and: [
                       {
-                        "noAvail.couid": ObjectId(country._id),
+                        "noAvail.couid": new ObjectId(country._id),
                       },
                       {
-                        "noAvail.addiv1": ObjectId(addiv1._id),
+                        "noAvail.addiv1": new ObjectId(addiv1._id),
                       },
                       {
-                        "noAvail.addiv2": ObjectId(addiv2._id),
+                        "noAvail.addiv2": new ObjectId(addiv2._id),
                       },
                       {
-                        "noAvail.addiv3": ObjectId(addiv3._id),
+                        "noAvail.addiv3": new ObjectId(addiv3._id),
                       },
                     ],
                   },

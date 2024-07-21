@@ -38,7 +38,10 @@ exports.checkEmailExist = async (req, res) => {
 
   try {
     if (estoreid && slug) {
-      user = await User.findOne({ email, estoreid: ObjectId(estoreid) }).exec();
+      user = await User.findOne({
+        email,
+        estoreid: new ObjectId(estoreid),
+      }).exec();
       if (user && user._id) {
         res.json({ ok: true });
       } else {

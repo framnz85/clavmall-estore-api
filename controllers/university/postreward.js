@@ -17,12 +17,14 @@ exports.getPostRewards = async (req, res) => {
   try {
     const result = await User.findOne({ email, password });
     if (result) {
-      const postRewards = await Postreward.find({ owner: ObjectId(result._id) })
+      const postRewards = await Postreward.find({
+        owner: new ObjectId(result._id),
+      })
         .skip((current - 1) * pageSize)
         .sort({ confirmed: -1, [sortkey]: sort })
         .limit(pageSize);
       const postRewardsTotal = await Postreward.find({
-        owner: ObjectId(result._id),
+        owner: new ObjectId(result._id),
       }).exec();
       res.json({ postRewards, postRewardsTotal: postRewardsTotal.length });
     } else {
@@ -41,7 +43,7 @@ exports.checkPostToday = async (req, res) => {
   try {
     const result = await User.findOne({ email, password });
     const postToday = await Postreward.findOne({
-      owner: ObjectId(result._id),
+      owner: new ObjectId(result._id),
       rewardDate: dateToday.toDateString(),
     }).exec();
     res.json({ postToday });
@@ -59,7 +61,7 @@ exports.createPostReward = async (req, res) => {
   try {
     const result = await User.findOne({ email, password });
     const postToday = await Postreward.findOne({
-      owner: ObjectId(result._id),
+      owner: new ObjectId(result._id),
       rewardDate: dateToday.toDateString(),
     }).exec();
 
@@ -69,7 +71,7 @@ exports.createPostReward = async (req, res) => {
       });
     } else {
       const checkExistPost = await Postreward.findOne({
-        owner: ObjectId(result._id),
+        owner: new ObjectId(result._id),
         postLink: promoteLink,
       }).exec();
 
@@ -79,7 +81,7 @@ exports.createPostReward = async (req, res) => {
         });
       } else {
         const reward = await new Postreward({
-          owner: ObjectId(result._id),
+          owner: new ObjectId(result._id),
           rewardDate: dateToday.toDateString(),
           postLink: promoteLink,
           amount:

@@ -18,7 +18,7 @@ exports.getUser = async (req, res) => {
       "programList.progid",
       "-salesPage"
     );
-    const faculty = await Faculty.findOne({ _id: ObjectId(facultyId) });
+    const faculty = await Faculty.findOne({ _id: new ObjectId(facultyId) });
     if (user) {
       await User.findOneAndUpdate(
         { email, password },
@@ -42,7 +42,7 @@ exports.getUserByToken = async (req, res) => {
       "programList.progid",
       "-salesPage"
     );
-    const faculty = await Faculty.findOne({ _id: ObjectId(facultyId) });
+    const faculty = await Faculty.findOne({ _id: new ObjectId(facultyId) });
     if (result.multiLogin !== faculty.multiLogin) {
       res.json({
         login: "You are required to login again due to recent system updates",
@@ -71,12 +71,12 @@ exports.getReferrals = async (req, res) => {
   try {
     const result = await User.findOne({ email, password });
     if (result) {
-      const referrals = await User.find({ refid: ObjectId(result._id) })
+      const referrals = await User.find({ refid: new ObjectId(result._id) })
         .skip((current - 1) * pageSize)
         .sort({ confirmed: -1, [sortkey]: sort })
         .limit(pageSize);
       const referralsTotal = await User.find({
-        refid: ObjectId(result._id),
+        refid: new ObjectId(result._id),
       }).exec();
       res.json({ referrals, referralsTotal: referralsTotal.length });
     } else {
@@ -92,7 +92,7 @@ exports.createUser = async (req, res) => {
   const password = req.user.password;
   try {
     const user = await User.findOne({ email }).exec();
-    const faculty = await Faculty.findOne({ _id: ObjectId(facultyId) });
+    const faculty = await Faculty.findOne({ _id: new ObjectId(facultyId) });
     if (user && user.password) {
       res.json({ err: "User under this email is already existing" });
     } else {
@@ -193,7 +193,7 @@ exports.updateUsersMcid = async (req, res) => {
         });
       } else {
         checkUser = await User.findOneAndUpdate(
-          { _id: ObjectId(userid) },
+          { _id: new ObjectId(userid) },
           { mcid, confirmed: true }
         ).exec();
       }
@@ -208,8 +208,8 @@ exports.updateUsersMcid = async (req, res) => {
 
     if (checkUser._id) {
       const checkReward1 = await Earning.findOne({
-        owner: ObjectId(checkUser._id),
-        customer: ObjectId(checkUser._id),
+        owner: new ObjectId(checkUser._id),
+        customer: new ObjectId(checkUser._id),
         productName: "Registration Bonus",
       }).exec();
 
@@ -219,17 +219,19 @@ exports.updateUsersMcid = async (req, res) => {
         });
       } else {
         await new Earning({
-          owner: ObjectId(checkUser._id),
-          customer: ObjectId(checkUser._id),
+          owner: new ObjectId(checkUser._id),
+          customer: new ObjectId(checkUser._id),
           productName: "Registration Bonus",
           amount: 750,
           commission: 750,
           status: true,
         }).save();
 
-        const referral = await User.findOne({ _id: ObjectId(checkUser.refid) });
+        const referral = await User.findOne({
+          _id: new ObjectId(checkUser.refid),
+        });
         await User.findOneAndUpdate(
-          { _id: ObjectId(checkUser._id) },
+          { _id: new ObjectId(checkUser._id) },
           {
             recruitCommission:
               referral.premium && referral.premium === 2

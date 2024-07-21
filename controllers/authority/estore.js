@@ -93,7 +93,7 @@ exports.copyAllAddiv1 = async (req, res) => {
   try {
     await MyCountry(estoreid).collection.insertOne({
       ...country,
-      _id: ObjectId(country._id),
+      _id: new ObjectId(country._id),
     });
   } catch (error) {}
 
@@ -106,7 +106,7 @@ exports.copyAllAddiv1 = async (req, res) => {
       try {
         await MyAddiv1(country.countryCode, estoreid).collection.insertOne({
           ...data,
-          couid: ObjectId(data.couid),
+          couid: new ObjectId(data.couid),
         });
       } catch (error) {}
     });
@@ -120,8 +120,8 @@ exports.copyAllAddiv1 = async (req, res) => {
       try {
         await MyAddiv2(country.countryCode, estoreid).collection.insertOne({
           ...data,
-          couid: ObjectId(data.couid),
-          adDivId1: ObjectId(data.adDivId1),
+          couid: new ObjectId(data.couid),
+          adDivId1: new ObjectId(data.adDivId1),
         });
       } catch (error) {}
     });
@@ -136,9 +136,9 @@ exports.copyAllAddiv1 = async (req, res) => {
       try {
         await MyAddiv3(country.countryCode, estoreid).collection.insertOne({
           ...data,
-          couid: ObjectId(data.couid),
-          adDivId1: ObjectId(data.adDivId1),
-          adDivId2: ObjectId(data.adDivId2),
+          couid: new ObjectId(data.couid),
+          adDivId1: new ObjectId(data.adDivId1),
+          adDivId2: new ObjectId(data.adDivId2),
         });
       } catch (error) {}
     });
@@ -154,28 +154,28 @@ exports.saveCreatedLocation1 = async (req, res) => {
   try {
     await MyCountry(estoreid).collection.insertOne({
       ...country,
-      _id: ObjectId(country._id),
+      _id: new ObjectId(country._id),
     });
   } catch (error) {}
 
   MyAddiv1(country.countryCode, estoreid)
     .collection.insertOne({
       name: addiv1.name,
-      couid: ObjectId(country._id),
+      couid: new ObjectId(country._id),
     })
     .then((result1) => {
       MyAddiv2(country.countryCode, estoreid)
         .collection.insertOne({
           name: addiv2.name,
-          couid: ObjectId(country._id),
-          adDivId1: ObjectId(result1.ops[0]._id),
+          couid: new ObjectId(country._id),
+          adDivId1: new ObjectId(result1.ops[0]._id),
         })
         .then((result2) => {
           MyAddiv3(country.countryCode, estoreid).collection.insertOne({
             name: addiv3.name,
-            couid: ObjectId(country._id),
-            adDivId1: ObjectId(result1.ops[0]._id),
-            adDivId2: ObjectId(result2.ops[0]._id),
+            couid: new ObjectId(country._id),
+            adDivId1: new ObjectId(result1.ops[0]._id),
+            adDivId2: new ObjectId(result2.ops[0]._id),
             ...details,
           });
         });
@@ -191,20 +191,23 @@ exports.copyAllAddiv2 = async (req, res) => {
   try {
     await MyCountry(estoreid).collection.insertOne({
       ...country,
-      _id: ObjectId(country._id),
+      _id: new ObjectId(country._id),
     });
   } catch (error) {}
 
   try {
     await MyAddiv1(country.countryCode, estoreid).collection.insertOne({
       ...addiv1,
-      _id: ObjectId(addiv1._id),
-      couid: ObjectId(country._id),
+      _id: new ObjectId(addiv1._id),
+      couid: new ObjectId(country._id),
     });
   } catch (error) {}
 
   const addiv2 = await Addiv2(country.countryCode)
-    .find({ couid: ObjectId(country._id), adDivId1: ObjectId(addiv1._id) })
+    .find({
+      couid: new ObjectId(country._id),
+      adDivId1: new ObjectId(addiv1._id),
+    })
     .exec();
   addiv2
     .map((data) => ({
@@ -214,14 +217,17 @@ exports.copyAllAddiv2 = async (req, res) => {
       try {
         await MyAddiv2(country.countryCode, estoreid).collection.insertOne({
           ...data,
-          couid: ObjectId(data.couid),
-          adDivId1: ObjectId(data.adDivId1),
+          couid: new ObjectId(data.couid),
+          adDivId1: new ObjectId(data.adDivId1),
         });
       } catch (error) {}
     });
 
   const addiv3 = await Addiv3(country.countryCode)
-    .find({ couid: ObjectId(country._id), adDivId1: ObjectId(addiv1._id) })
+    .find({
+      couid: new ObjectId(country._id),
+      adDivId1: new ObjectId(addiv1._id),
+    })
     .exec();
   addiv3
     .map((data) => ({
@@ -232,9 +238,9 @@ exports.copyAllAddiv2 = async (req, res) => {
       try {
         await MyAddiv3(country.countryCode, estoreid).collection.insertOne({
           ...data,
-          couid: ObjectId(data.couid),
-          adDivId1: ObjectId(data.adDivId1),
-          adDivId2: ObjectId(data.adDivId2),
+          couid: new ObjectId(data.couid),
+          adDivId1: new ObjectId(data.adDivId1),
+          adDivId2: new ObjectId(data.adDivId2),
         });
       } catch (error) {}
     });
@@ -250,30 +256,30 @@ exports.saveCreatedLocation2 = async (req, res) => {
   try {
     await MyCountry(estoreid).collection.insertOne({
       ...country,
-      _id: ObjectId(country._id),
+      _id: new ObjectId(country._id),
     });
   } catch (error) {}
 
   try {
     await MyAddiv1(country.countryCode, estoreid).collection.insertOne({
       ...addiv1,
-      _id: ObjectId(addiv1._id),
-      couid: ObjectId(country._id),
+      _id: new ObjectId(addiv1._id),
+      couid: new ObjectId(country._id),
     });
   } catch (error) {}
 
   MyAddiv2(country.countryCode, estoreid)
     .collection.insertOne({
       name: addiv2.name,
-      couid: ObjectId(country._id),
-      adDivId1: ObjectId(addiv1._id),
+      couid: new ObjectId(country._id),
+      adDivId1: new ObjectId(addiv1._id),
     })
     .then((result2) => {
       MyAddiv3(country.countryCode, estoreid).collection.insertOne({
         name: addiv3.name,
-        couid: ObjectId(country._id),
-        adDivId1: ObjectId(addiv1._id),
-        adDivId2: ObjectId(result2.ops[0]._id),
+        couid: new ObjectId(country._id),
+        adDivId1: new ObjectId(addiv1._id),
+        adDivId2: new ObjectId(result2.ops[0]._id),
         ...details,
       });
     });
@@ -288,32 +294,32 @@ exports.copyAllAddiv3 = async (req, res) => {
   try {
     await MyCountry(estoreid).collection.insertOne({
       ...country,
-      _id: ObjectId(country._id),
+      _id: new ObjectId(country._id),
     });
   } catch (error) {}
 
   try {
     await MyAddiv1(country.countryCode, estoreid).collection.insertOne({
       ...addiv1,
-      _id: ObjectId(addiv1._id),
-      couid: ObjectId(country._id),
+      _id: new ObjectId(addiv1._id),
+      couid: new ObjectId(country._id),
     });
   } catch (error) {}
 
   try {
     await MyAddiv2(country.countryCode, estoreid).collection.insertOne({
       ...addiv2,
-      _id: ObjectId(addiv2._id),
-      couid: ObjectId(country._id),
-      adDivId1: ObjectId(addiv1._id),
+      _id: new ObjectId(addiv2._id),
+      couid: new ObjectId(country._id),
+      adDivId1: new ObjectId(addiv1._id),
     });
   } catch (error) {}
 
   const addiv3 = await Addiv3(country.countryCode)
     .find({
-      couid: ObjectId(country._id),
-      adDivId1: ObjectId(addiv1._id),
-      adDivId2: ObjectId(addiv2._id),
+      couid: new ObjectId(country._id),
+      adDivId1: new ObjectId(addiv1._id),
+      adDivId2: new ObjectId(addiv2._id),
     })
     .exec();
   addiv3
@@ -325,9 +331,9 @@ exports.copyAllAddiv3 = async (req, res) => {
       try {
         await MyAddiv3(country.countryCode, estoreid).collection.insertOne({
           ...data,
-          couid: ObjectId(data.couid),
-          adDivId1: ObjectId(data.adDivId1),
-          adDivId2: ObjectId(data.adDivId2),
+          couid: new ObjectId(data.couid),
+          adDivId1: new ObjectId(data.adDivId1),
+          adDivId2: new ObjectId(data.adDivId2),
         });
       } catch (error) {}
     });
@@ -343,32 +349,32 @@ exports.saveCreatedLocation3 = async (req, res) => {
   try {
     await MyCountry(estoreid).collection.insertOne({
       ...country,
-      _id: ObjectId(country._id),
+      _id: new ObjectId(country._id),
     });
   } catch (error) {}
 
   try {
     await MyAddiv1(country.countryCode, estoreid).collection.insertOne({
       ...addiv1,
-      _id: ObjectId(addiv1._id),
-      couid: ObjectId(country._id),
+      _id: new ObjectId(addiv1._id),
+      couid: new ObjectId(country._id),
     });
   } catch (error) {}
 
   try {
     await MyAddiv2(country.countryCode, estoreid).collection.insertOne({
       ...addiv2,
-      _id: ObjectId(addiv2._id),
-      couid: ObjectId(country._id),
-      adDivId1: ObjectId(addiv1._id),
+      _id: new ObjectId(addiv2._id),
+      couid: new ObjectId(country._id),
+      adDivId1: new ObjectId(addiv1._id),
     });
   } catch (error) {}
 
   MyAddiv3(country.countryCode, estoreid).collection.insertOne({
     name: addiv3.name,
-    couid: ObjectId(country._id),
-    adDivId1: ObjectId(addiv1._id),
-    adDivId2: ObjectId(addiv2._id),
+    couid: new ObjectId(country._id),
+    adDivId1: new ObjectId(addiv1._id),
+    adDivId2: new ObjectId(addiv2._id),
     ...details,
   });
 
@@ -382,34 +388,34 @@ exports.saveLocation3 = async (req, res) => {
   try {
     await MyCountry(estoreid).collection.insertOne({
       ...country,
-      _id: ObjectId(country._id),
+      _id: new ObjectId(country._id),
     });
   } catch (error) {}
 
   try {
     await MyAddiv1(country.countryCode, estoreid).collection.insertOne({
       ...addiv1,
-      _id: ObjectId(addiv1._id),
-      couid: ObjectId(country._id),
+      _id: new ObjectId(addiv1._id),
+      couid: new ObjectId(country._id),
     });
   } catch (error) {}
 
   try {
     await MyAddiv2(country.countryCode, estoreid).collection.insertOne({
       ...addiv2,
-      _id: ObjectId(addiv2._id),
-      couid: ObjectId(country._id),
-      adDivId1: ObjectId(addiv1._id),
+      _id: new ObjectId(addiv2._id),
+      couid: new ObjectId(country._id),
+      adDivId1: new ObjectId(addiv1._id),
     });
   } catch (error) {}
 
   try {
     await MyAddiv3(country.countryCode, estoreid).collection.insertOne({
       ...addiv3,
-      _id: ObjectId(addiv3._id),
-      couid: ObjectId(country._id),
-      adDivId1: ObjectId(addiv1._id),
-      adDivId2: ObjectId(addiv2._id),
+      _id: new ObjectId(addiv3._id),
+      couid: new ObjectId(country._id),
+      adDivId1: new ObjectId(addiv1._id),
+      adDivId2: new ObjectId(addiv2._id),
       ...details,
     });
   } catch (error) {}
@@ -449,7 +455,7 @@ exports.deleteAddiv2 = async (req, res) => {
 
     await MyAddiv3(coucode, estoreid)
       .deleteMany({
-        adDivId2: ObjectId(addiv2),
+        adDivId2: new ObjectId(addiv2),
       })
       .exec();
 
@@ -473,13 +479,13 @@ exports.deleteAddiv1 = async (req, res) => {
 
     await MyAddiv2(coucode, estoreid)
       .deleteMany({
-        adDivId1: ObjectId(addiv1),
+        adDivId1: new ObjectId(addiv1),
       })
       .exec();
 
     await MyAddiv3(coucode, estoreid)
       .deleteMany({
-        adDivId1: ObjectId(addiv1),
+        adDivId1: new ObjectId(addiv1),
       })
       .exec();
 

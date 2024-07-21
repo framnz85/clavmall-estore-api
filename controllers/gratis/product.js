@@ -13,14 +13,14 @@ exports.randomItems = async (req, res) => {
 
   try {
     let products = await Product.aggregate([
-      { $match: { activate: true, estoreid: ObjectId(estoreid) } },
+      { $match: { activate: true, estoreid: new ObjectId(estoreid) } },
       { $sample: { size: parseInt(count) } },
     ]).exec();
 
     products = await populateProduct(products, estoreid);
 
     const countProduct = await Product.find({
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
     }).exec();
 
     res.json({ products, count: countProduct.length });
@@ -36,7 +36,7 @@ exports.getProductBySlug = async (req, res) => {
   try {
     let product = await Product.find({
       slug,
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
     }).exec();
 
     product = await populateProduct(product, estoreid);
@@ -53,8 +53,8 @@ exports.getProductById = async (req, res) => {
 
   try {
     let product = await Product.find({
-      _id: ObjectId(prodid),
-      estoreid: ObjectId(estoreid),
+      _id: new ObjectId(prodid),
+      estoreid: new ObjectId(estoreid),
     }).exec();
 
     product = await populateProduct(product, estoreid);
@@ -76,7 +76,7 @@ exports.itemsByBarcode = async (req, res) => {
     if (purpose === "read" || purpose === "inventory") {
       products = await Product.find({
         barcode,
-        estoreid: ObjectId(estoreid),
+        estoreid: new ObjectId(estoreid),
       })
         .sort({ updatedAt: -1 })
         .limit(5)
@@ -147,8 +147,8 @@ exports.loadInitProducts = async (req, res) => {
           });
           await newCategory.save();
           await Product.updateMany(
-            { category: ObjectId(category._id), estoreid },
-            { category: ObjectId(newCategory._id) },
+            { category: new ObjectId(category._id), estoreid },
+            { category: new ObjectId(newCategory._id) },
             { new: true }
           );
         });
@@ -170,7 +170,7 @@ exports.getWaitingProducts = async (req, res) => {
     const user = await User.findOne({ email }).exec();
     if (user) {
       const products = await Product.find({
-        estoreid: ObjectId(estoreid),
+        estoreid: new ObjectId(estoreid),
         "waiting._id": { $exists: true },
       })
         .select("waiting")
@@ -200,13 +200,13 @@ exports.getAdminItems = async (req, res) => {
     } = req.body;
 
     let searchObj = searchQuery
-      ? { $text: { $search: searchQuery }, estoreid: ObjectId(estoreid) }
-      : { estoreid: ObjectId(estoreid) };
+      ? { $text: { $search: searchQuery }, estoreid: new ObjectId(estoreid) }
+      : { estoreid: new ObjectId(estoreid) };
 
     if (category && category !== "1") {
       searchObj = {
         ...searchObj,
-        category: ObjectId(category),
+        category: new ObjectId(category),
       };
     }
 
@@ -226,7 +226,7 @@ exports.getAdminItems = async (req, res) => {
     if (products.length < 1 && searchQuery) {
       products = await Product.find({
         title: { $regex: searchQuery, $options: "i" },
-        estoreid: ObjectId(estoreid),
+        estoreid: new ObjectId(estoreid),
       })
         .skip((currentPage - 1) * pageSize)
         .sort({ [sortkey]: sort })
@@ -243,7 +243,7 @@ exports.getAdminItems = async (req, res) => {
       for (i = 0; i < products.length; i++) {
         const result = await Order.find({
           estoreid: Object(estoreid),
-          "products.product": ObjectId(products[i]._id),
+          "products.product": new ObjectId(products[i]._id),
           createdAt: {
             $gte: new Date(new Date(sales.dateStart).setHours(0o0, 0o0, 0o0)),
             $lt: new Date(new Date(sales.endDate).setHours(23, 59, 59)),
@@ -279,7 +279,7 @@ exports.addProduct = async (req, res) => {
     if (platform === "cosmic") {
       const checkExist = await Product.findOne({
         slug: slugify(req.body.title.toString().toLowerCase()),
-        estoreid: ObjectId(estoreid),
+        estoreid: new ObjectId(estoreid),
       });
       if (checkExist) {
         res.json({
@@ -289,7 +289,7 @@ exports.addProduct = async (req, res) => {
         let product = new Product({
           ...req.body,
           slug: slugify(req.body.title.toString().toLowerCase()),
-          estoreid: ObjectId(estoreid),
+          estoreid: new ObjectId(estoreid),
         });
         await product.save();
         product = await populateProduct([product], estoreid);
@@ -321,11 +321,14 @@ exports.searchProduct = async (req, res) => {
   if (catSlug && catSlug !== "all") {
     const category = await Category.findOne({
       slug: catSlug,
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
     });
     if (category) {
-      querySearch = { ...querySearch, category: ObjectId(category._id) };
-      noResultSearch = { ...noResultSearch, category: ObjectId(category._id) };
+      querySearch = { ...querySearch, category: new ObjectId(category._id) };
+      noResultSearch = {
+        ...noResultSearch,
+        category: new ObjectId(category._id),
+      };
     }
   }
 
@@ -340,7 +343,7 @@ exports.searchProduct = async (req, res) => {
     if (Object.keys(querySearch).length) {
       products = await Product.find({
         ...querySearch,
-        estoreid: ObjectId(estoreid),
+        estoreid: new ObjectId(estoreid),
       })
         .limit(30)
         .exec();
@@ -348,7 +351,7 @@ exports.searchProduct = async (req, res) => {
       if (products.length < 31 && text) {
         products = await Product.find({
           title: { $regex: text, $options: "i" },
-          estoreid: ObjectId(estoreid),
+          estoreid: new ObjectId(estoreid),
           ...noResultSearch,
         }).exec();
       }
@@ -356,7 +359,7 @@ exports.searchProduct = async (req, res) => {
       products = await populateProduct(products, estoreid);
     } else {
       products = await Product.find({
-        estoreid: ObjectId(estoreid),
+        estoreid: new ObjectId(estoreid),
       })
         .limit(30)
         .exec();
@@ -383,8 +386,8 @@ exports.updateProduct = async (req, res) => {
   try {
     let product = await Product.findOneAndUpdate(
       {
-        _id: ObjectId(prodid),
-        estoreid: ObjectId(estoreid),
+        _id: new ObjectId(prodid),
+        estoreid: new ObjectId(estoreid),
       },
       values,
       { new: true }
@@ -407,8 +410,8 @@ exports.receiveProducts = async (req, res) => {
       if (products[i].supplierPrice === products[i].newSupplierPrice) {
         await Product.findOneAndUpdate(
           {
-            _id: ObjectId(products[i]._id),
-            estoreid: ObjectId(estoreid),
+            _id: new ObjectId(products[i]._id),
+            estoreid: new ObjectId(estoreid),
           },
           { $inc: { quantity: products[i].newQuantity } },
           { new: true }
@@ -416,8 +419,8 @@ exports.receiveProducts = async (req, res) => {
       } else {
         await Product.findOneAndUpdate(
           {
-            _id: ObjectId(products[i]._id),
-            estoreid: ObjectId(estoreid),
+            _id: new ObjectId(products[i]._id),
+            estoreid: new ObjectId(estoreid),
           },
           { waiting: products[i] },
           { new: true }
@@ -436,7 +439,10 @@ exports.updateProducts = async (req, res) => {
     const products = req.body.products;
     for (let i = 0; i < products.length; i++) {
       await Product.findOneAndUpdate(
-        { _id: ObjectId(products[i]._id), estoreid: ObjectId(estoreid) },
+        {
+          _id: new ObjectId(products[i]._id),
+          estoreid: new ObjectId(estoreid),
+        },
         products[i],
         { new: true }
       );
@@ -452,8 +458,8 @@ exports.deleteProduct = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
     let product = await Product.findOneAndDelete({
-      _id: ObjectId(prodid),
-      estoreid: ObjectId(estoreid),
+      _id: new ObjectId(prodid),
+      estoreid: new ObjectId(estoreid),
     }).exec();
     if (product) {
       product = await populateProduct([product], estoreid);
@@ -476,7 +482,7 @@ exports.checkImageUser = async (req, res) => {
       images: {
         $elemMatch: { public_id: publicid },
       },
-      estoreid: ObjectId(defaultestore),
+      estoreid: new ObjectId(defaultestore),
     }).exec();
 
     if (product) {
@@ -490,7 +496,7 @@ exports.checkImageUser = async (req, res) => {
         images: {
           $elemMatch: { public_id: publicid },
         },
-        estoreid: ObjectId(estoreid),
+        estoreid: new ObjectId(estoreid),
       }).exec();
 
       if (product && product.images[0] && product.images[0].fromid) {

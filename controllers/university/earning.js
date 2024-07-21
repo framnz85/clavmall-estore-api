@@ -13,7 +13,7 @@ exports.getDashboard = async (req, res) => {
     const sumCommission = await Earning.aggregate([
       {
         $match: {
-          owner: ObjectId(userid),
+          owner: new ObjectId(userid),
           commission: { $gte: 0 },
           status: true,
         },
@@ -24,7 +24,7 @@ exports.getDashboard = async (req, res) => {
     const totalCommission = sumCommission[0] ? sumCommission[0].sum : 0;
 
     const numberOfEarnings = await Earning.find({
-      owner: ObjectId(userid),
+      owner: new ObjectId(userid),
       commission: { $gte: 0 },
       status: true,
     }).exec();
@@ -51,20 +51,20 @@ exports.getEarnings = async (req, res) => {
     const result = await User.findOne({ email, password });
     if (result) {
       const recruitExist = await Earning.findOne({
-        owner: ObjectId(result._id),
+        owner: new ObjectId(result._id),
         productName: "Recruitment Reward",
       }).exec();
       const loginExist = await Earning.findOne({
-        owner: ObjectId(result._id),
+        owner: new ObjectId(result._id),
         productName: "Login Reward",
       }).exec();
       const postExist = await Earning.findOne({
-        owner: ObjectId(result._id),
+        owner: new ObjectId(result._id),
         productName: "Post Reward",
       }).exec();
 
       const referrals = await User.aggregate([
-        { $match: { refid: ObjectId(result._id), confirmed: true } },
+        { $match: { refid: new ObjectId(result._id), confirmed: true } },
         { $group: { _id: null, sum: { $sum: "$recruitCommission" } } },
       ]).exec();
 
@@ -74,7 +74,7 @@ exports.getEarnings = async (req, res) => {
       if (recruitExist) {
         if (recruitExist.commission !== sumOfRecruitment) {
           await Earning.findOneAndUpdate(
-            { _id: ObjectId(recruitExist._id) },
+            { _id: new ObjectId(recruitExist._id) },
             {
               amount: sumOfRecruitment,
               commission: sumOfRecruitment,
@@ -85,8 +85,8 @@ exports.getEarnings = async (req, res) => {
       } else {
         if (sumOfRecruitment > 0) {
           await new Earning({
-            owner: ObjectId(result._id),
-            customer: ObjectId(result._id),
+            owner: new ObjectId(result._id),
+            customer: new ObjectId(result._id),
             productName: "Recruitment Reward",
             amount: sumOfRecruitment,
             commission: sumOfRecruitment,
@@ -96,7 +96,7 @@ exports.getEarnings = async (req, res) => {
       }
 
       const loginRewards = await Loginreward.aggregate([
-        { $match: { owner: ObjectId(result._id), status: true } },
+        { $match: { owner: new ObjectId(result._id), status: true } },
         { $group: { _id: null, sum: { $sum: "$commission" } } },
       ]).exec();
 
@@ -106,7 +106,7 @@ exports.getEarnings = async (req, res) => {
       if (loginExist) {
         if (loginExist.commission !== sumOfLoginRewards) {
           await Earning.findOneAndUpdate(
-            { _id: ObjectId(loginExist._id) },
+            { _id: new ObjectId(loginExist._id) },
             {
               amount: sumOfLoginRewards,
               commission: sumOfLoginRewards,
@@ -117,8 +117,8 @@ exports.getEarnings = async (req, res) => {
       } else {
         if (sumOfLoginRewards > 0) {
           await new Earning({
-            owner: ObjectId(result._id),
-            customer: ObjectId(result._id),
+            owner: new ObjectId(result._id),
+            customer: new ObjectId(result._id),
             productName: "Login Reward",
             amount: sumOfLoginRewards,
             commission: sumOfLoginRewards,
@@ -128,7 +128,7 @@ exports.getEarnings = async (req, res) => {
       }
 
       const postRewards = await Postreward.aggregate([
-        { $match: { owner: ObjectId(result._id), status: true } },
+        { $match: { owner: new ObjectId(result._id), status: true } },
         { $group: { _id: null, sum: { $sum: "$commission" } } },
       ]).exec();
 
@@ -138,7 +138,7 @@ exports.getEarnings = async (req, res) => {
       if (postExist) {
         if (postExist.commission !== sumOfPostRewards) {
           await Earning.findOneAndUpdate(
-            { _id: ObjectId(postExist._id) },
+            { _id: new ObjectId(postExist._id) },
             {
               amount: sumOfPostRewards,
               commission: sumOfPostRewards,
@@ -149,8 +149,8 @@ exports.getEarnings = async (req, res) => {
       } else {
         if (sumOfPostRewards > 0) {
           await new Earning({
-            owner: ObjectId(result._id),
-            customer: ObjectId(result._id),
+            owner: new ObjectId(result._id),
+            customer: new ObjectId(result._id),
             productName: "Post Reward",
             amount: sumOfPostRewards,
             commission: sumOfPostRewards,
@@ -159,7 +159,7 @@ exports.getEarnings = async (req, res) => {
         }
       }
 
-      const earnings = await Earning.find({ owner: ObjectId(result._id) })
+      const earnings = await Earning.find({ owner: new ObjectId(result._id) })
         .populate("customer")
         .populate("product")
         .skip((current - 1) * pageSize)
@@ -167,7 +167,7 @@ exports.getEarnings = async (req, res) => {
         .limit(pageSize);
 
       const earningsTotal = await Earning.find({
-        owner: ObjectId(result._id),
+        owner: new ObjectId(result._id),
       }).exec();
 
       res.json({ earnings, earningsTotal: earningsTotal.length });
@@ -188,7 +188,7 @@ exports.addUpdateEarning = async (req, res) => {
     const result = await User.findOne({ email, password });
     if (result && result.refid && choosenPackage.discountPrice !== "Free") {
       let commission = 0;
-      const referral = await User.findOne({ _id: ObjectId(result.refid) });
+      const referral = await User.findOne({ _id: new ObjectId(result.refid) });
       const checkIfEnrolled = referral.programList
         ? referral.programList.filter(
             (prog) => prog.status && prog.progid === program._id
@@ -204,8 +204,8 @@ exports.addUpdateEarning = async (req, res) => {
       }
 
       const checkReward2 = await Earning.findOne({
-        owner: ObjectId(result.refid),
-        customer: ObjectId(result._id),
+        owner: new ObjectId(result.refid),
+        customer: new ObjectId(result._id),
         productName: program.title,
       }).exec();
 
@@ -219,8 +219,8 @@ exports.addUpdateEarning = async (req, res) => {
         ).exec();
       } else {
         await new Earning({
-          owner: ObjectId(result.refid),
-          customer: ObjectId(result._id),
+          owner: new ObjectId(result.refid),
+          customer: new ObjectId(result._id),
           productName: program.title,
           amount: parseFloat(choosenPackage.discountPrice),
           commission,

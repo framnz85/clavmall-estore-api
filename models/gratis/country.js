@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const conn = require("../../dbconnect/gratis");
+const conn = require("../../dbconnect/address");
 
 const countrySchema = new mongoose.Schema({
   name: {
@@ -45,4 +45,4 @@ const countrySchema = new mongoose.Schema({
 
 countrySchema.index({ name: "text" });
 
-module.exports = conn.model("GratisCountry", countrySchema);
+module.exports = conn.model("country", countrySchema);

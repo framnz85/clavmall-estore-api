@@ -7,7 +7,7 @@ exports.getProducts = async (req, res) => {
 
   try {
     const products = await Product.find({
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
     }).exec();
 
     res.json(products);
@@ -24,8 +24,8 @@ exports.updateProduct = async (req, res) => {
   try {
     product = await Product.findOneAndUpdate(
       {
-        _id: ObjectId(prodid),
-        estoreid: ObjectId(estoreid),
+        _id: new ObjectId(prodid),
+        estoreid: new ObjectId(estoreid),
       },
       { $inc: { quantity: -count, sold: count } },
       { new: true }
@@ -47,7 +47,7 @@ exports.updateProduct = async (req, res) => {
 
       product = await Product.findOneAndUpdate(
         {
-          _id: ObjectId(prodid),
+          _id: new ObjectId(prodid),
           estoreid: Object(estoreid),
         },
         {
