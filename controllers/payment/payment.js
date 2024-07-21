@@ -31,10 +31,10 @@ exports.listMyPayments = async (req, res) => {
               {
                 $and: [
                   {
-                    "noAvail.couid": new ObjectId(country._id),
+                    "noAvail.couid": ObjectId(country._id),
                   },
                   {
-                    "noAvail.addiv1": new ObjectId(addiv1._id),
+                    "noAvail.addiv1": ObjectId(addiv1._id),
                   },
                   {
                     "noAvail.addiv2": undefined,
@@ -47,13 +47,13 @@ exports.listMyPayments = async (req, res) => {
               {
                 $and: [
                   {
-                    "noAvail.couid": new ObjectId(country._id),
+                    "noAvail.couid": ObjectId(country._id),
                   },
                   {
-                    "noAvail.addiv1": new ObjectId(addiv1._id),
+                    "noAvail.addiv1": ObjectId(addiv1._id),
                   },
                   {
-                    "noAvail.addiv2": new ObjectId(addiv2._id),
+                    "noAvail.addiv2": ObjectId(addiv2._id),
                   },
                   {
                     "noAvail.addiv3": undefined,
@@ -63,16 +63,16 @@ exports.listMyPayments = async (req, res) => {
               {
                 $and: [
                   {
-                    "noAvail.couid": new ObjectId(country._id),
+                    "noAvail.couid": ObjectId(country._id),
                   },
                   {
-                    "noAvail.addiv1": new ObjectId(addiv1._id),
+                    "noAvail.addiv1": ObjectId(addiv1._id),
                   },
                   {
-                    "noAvail.addiv2": new ObjectId(addiv2._id),
+                    "noAvail.addiv2": ObjectId(addiv2._id),
                   },
                   {
-                    "noAvail.addiv3": new ObjectId(addiv3._id),
+                    "noAvail.addiv3": ObjectId(addiv3._id),
                   },
                 ],
               },
@@ -105,12 +105,12 @@ exports.createPayment = async (req, res) => {
           );
     }
     req.body.details = req.body.details.map((det) => {
-      return { ...det, _id: new ObjectId() };
+      return { ...det, _id: ObjectId() };
     });
     req.body.noAvail = [];
     const newPayment = await MyPayment(estoreid).collection.insertOne({
       ...req.body,
-      _id: new ObjectId(),
+      _id: ObjectId(),
     });
     res.json(newPayment);
   } catch (error) {
@@ -143,7 +143,7 @@ exports.updatePayment = async (req, res) => {
 exports.imageupdate = async (req, res) => {
   const estoreid = req.headers.estoreid;
   await MyPayment(estoreid).findOneAndUpdate(
-    { _id: new ObjectId(req.params.payid) },
+    { _id: ObjectId(req.params.payid) },
     { images: req.body.images },
     { new: true }
   );

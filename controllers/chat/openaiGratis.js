@@ -7,7 +7,7 @@ const Product = require("../../models/gratis/product");
 const searchProduct = async (estoreid, message) => {
   const result = await Product.find({
     $text: { $search: message },
-    estoreid: new ObjectId(estoreid),
+    estoreid: ObjectId(estoreid),
   }).exec();
 
   return result;
@@ -18,7 +18,7 @@ exports.getGroceyResponse = async (req, res) => {
   let promptLocation = "";
   let promptProduct = "";
 
-  const estore = await Estore.findOne({ _id: new ObjectId(estoreid) }).exec();
+  const estore = await Estore.findOne({ _id: ObjectId(estoreid) }).exec();
 
   const location = estore && estore.delloc ? estore.delloc.split(",") : [];
   const delfee = estore && estore.delfee ? estore.delfee : "0";

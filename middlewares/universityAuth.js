@@ -54,7 +54,7 @@ exports.uniLogAuthCheck = async (req, res, next) => {
         password: jwtDecode.password,
       }).exec();
       if (gratisuser) {
-        const faculty = await Faculty.findOne({ _id: new ObjectId(facultyId) });
+        const faculty = await Faculty.findOne({ _id: ObjectId(facultyId) });
         await new UniUser({
           ...req.body,
           name: gratisuser.name,

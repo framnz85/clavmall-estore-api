@@ -24,7 +24,7 @@ exports.commissionlist = async (req, res) => {
     const curPage = currentPage || 1;
 
     const commissions = await Referral(estoreid)
-      .find({ ownerid: new ObjectId(user._id) })
+      .find({ ownerid: ObjectId(user._id) })
       .skip((curPage - 1) * pageSize)
       .sort({ [sortkey]: sort })
       .limit(pageSize)
@@ -53,7 +53,7 @@ exports.referrallist = async (req, res) => {
     const curPage = currentPage || 1;
 
     const referrals = await User(estoreid)
-      .find({ refid: new ObjectId(user._id) })
+      .find({ refid: ObjectId(user._id) })
       .skip((curPage - 1) * pageSize)
       .sort({ [sortkey]: sort })
       .limit(pageSize)
@@ -82,7 +82,7 @@ exports.referralorders = async (req, res) => {
     const curPage = currentPage || 1;
 
     let referralIds = await User(estoreid)
-      .find({ refid: new ObjectId(user._id) }, "_id")
+      .find({ refid: ObjectId(user._id) }, "_id")
       .exec();
     referralIds = referralIds.map((ref) => ref._id);
 
@@ -115,11 +115,11 @@ exports.referralCreate = async (req, res) => {
       commission,
     } = req.body;
     const referral = await User(estoreid)
-      .findOne({ _id: new ObjectId(ownerid) })
+      .findOne({ _id: ObjectId(ownerid) })
       .exec();
 
     const checkCommission = await Referral(estoreid)
-      .findOne({ orderid: new ObjectId(orderid), orderCode })
+      .findOne({ orderid: ObjectId(orderid), orderCode })
       .exec();
 
     if (checkCommission) {
@@ -128,11 +128,11 @@ exports.referralCreate = async (req, res) => {
       });
     } else {
       await Referral(estoreid).collection.insertOne({
-        ownerid: new ObjectId(ownerid),
+        ownerid: ObjectId(ownerid),
         ownername: referral.name,
-        orderid: new ObjectId(orderid),
+        orderid: ObjectId(orderid),
         orderCode,
-        userid: new ObjectId(userid),
+        userid: ObjectId(userid),
         username,
         amount,
         commission,
@@ -174,7 +174,7 @@ exports.editCommissionStatus = async (req, res) => {
 
   try {
     const newCommission = await Referral(estoreid).findOneAndUpdate(
-      { _id: new ObjectId(commid) },
+      { _id: ObjectId(commid) },
       { status },
       { new: true }
     );
@@ -200,7 +200,7 @@ exports.referralWithdraw = async (req, res) => {
   try {
     const { values } = req.body;
     const newAffiliate = await Referral(estoreid).collection.insertOne({
-      ownerid: new ObjectId(user._id),
+      ownerid: ObjectId(user._id),
       ownername: user.name,
       username: "Withdraw",
       orderCode: "Withdrawal",

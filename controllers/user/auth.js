@@ -15,7 +15,7 @@ exports.createOrUpdateUser = async (req, res) => {
 
   // const superAdminUser = await User(estoreid).findOne({ superAdmin: true });
   if (combineUser.refid) {
-    combineUser = { ...combineUser, refid: new ObjectId(combineUser.refid) };
+    combineUser = { ...combineUser, refid: ObjectId(combineUser.refid) };
   } else {
     delete combineUser.refid;
   }
@@ -138,7 +138,7 @@ exports.removeUser = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
     const deleted = await User(estoreid).findOneAndDelete({
-      _id: new ObjectId(req.params.userid),
+      _id: ObjectId(req.params.userid),
     });
     if (!deleted) {
       res.status(404).send(`No user exist`);

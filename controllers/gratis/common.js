@@ -13,7 +13,7 @@ exports.populateProduct = async (products, estoreid) => {
 
   const categoryList = await Category.find({
     _id: { $in: categories },
-    estoreid: new ObjectId(estoreid),
+    estoreid: ObjectId(estoreid),
   }).exec();
 
   products = products.map((product) => {

@@ -26,7 +26,7 @@ exports.getReseller = async (req, res) => {
       .exec();
     if (estore && estore.reseller) {
       const payments = await Payment.find({
-        estoreid: new ObjectId(req.params.id),
+        estoreid: ObjectId(req.params.id),
       });
       res.json({
         reseller: estore.reseller,
@@ -52,10 +52,10 @@ exports.getEstores = async (req, res) => {
     let searchObj = searchQuery
       ? masterUser
         ? { $text: { $search: searchQuery } }
-        : { $text: { $search: searchQuery }, resellid: new ObjectId(estoreid) }
+        : { $text: { $search: searchQuery }, resellid: ObjectId(estoreid) }
       : masterUser
       ? {}
-      : { resellid: new ObjectId(estoreid) };
+      : { resellid: ObjectId(estoreid) };
 
     let estores = await Estore.find(searchObj)
       .skip((currentPage - 1) * pageSize)
@@ -73,7 +73,7 @@ exports.getEstores = async (req, res) => {
             }
           : {
               email: searchQuery,
-              resellid: new ObjectId(estoreid),
+              resellid: ObjectId(estoreid),
             }
       )
         .skip((currentPage - 1) * pageSize)
@@ -87,7 +87,7 @@ exports.getEstores = async (req, res) => {
             }
           : {
               email: searchQuery,
-              resellid: new ObjectId(estoreid),
+              resellid: ObjectId(estoreid),
             }
       );
     }
@@ -96,11 +96,11 @@ exports.getEstores = async (req, res) => {
       estores = await Estore.find(
         masterUser
           ? {
-              _id: new ObjectId(searchQuery),
+              _id: ObjectId(searchQuery),
             }
           : {
-              _id: new ObjectId(searchQuery),
-              resellid: new ObjectId(estoreid),
+              _id: ObjectId(searchQuery),
+              resellid: ObjectId(estoreid),
             }
       )
         .skip((currentPage - 1) * pageSize)
@@ -110,11 +110,11 @@ exports.getEstores = async (req, res) => {
       countEstores = await Estore.estimatedDocumentCount(
         masterUser
           ? {
-              _id: new ObjectId(searchQuery),
+              _id: ObjectId(searchQuery),
             }
           : {
-              _id: new ObjectId(searchQuery),
-              resellid: new ObjectId(estoreid),
+              _id: ObjectId(searchQuery),
+              resellid: ObjectId(estoreid),
             }
       );
     } else {
@@ -136,7 +136,7 @@ exports.getEstoresBilling = async (req, res) => {
     const { sortkey, sort, currentPage, pageSize } = req.body;
 
     let estores = await Estore.find({
-      resellid: new ObjectId(estoreid),
+      resellid: ObjectId(estoreid),
       $or: [
         { approval: "Pending" },
         { approval2: "Pending" },
@@ -151,7 +151,7 @@ exports.getEstoresBilling = async (req, res) => {
     estores = await populateEstore(estores);
 
     countEstores = await Estore.find({
-      resellid: new ObjectId(estoreid),
+      resellid: ObjectId(estoreid),
       $or: [
         { approval: "Pending" },
         { approval2: "Pending" },
@@ -168,7 +168,7 @@ exports.getEstoresBilling = async (req, res) => {
 exports.getEstoreCounters = async (req, res) => {
   try {
     const estore = await Estore.findOne({
-      _id: new ObjectId(req.params.estoreid),
+      _id: ObjectId(req.params.estoreid),
     })
       .populate("country")
       .select(
@@ -228,23 +228,23 @@ exports.createEstore = async (req, res) => {
                 name: req.body.name,
                 email: req.body.email,
                 slug: slugify(req.body.name.toString().toLowerCase()),
-                country: new ObjectId(req.body.country),
-                resellid: new ObjectId(resellid),
+                country: ObjectId(req.body.country),
+                resellid: ObjectId(resellid),
                 reseller,
               }
             : {
                 name: req.body.name,
                 email: req.body.email,
                 slug: slugify(req.body.name.toString().toLowerCase()),
-                country: new ObjectId(req.body.country),
-                resellid: new ObjectId(resellid),
+                country: ObjectId(req.body.country),
+                resellid: ObjectId(resellid),
               }
         );
         await estore.save();
 
         if (refid) {
           const user = await User.findOne({
-            _id: new ObjectId(refid),
+            _id: ObjectId(refid),
             role: "admin",
           }).exec();
 

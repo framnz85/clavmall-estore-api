@@ -10,8 +10,8 @@ exports.getCategory = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
     const category = await Category.findOne({
-      _id: new ObjectId(catid),
-      estoreid: new ObjectId(estoreid),
+      _id: ObjectId(catid),
+      estoreid: ObjectId(estoreid),
     });
     res.json(category);
   } catch (error) {
@@ -23,15 +23,15 @@ exports.getCategories = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
     let categories = await Category.find({
-      estoreid: new ObjectId(estoreid),
+      estoreid: ObjectId(estoreid),
     }).exec();
 
     let updatedCategories = [];
 
     for (let i = 0; i < categories.length; i++) {
       const countProduct = await Product.find({
-        category: new ObjectId(categories[i]._id),
-        estoreid: new ObjectId(estoreid),
+        category: ObjectId(categories[i]._id),
+        estoreid: ObjectId(estoreid),
       }).exec();
       updatedCategories.push({
         ...categories[i]._doc,
@@ -55,7 +55,7 @@ exports.checkImageUser = async (req, res) => {
       images: {
         $elemMatch: { public_id: publicid },
       },
-      estoreid: new ObjectId(defaultestore),
+      estoreid: ObjectId(defaultestore),
     }).exec();
 
     if (category) {
@@ -69,7 +69,7 @@ exports.checkImageUser = async (req, res) => {
         images: {
           $elemMatch: { public_id: publicid },
         },
-        estoreid: new ObjectId(estoreid),
+        estoreid: ObjectId(estoreid),
       }).exec();
 
       if (category && category.images[0] && category.images[0].fromid) {
@@ -96,13 +96,13 @@ exports.addCategory = async (req, res) => {
 
   try {
     const estore = await Estore.findOne({
-      _id: new ObjectId(estoreid),
+      _id: ObjectId(estoreid),
     })
       .select("categoryLimit")
       .exec();
 
     const categoryCount = await Category.countDocuments({
-      estoreid: new ObjectId(estoreid),
+      estoreid: ObjectId(estoreid),
     }).exec();
 
     if (categoryCount < estore.categoryLimit || platform === "cosmic") {
@@ -135,8 +135,8 @@ exports.updateCategory = async (req, res) => {
   try {
     const category = await Category.findOneAndUpdate(
       {
-        _id: new ObjectId(catid),
-        estoreid: new ObjectId(estoreid),
+        _id: ObjectId(catid),
+        estoreid: ObjectId(estoreid),
       },
       values,
       {
@@ -145,8 +145,8 @@ exports.updateCategory = async (req, res) => {
     ).exec();
 
     const countProduct = await Product.find({
-      category: new ObjectId(catid),
-      estoreid: new ObjectId(estoreid),
+      category: ObjectId(catid),
+      estoreid: ObjectId(estoreid),
     }).exec();
 
     res.json({ ...category._doc, itemcount: countProduct.length });
@@ -160,8 +160,8 @@ exports.removeCategory = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
     const category = await Category.findOneAndDelete({
-      _id: new ObjectId(catid),
-      estoreid: new ObjectId(estoreid),
+      _id: ObjectId(catid),
+      estoreid: ObjectId(estoreid),
     }).exec();
     res.json(category);
   } catch (error) {

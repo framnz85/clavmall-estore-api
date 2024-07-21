@@ -13,25 +13,25 @@ exports.getPromote = async (req, res) => {
 
   try {
     if (type === "all") {
-      const promote = await Promote.find({ program: new ObjectId(progid) })
+      const promote = await Promote.find({ program: ObjectId(progid) })
         .skip((current - 1) * pageSize)
         .sort({ [sortkey]: sort })
         .limit(pageSize);
       const totalPromote = await Promote.find({
-        program: new ObjectId(progid),
+        program: ObjectId(progid),
       }).exec();
 
       res.json({ promote, total: totalPromote.length });
     } else {
       const promote = await Promote.find({
-        program: new ObjectId(progid),
+        program: ObjectId(progid),
         type,
       })
         .skip((current - 1) * pageSize)
         .sort({ [sortkey]: sort })
         .limit(pageSize);
       const totalPromote = await Promote.find({
-        program: new ObjectId(progid),
+        program: ObjectId(progid),
         type,
       }).exec();
 

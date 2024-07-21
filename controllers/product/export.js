@@ -24,7 +24,7 @@ exports.importProducts = async (req, res) => {
     const products = req.body.products;
     for (let i = 0; i < products.length; i++) {
       await Product(estoreid).findOneAndUpdate(
-        { _id: new ObjectId(products[i]._id) },
+        { _id: ObjectId(products[i]._id) },
         products[i],
         { new: true }
       );

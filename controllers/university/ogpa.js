@@ -179,7 +179,7 @@ exports.getProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const product = await Product.findOneAndUpdate(
-      { _id: new ObjectId(req.params.prodid) },
+      { _id: ObjectId(req.params.prodid) },
       req.body
     ).exec();
     if (product) {
@@ -197,7 +197,7 @@ exports.updateProducts = async (req, res) => {
     const products = req.body;
     for (let i = 0; i < products.length; i++) {
       await Product.findOneAndUpdate(
-        { _id: new ObjectId(products[i]._id) },
+        { _id: ObjectId(products[i]._id) },
         products[i],
         { new: true }
       );

@@ -14,13 +14,13 @@ exports.getPosOrders = async (req, res) => {
     const user = await User.findOne({ email }).exec();
     if (user.role === "cashier") {
       orders = await Order.find({
-        estoreid: new ObjectId(estoreid),
+        estoreid: ObjectId(estoreid),
         orderType: "pos",
         createdBy: user._id,
       }).exec();
     } else {
       orders = await Order.find({
-        estoreid: new ObjectId(estoreid),
+        estoreid: ObjectId(estoreid),
         orderType: "pos",
       }).exec();
     }
@@ -55,19 +55,19 @@ exports.saveOrder = async (req, res) => {
       if (customerPhone) {
         checkUser = await User.findOne({
           phone: customerPhone,
-          estoreid: new ObjectId(estoreid),
+          estoreid: ObjectId(estoreid),
         });
       }
       if (customerEmail) {
         checkUser = await User.findOne({
           email: customerEmail,
-          estoreid: new ObjectId(estoreid),
+          estoreid: ObjectId(estoreid),
         });
       }
       if (orderedBy) {
         checkUser = await User.findOne({
-          _id: new ObjectId(orderedBy),
-          estoreid: new ObjectId(estoreid),
+          _id: ObjectId(orderedBy),
+          estoreid: ObjectId(estoreid),
         });
       }
       if (!checkUser && (customerPhone || customerEmail)) {
@@ -78,7 +78,7 @@ exports.saveOrder = async (req, res) => {
           password: md5("Grocery@2000"),
           showPass: "Grocery@2000",
           role: "customer",
-          estoreid: new ObjectId(estoreid),
+          estoreid: ObjectId(estoreid),
         });
         checkUser = await newUser.save();
       }
@@ -94,7 +94,7 @@ exports.saveOrder = async (req, res) => {
       createdBy: user._id,
       orderedBy: checkUser && checkUser._id ? checkUser._id : user._id,
       orderedName: customerName || user.name,
-      estoreid: new ObjectId(estoreid),
+      estoreid: ObjectId(estoreid),
       orderNotes,
       products,
     });
@@ -117,7 +117,7 @@ exports.saveOrder = async (req, res) => {
       for (i = 0; i < orderProducts.length; i++) {
         const result = await Product.findOneAndUpdate(
           {
-            _id: new ObjectId(orderProducts[i].product),
+            _id: ObjectId(orderProducts[i].product),
             estoreid: Object(estoreid),
           },
           {
@@ -147,7 +147,7 @@ exports.saveOrder = async (req, res) => {
 
           await Product.findOneAndUpdate(
             {
-              _id: new ObjectId(orderProducts[i].product),
+              _id: ObjectId(orderProducts[i].product),
               estoreid: Object(estoreid),
             },
             {
@@ -216,19 +216,19 @@ exports.sendOrder = async (req, res) => {
       if (customerPhone) {
         checkUser = await User.findOne({
           phone: customerPhone,
-          estoreid: new ObjectId(estoreid),
+          estoreid: ObjectId(estoreid),
         });
       }
       if (customerEmail) {
         checkUser = await User.findOne({
           email: customerEmail,
-          estoreid: new ObjectId(estoreid),
+          estoreid: ObjectId(estoreid),
         });
       }
       if (orderedBy) {
         checkUser = await User.findOne({
-          _id: new ObjectId(orderedBy),
-          estoreid: new ObjectId(estoreid),
+          _id: ObjectId(orderedBy),
+          estoreid: ObjectId(estoreid),
         });
       }
       if (!checkUser && (customerPhone || customerEmail)) {
@@ -239,7 +239,7 @@ exports.sendOrder = async (req, res) => {
           password: md5("Grocery@2000"),
           showPass: "Grocery@2000",
           role: "customer",
-          estoreid: new ObjectId(estoreid),
+          estoreid: ObjectId(estoreid),
         });
         checkUser = await newUser.save();
       }
@@ -255,7 +255,7 @@ exports.sendOrder = async (req, res) => {
       createdBy: user._id,
       orderedBy: checkUser && checkUser._id ? checkUser._id : user._id,
       orderedName: customerName || user.name,
-      estoreid: new ObjectId(estoreid),
+      estoreid: ObjectId(estoreid),
       orderNotes,
       products,
     });

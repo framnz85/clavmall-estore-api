@@ -13,7 +13,7 @@ exports.create = async (req, res) => {
     req.body.subcats = req.body.subcats.map((subcat) => ObjectId(subcat));
     req.body.parent = ObjectId(req.body.parent);
     req.body.variants = req.body.variants.map((variant) => {
-      return { ...variant, _id: new ObjectId() };
+      return { ...variant, _id: ObjectId() };
     });
     req.body.sold = 0;
     req.body.noAvail = [];
@@ -112,7 +112,7 @@ exports.list = async (req, res) => {
     if (category)
       searchObj = {
         ...searchObj,
-        category: new ObjectId(category),
+        category: ObjectId(category),
       };
 
     if (subcat)
@@ -124,7 +124,7 @@ exports.list = async (req, res) => {
     if (parent)
       searchObj = {
         ...searchObj,
-        parent: new ObjectId(parent),
+        parent: ObjectId(parent),
       };
 
     let products = await Product(estoreid)
@@ -172,10 +172,10 @@ exports.random = async (req, res) => {
               {
                 $and: [
                   {
-                    "noAvail.couid": new ObjectId(country._id),
+                    "noAvail.couid": ObjectId(country._id),
                   },
                   {
-                    "noAvail.addiv1": new ObjectId(addiv1._id),
+                    "noAvail.addiv1": ObjectId(addiv1._id),
                   },
                   {
                     "noAvail.addiv2": undefined,
@@ -188,13 +188,13 @@ exports.random = async (req, res) => {
               {
                 $and: [
                   {
-                    "noAvail.couid": new ObjectId(country._id),
+                    "noAvail.couid": ObjectId(country._id),
                   },
                   {
-                    "noAvail.addiv1": new ObjectId(addiv1._id),
+                    "noAvail.addiv1": ObjectId(addiv1._id),
                   },
                   {
-                    "noAvail.addiv2": new ObjectId(addiv2._id),
+                    "noAvail.addiv2": ObjectId(addiv2._id),
                   },
                   {
                     "noAvail.addiv3": undefined,
@@ -204,16 +204,16 @@ exports.random = async (req, res) => {
               {
                 $and: [
                   {
-                    "noAvail.couid": new ObjectId(country._id),
+                    "noAvail.couid": ObjectId(country._id),
                   },
                   {
-                    "noAvail.addiv1": new ObjectId(addiv1._id),
+                    "noAvail.addiv1": ObjectId(addiv1._id),
                   },
                   {
-                    "noAvail.addiv2": new ObjectId(addiv2._id),
+                    "noAvail.addiv2": ObjectId(addiv2._id),
                   },
                   {
-                    "noAvail.addiv3": new ObjectId(addiv3._id),
+                    "noAvail.addiv3": ObjectId(addiv3._id),
                   },
                 ],
               },
@@ -341,10 +341,10 @@ const handleSearchQuery = async (req, res, querySearch, address) => {
       {
         $and: [
           {
-            "noAvail.couid": new ObjectId(country._id),
+            "noAvail.couid": ObjectId(country._id),
           },
           {
-            "noAvail.addiv1": new ObjectId(addiv1._id),
+            "noAvail.addiv1": ObjectId(addiv1._id),
           },
           {
             "noAvail.addiv2": undefined,
@@ -357,13 +357,13 @@ const handleSearchQuery = async (req, res, querySearch, address) => {
       {
         $and: [
           {
-            "noAvail.couid": new ObjectId(country._id),
+            "noAvail.couid": ObjectId(country._id),
           },
           {
-            "noAvail.addiv1": new ObjectId(addiv1._id),
+            "noAvail.addiv1": ObjectId(addiv1._id),
           },
           {
-            "noAvail.addiv2": new ObjectId(addiv2._id),
+            "noAvail.addiv2": ObjectId(addiv2._id),
           },
           {
             "noAvail.addiv3": undefined,
@@ -373,16 +373,16 @@ const handleSearchQuery = async (req, res, querySearch, address) => {
       {
         $and: [
           {
-            "noAvail.couid": new ObjectId(country._id),
+            "noAvail.couid": ObjectId(country._id),
           },
           {
-            "noAvail.addiv1": new ObjectId(addiv1._id),
+            "noAvail.addiv1": ObjectId(addiv1._id),
           },
           {
-            "noAvail.addiv2": new ObjectId(addiv2._id),
+            "noAvail.addiv2": ObjectId(addiv2._id),
           },
           {
-            "noAvail.addiv3": new ObjectId(addiv3._id),
+            "noAvail.addiv3": ObjectId(addiv3._id),
           },
         ],
       },
@@ -428,10 +428,10 @@ const handleStarQuery = (req, res, querySearch, address, stars) => {
           {
             $and: [
               {
-                "noAvail.couid": new ObjectId(country._id),
+                "noAvail.couid": ObjectId(country._id),
               },
               {
-                "noAvail.addiv1": new ObjectId(addiv1._id),
+                "noAvail.addiv1": ObjectId(addiv1._id),
               },
               {
                 "noAvail.addiv2": undefined,
@@ -444,13 +444,13 @@ const handleStarQuery = (req, res, querySearch, address, stars) => {
           {
             $and: [
               {
-                "noAvail.couid": new ObjectId(country._id),
+                "noAvail.couid": ObjectId(country._id),
               },
               {
-                "noAvail.addiv1": new ObjectId(addiv1._id),
+                "noAvail.addiv1": ObjectId(addiv1._id),
               },
               {
-                "noAvail.addiv2": new ObjectId(addiv2._id),
+                "noAvail.addiv2": ObjectId(addiv2._id),
               },
               {
                 "noAvail.addiv3": undefined,
@@ -460,16 +460,16 @@ const handleStarQuery = (req, res, querySearch, address, stars) => {
           {
             $and: [
               {
-                "noAvail.couid": new ObjectId(country._id),
+                "noAvail.couid": ObjectId(country._id),
               },
               {
-                "noAvail.addiv1": new ObjectId(addiv1._id),
+                "noAvail.addiv1": ObjectId(addiv1._id),
               },
               {
-                "noAvail.addiv2": new ObjectId(addiv2._id),
+                "noAvail.addiv2": ObjectId(addiv2._id),
               },
               {
-                "noAvail.addiv3": new ObjectId(addiv3._id),
+                "noAvail.addiv3": ObjectId(addiv3._id),
               },
             ],
           },
@@ -523,10 +523,9 @@ exports.bulkChangePrice = async (req, res) => {
   const { category, subcat, parent, supprice, suppricetype } = req.body.values;
   let querySearch = {};
 
-  if (category)
-    querySearch = { ...querySearch, category: new ObjectId(category) };
-  if (subcat) querySearch = { ...querySearch, subcats: new ObjectId(subcat) };
-  if (parent) querySearch = { ...querySearch, parent: new ObjectId(parent) };
+  if (category) querySearch = { ...querySearch, category: ObjectId(category) };
+  if (subcat) querySearch = { ...querySearch, subcats: ObjectId(subcat) };
+  if (parent) querySearch = { ...querySearch, parent: ObjectId(parent) };
 
   try {
     const updatedProducts = [];
@@ -547,7 +546,7 @@ exports.bulkChangePrice = async (req, res) => {
       });
       await Product(estoreid)
         .findOneAndUpdate(
-          { _id: new ObjectId(product._id) },
+          { _id: ObjectId(product._id) },
           {
             supplierPrice: finalSupPrice.toFixed(2),
             price: finalPrice.toFixed(2),
@@ -574,10 +573,9 @@ exports.bulkChangeMarkup = async (req, res) => {
   } = req.body.values;
   let querySearch = {};
 
-  if (category)
-    querySearch = { ...querySearch, category: new ObjectId(category) };
-  if (subcat) querySearch = { ...querySearch, subcats: new ObjectId(subcat) };
-  if (parent) querySearch = { ...querySearch, parent: new ObjectId(parent) };
+  if (category) querySearch = { ...querySearch, category: ObjectId(category) };
+  if (subcat) querySearch = { ...querySearch, subcats: ObjectId(subcat) };
+  if (parent) querySearch = { ...querySearch, parent: ObjectId(parent) };
 
   try {
     const updatedProducts = [];
@@ -594,7 +592,7 @@ exports.bulkChangeMarkup = async (req, res) => {
       });
       await Product(estoreid)
         .findOneAndUpdate(
-          { _id: new ObjectId(product._id) },
+          { _id: ObjectId(product._id) },
           {
             price: finalPrice.toFixed(2),
             markup,
@@ -614,16 +612,15 @@ exports.bulkDeleteProduct = async (req, res) => {
   const { category, subcat, parent } = req.body.values;
   let querySearch = {};
 
-  if (category)
-    querySearch = { ...querySearch, category: new ObjectId(category) };
-  if (subcat) querySearch = { ...querySearch, subcats: new ObjectId(subcat) };
-  if (parent) querySearch = { ...querySearch, parent: new ObjectId(parent) };
+  if (category) querySearch = { ...querySearch, category: ObjectId(category) };
+  if (subcat) querySearch = { ...querySearch, subcats: ObjectId(subcat) };
+  if (parent) querySearch = { ...querySearch, parent: ObjectId(parent) };
   try {
     const products = await Product(estoreid).find(querySearch).exec();
     products.map(async (product) => {
       await Product(estoreid)
         .findOneAndRemove({
-          _id: new ObjectId(product._id),
+          _id: ObjectId(product._id),
         })
         .exec();
     });
@@ -638,10 +635,9 @@ exports.bulkStatusProduct = async (req, res) => {
   const { category, subcat, parent, status } = req.body.values;
   let querySearch = {};
 
-  if (category)
-    querySearch = { ...querySearch, category: new ObjectId(category) };
-  if (subcat) querySearch = { ...querySearch, subcats: new ObjectId(subcat) };
-  if (parent) querySearch = { ...querySearch, parent: new ObjectId(parent) };
+  if (category) querySearch = { ...querySearch, category: ObjectId(category) };
+  if (subcat) querySearch = { ...querySearch, subcats: ObjectId(subcat) };
+  if (parent) querySearch = { ...querySearch, parent: ObjectId(parent) };
 
   try {
     const updatedProducts = [];
@@ -652,10 +648,7 @@ exports.bulkStatusProduct = async (req, res) => {
         activate: status,
       });
       await Product(estoreid)
-        .findOneAndUpdate(
-          { _id: new ObjectId(product._id) },
-          { activate: status }
-        )
+        .findOneAndUpdate({ _id: ObjectId(product._id) }, { activate: status })
         .exec();
     });
     res.json(updatedProducts);
@@ -669,10 +662,9 @@ exports.bulkReferralProduct = async (req, res) => {
   const { category, subcat, parent, referral, referraltype } = req.body.values;
   let querySearch = {};
 
-  if (category)
-    querySearch = { ...querySearch, category: new ObjectId(category) };
-  if (subcat) querySearch = { ...querySearch, subcats: new ObjectId(subcat) };
-  if (parent) querySearch = { ...querySearch, parent: new ObjectId(parent) };
+  if (category) querySearch = { ...querySearch, category: ObjectId(category) };
+  if (subcat) querySearch = { ...querySearch, subcats: ObjectId(subcat) };
+  if (parent) querySearch = { ...querySearch, parent: ObjectId(parent) };
 
   try {
     const updatedProducts = [];
@@ -685,7 +677,7 @@ exports.bulkReferralProduct = async (req, res) => {
       });
       await Product(estoreid)
         .findOneAndUpdate(
-          { _id: new ObjectId(product._id) },
+          { _id: ObjectId(product._id) },
           { referral, referraltype }
         )
         .exec();

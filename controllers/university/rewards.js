@@ -17,7 +17,7 @@ exports.rewardDailyCheck = () => {
 
     users.forEach(async (user) => {
       const loginToday = await Loginreward.findOne({
-        owner: new ObjectId(user._id),
+        owner: ObjectId(user._id),
         rewardDate: dateToday.toDateString(),
       }).exec();
 
@@ -38,7 +38,7 @@ exports.rewardDailyCheck = () => {
       }
 
       const postToday = await Postreward.findOne({
-        owner: new ObjectId(user._id),
+        owner: ObjectId(user._id),
         rewardDate: dateToday.toDateString(),
       }).exec();
 
