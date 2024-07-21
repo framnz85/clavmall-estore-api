@@ -7,8 +7,8 @@ exports.getPayment = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
     const payment = await Payment.findOne({
-      _id: ObjectId(payid),
-      estoreid: ObjectId(estoreid),
+      _id: new ObjectId(payid),
+      estoreid: new ObjectId(estoreid),
     });
     res.json(payment);
   } catch (error) {
@@ -19,7 +19,7 @@ exports.getPayment = async (req, res) => {
 exports.getPayments = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
-    const payments = await Payment.find({ estoreid: ObjectId(estoreid) });
+    const payments = await Payment.find({ estoreid: new ObjectId(estoreid) });
     res.json(payments);
   } catch (error) {
     res.json({ err: "Getting payments fails. " + error.message });
@@ -43,8 +43,8 @@ exports.updatePayment = async (req, res) => {
   try {
     const payment = await Payment.findOneAndUpdate(
       {
-        _id: ObjectId(payid),
-        estoreid: ObjectId(estoreid),
+        _id: new ObjectId(payid),
+        estoreid: new ObjectId(estoreid),
       },
       req.body,
       {
@@ -62,8 +62,8 @@ exports.removePayment = async (req, res) => {
   const estoreid = req.headers.estoreid;
   try {
     const payment = await Payment.findOneAndDelete({
-      _id: ObjectId(payid),
-      estoreid: ObjectId(estoreid),
+      _id: new ObjectId(payid),
+      estoreid: new ObjectId(estoreid),
     }).exec();
     if (payment) {
       res.json(payment);

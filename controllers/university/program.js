@@ -33,7 +33,7 @@ exports.getMyPrograms = async (req, res) => {
     const result = await User.findOne({ email, password });
     if (result) {
       const myPrograms = await Program.find({
-        owner: ObjectId(result._id),
+        owner: new ObjectId(result._id),
       }).select("-salesPage");
       res.json(myPrograms);
     } else {
@@ -52,7 +52,7 @@ exports.createProgram = async (req, res) => {
     if (result) {
       const program = new Program({
         ...req.body,
-        owner: ObjectId(result._id),
+        owner: new ObjectId(result._id),
       });
       program.save();
 
@@ -75,7 +75,7 @@ exports.updateProgram = async (req, res) => {
       delete req.body.productChange;
       const update = await Program.findOneAndUpdate(
         {
-          _id: ObjectId(progid),
+          _id: new ObjectId(progid),
           owner: result._id,
         },
         { ...req.body, $inc: { productChange: 1 } }
@@ -104,8 +104,8 @@ exports.updateSalesPage = async (req, res) => {
       if (saleid) {
         const updateSale = await ProgramSale.findOneAndUpdate(
           {
-            _id: ObjectId(saleid),
-            progid: ObjectId(progid),
+            _id: new ObjectId(saleid),
+            progid: new ObjectId(progid),
             owner: result._id,
           },
           { title, salesPagesCount },
@@ -118,7 +118,7 @@ exports.updateSalesPage = async (req, res) => {
         }
       } else {
         const newProgSale = new ProgramSale({
-          progid: ObjectId(progid),
+          progid: new ObjectId(progid),
           owner: result._id,
           title,
           salesPagesCount,
@@ -144,7 +144,7 @@ exports.getProgramSales = async (req, res) => {
   const { progid } = req.params;
   try {
     const salesPage = await ProgramSale.find({
-      progid: ObjectId(progid),
+      progid: new ObjectId(progid),
     }).sort("createdAt");
     res.json(salesPage);
   } catch (error) {
@@ -161,8 +161,8 @@ exports.deleteProgramSales = async (req, res) => {
     const result = await User.findOne({ email, password });
     if (result) {
       const salesPage = await ProgramSale.findOneAndDelete({
-        _id: ObjectId(saleid),
-        progid: ObjectId(progid),
+        _id: new ObjectId(saleid),
+        progid: new ObjectId(progid),
         owner: result._id,
       });
       res.json(salesPage);

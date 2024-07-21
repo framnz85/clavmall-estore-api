@@ -8,7 +8,7 @@ const {
 const { authCheck, adminGratisCheck } = require("../../middlewares/auth");
 
 router.get("/app/all-users", authCheck, adminGratisCheck, getUsers);
-// router.get("/app/user-details/:resellid", authCheck, getUserDetails);
-// router.post("/app/auth-login", loginUser);
+router.get("/app/user-details/:resellid", authCheck, getUserDetails);
+router.post("/app/auth-login", loginUser);
 
 module.exports = router;

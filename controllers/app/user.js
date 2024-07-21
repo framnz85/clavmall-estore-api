@@ -9,7 +9,7 @@ exports.getUsers = async (req, res) => {
 
   try {
     const users = await User.find({
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
     }).exec();
 
     res.json(users);
@@ -51,8 +51,8 @@ exports.getUserDetails = async (req, res) => {
   try {
     const user = await User.findOne({
       email,
-      estoreid: ObjectId(estoreid),
-      resellid: ObjectId(resellid),
+      estoreid: new ObjectId(estoreid),
+      resellid: new ObjectId(resellid),
     })
       .populate({
         path: "estoreid",
@@ -67,7 +67,7 @@ exports.getUserDetails = async (req, res) => {
     } else {
       const userWithReseller = await User.findOne({
         email,
-        resellid: ObjectId(resellid),
+        resellid: new ObjectId(resellid),
       })
         .populate({
           path: "estoreid",
@@ -82,7 +82,7 @@ exports.getUserDetails = async (req, res) => {
       } else {
         const userWithEmail = await User.findOne({
           email,
-          estoreid: ObjectId(estoreid),
+          estoreid: new ObjectId(estoreid),
         })
           .populate({
             path: "estoreid",

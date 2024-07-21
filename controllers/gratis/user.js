@@ -17,8 +17,8 @@ exports.getUserDetails = async (req, res) => {
   try {
     const user = await User.findOne({
       email,
-      estoreid: ObjectId(estoreid),
-      resellid: ObjectId(resellid),
+      estoreid: new ObjectId(estoreid),
+      resellid: new ObjectId(resellid),
     })
       .populate({
         path: "estoreid",
@@ -33,7 +33,7 @@ exports.getUserDetails = async (req, res) => {
     } else {
       const userWithReseller = await User.findOne({
         email,
-        resellid: ObjectId(resellid),
+        resellid: new ObjectId(resellid),
       })
         .populate({
           path: "estoreid",
@@ -48,7 +48,7 @@ exports.getUserDetails = async (req, res) => {
       } else {
         const userWithEmail = await User.findOne({
           email,
-          estoreid: ObjectId(estoreid),
+          estoreid: new ObjectId(estoreid),
         })
           .populate({
             path: "estoreid",
@@ -105,7 +105,7 @@ exports.getUserToAffiliate = async (req, res) => {
       } else {
         delete referral.estoreid;
         await User.findOneAndUpdate(
-          { _id: ObjectId(referral._id) },
+          { _id: new ObjectId(referral._id) },
           { refid: user._id },
           {
             new: true,
@@ -130,11 +130,11 @@ exports.getRaffleEntries = async (req, res) => {
   try {
     const user = await User.findOne({
       email,
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
     }).exec();
     const raffles = await Raffle.find({
       owner: user._id,
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
     })
       .populate("orderid")
       .exec();
@@ -150,7 +150,7 @@ exports.getTopEntries = async (req, res) => {
 
   try {
     let entries = await Raffle.aggregate([
-      { $match: { estoreid: ObjectId(estoreid) } },
+      { $match: { estoreid: new ObjectId(estoreid) } },
       { $sample: { size: parseInt(count) } },
     ]).exec();
     entries = await populateRaffle(entries);
@@ -169,10 +169,10 @@ exports.getAffiliates = async (req, res) => {
 
     const user = await User.findOne({
       email,
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
     }).exec();
     const referrals = await User.find({
-      refid: ObjectId(user._id),
+      refid: new ObjectId(user._id),
       role: "admin",
     })
       .skip((currentPage - 1) * pageSize)
@@ -180,11 +180,11 @@ exports.getAffiliates = async (req, res) => {
       .limit(pageSize)
       .exec();
     const countReferral = await User.find({
-      refid: ObjectId(user._id),
+      refid: new ObjectId(user._id),
       role: "admin",
     }).exec();
     const earnings = await User.aggregate([
-      { $match: { refid: ObjectId(user._id) } },
+      { $match: { refid: new ObjectId(user._id) } },
       { $group: { _id: null, amount: { $sum: "$refCommission" } } },
     ]);
     const withdraw = 0;
@@ -201,19 +201,19 @@ exports.getAllUsers = async (req, res) => {
     const { sortkey, sort, currentPage, pageSize, searchQuery } = req.body;
 
     let searchObj = searchQuery
-      ? { $text: { $search: searchQuery }, estoreid: ObjectId(estoreid) }
-      : { estoreid: ObjectId(estoreid) };
+      ? { $text: { $search: searchQuery }, estoreid: new ObjectId(estoreid) }
+      : { estoreid: new ObjectId(estoreid) };
 
     const admins = await User.find({
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
       role: "admin",
     }).exec();
     const moderators = await User.find({
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
       role: "moderator",
     }).exec();
     const cashiers = await User.find({
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
       role: "cashier",
     }).exec();
 
@@ -229,7 +229,7 @@ exports.getAllUsers = async (req, res) => {
     if (customers.length < 1 && searchQuery) {
       customers = await User.find({
         name: { $regex: searchQuery, $options: "i" },
-        estoreid: ObjectId(estoreid),
+        estoreid: new ObjectId(estoreid),
       })
         .skip((currentPage - 1) * pageSize)
         .sort({ [sortkey]: sort })
@@ -263,15 +263,15 @@ exports.createNewUser = async (req, res) => {
     const user = new User(
       req.body.refid
         ? {
-            refid: ObjectId(req.body.refid),
+            refid: new ObjectId(req.body.refid),
             name: req.body.owner,
             phone: req.body.phone,
             email: req.body.email,
             password: md5(req.body.password),
             showPass: req.body.password,
             role: req.body.role,
-            estoreid: ObjectId(estoreid),
-            resellid: ObjectId(resellid),
+            estoreid: new ObjectId(estoreid),
+            resellid: new ObjectId(resellid),
           }
         : {
             name: req.body.owner,
@@ -280,8 +280,8 @@ exports.createNewUser = async (req, res) => {
             password: md5(req.body.password),
             showPass: req.body.password,
             role: req.body.role,
-            estoreid: ObjectId(estoreid),
-            resellid: ObjectId(resellid),
+            estoreid: new ObjectId(estoreid),
+            resellid: new ObjectId(resellid),
           }
     );
     await user.save();
@@ -293,7 +293,7 @@ exports.createNewUser = async (req, res) => {
     let refUser = {};
     if (req.body.refid) {
       refUser = await User.findOne({
-        _id: ObjectId(req.body.refid),
+        _id: new ObjectId(req.body.refid),
         role: "admin",
       }).exec();
     }
@@ -330,11 +330,11 @@ exports.getResellerUsers = async (req, res) => {
         : {
             $text: { $search: searchQuery },
             role: "admin",
-            resellid: ObjectId(resellid),
+            resellid: new ObjectId(resellid),
           }
       : masterUser
       ? { role: "admin" }
-      : { role: "admin", resellid: ObjectId(resellid) };
+      : { role: "admin", resellid: new ObjectId(resellid) };
 
     let owners = await User.find(searchObj)
       .populate("estoreid")
@@ -355,7 +355,7 @@ exports.getResellerUsers = async (req, res) => {
           : {
               email: searchQuery,
               role: "admin",
-              resellid: ObjectId(resellid),
+              resellid: new ObjectId(resellid),
             }
       )
         .populate("estoreid")
@@ -372,7 +372,7 @@ exports.getResellerUsers = async (req, res) => {
           : {
               email: searchQuery,
               role: "admin",
-              resellid: ObjectId(resellid),
+              resellid: new ObjectId(resellid),
             }
       ).exec();
     } else {
@@ -434,13 +434,13 @@ exports.updateUser = async (req, res) => {
   try {
     const checkUser = await User.findOne({
       email,
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
     });
     if (checkUser.verifyCode && checkUser.verifyCode.length > 0) {
       objValues = { ...req.body, verifyCode: checkUser.verifyCode };
     }
     const user = await User.findOneAndUpdate(
-      { email, estoreid: ObjectId(estoreid) },
+      { email, estoreid: new ObjectId(estoreid) },
       objValues,
       {
         new: true,
@@ -465,7 +465,7 @@ exports.updateCustomer = async (req, res) => {
 
   try {
     await User.findOneAndUpdate(
-      { _id: ObjectId(userid), estoreid: ObjectId(estoreid) },
+      { _id: new ObjectId(userid), estoreid: new ObjectId(estoreid) },
       req.body,
       {
         new: true,
@@ -485,7 +485,7 @@ exports.verifyUserEmail = async (req, res) => {
 
   try {
     const user = await User.findOneAndUpdate(
-      { email, estoreid: ObjectId(estoreid), verifyCode: code },
+      { email, estoreid: new ObjectId(estoreid), verifyCode: code },
       { verifyCode: "", emailConfirm: true },
       {
         new: true,
@@ -501,7 +501,7 @@ exports.verifyUserEmail = async (req, res) => {
     if (user) {
       if (user.role === "admin") {
         await Estore.findOneAndUpdate(
-          { _id: ObjectId(estoreid) },
+          { _id: new ObjectId(estoreid) },
           { status: "active" },
           {
             new: true,
@@ -529,7 +529,7 @@ exports.changePassword = async (req, res) => {
     const user = await User.findOneAndUpdate(
       {
         email,
-        estoreid: ObjectId(estoreid),
+        estoreid: new ObjectId(estoreid),
         password: md5(oldpassword),
       },
       {
@@ -554,8 +554,8 @@ exports.resetPassword = async (req, res) => {
   try {
     const user = await User.findOneAndUpdate(
       {
-        _id: ObjectId(userid),
-        estoreid: ObjectId(estoreid),
+        _id: new ObjectId(userid),
+        estoreid: new ObjectId(estoreid),
       },
       {
         password: md5("Grocery@2000"),
@@ -579,7 +579,7 @@ exports.forgotPassword = async (req, res) => {
       user = await User.findOneAndUpdate(
         {
           email,
-          estoreid: ObjectId(estoreid),
+          estoreid: new ObjectId(estoreid),
         },
         {
           password: md5(newpassword),
@@ -637,8 +637,8 @@ exports.deleteUser = async (req, res) => {
 
   try {
     const user = await User.findOneAndDelete({
-      _id: ObjectId(userid),
-      estoreid: ObjectId(estoreid),
+      _id: new ObjectId(userid),
+      estoreid: new ObjectId(estoreid),
     });
     res.json(user);
   } catch (error) {
@@ -651,7 +651,7 @@ exports.deleteAllRaffles = async (req, res) => {
 
   try {
     const raffles = await Raffle.remove({
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
     });
     res.json(raffles);
   } catch (error) {

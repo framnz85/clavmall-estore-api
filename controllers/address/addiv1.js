@@ -15,7 +15,7 @@ exports.listMyAddiv1 = async (req, res) => {
   const couid = req.params.couid;
   const coucode = req.query.coucode;
   const addiv1 = await MyAddiv1(coucode, estoreid)
-    .find({ couid: ObjectId(couid) })
+    .find({ couid: new ObjectId(couid) })
     .sort({ name: 1 })
     .exec();
   res.json(addiv1);

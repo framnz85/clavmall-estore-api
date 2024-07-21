@@ -25,7 +25,7 @@ exports.getUser = async (req, res) => {
 exports.getOgts = async (req, res) => {
   const userid = req.params.userid;
   try {
-    const result = await Ogts.findOne({ _id: ObjectId(userid) }).populate(
+    const result = await Ogts.findOne({ _id: new ObjectId(userid) }).populate(
       "programList.progid"
     );
     res.json(result);
@@ -39,15 +39,15 @@ exports.getOgpas = async (req, res) => {
 
   try {
     const result1 = await Ogpas.find({
-      refid: ObjectId(userid),
+      refid: new ObjectId(userid),
       afftype: "non-ogpa",
     });
-    const result2 = await Ogts.find({ refid: ObjectId(userid) });
+    const result2 = await Ogts.find({ refid: new ObjectId(userid) });
 
     const sumCommission = await Ogpas.aggregate([
       {
         $match: {
-          refid: ObjectId(userid),
+          refid: new ObjectId(userid),
           afftype: "non-ogpa",
           commission: { $gte: 0 },
           status: "active",
@@ -59,7 +59,7 @@ exports.getOgpas = async (req, res) => {
     const sumWithdraw = await Ogpas.aggregate([
       {
         $match: {
-          refid: ObjectId(userid),
+          refid: new ObjectId(userid),
           afftype: "non-ogpa",
           commission: { $lte: 0 },
         },
@@ -68,7 +68,7 @@ exports.getOgpas = async (req, res) => {
     ]).exec();
 
     const totalProducts = await Ogpas.find({
-      refid: ObjectId(userid),
+      refid: new ObjectId(userid),
       afftype: "non-ogpa",
       commission: { $gte: 0 },
       status: "active",
@@ -219,15 +219,15 @@ exports.getEarnings = async (req, res) => {
   const userid = req.params.userid;
 
   try {
-    const result1 = await Earning.find({ owner: ObjectId(userid) })
+    const result1 = await Earning.find({ owner: new ObjectId(userid) })
       .populate("customer")
       .populate("product");
-    const result2 = await Ogts.find({ refid: ObjectId(userid) });
+    const result2 = await Ogts.find({ refid: new ObjectId(userid) });
 
     const sumCommission = await Earning.aggregate([
       {
         $match: {
-          owner: ObjectId(userid),
+          owner: new ObjectId(userid),
           commission: { $gte: 0 },
           status: true,
         },
@@ -236,18 +236,18 @@ exports.getEarnings = async (req, res) => {
     ]).exec();
 
     // const sumWithdraw = await Ogpas.aggregate([
-    //   { $match: { refid: ObjectId(userid), afftype: "non-ogpa", commission: { $lte: 0 } } },
+    //   { $match: { refid: new ObjectId(userid), afftype: "non-ogpa", commission: { $lte: 0 } } },
     //   { $group: { _id : null, sum : { $sum: "$commission" } } }
     // ]).exec();
 
     const totalProducts = await Earning.find({
-      owner: ObjectId(userid),
+      owner: new ObjectId(userid),
       commission: { $gte: 0 },
       status: true,
     }).exec();
 
     const countAffiliate = await Earning.find({
-      owner: ObjectId(userid),
+      owner: new ObjectId(userid),
     }).exec();
 
     res.json({
@@ -279,7 +279,7 @@ exports.checkOgtsMcid = async (req, res) => {
         });
       } else {
         checkUser = await Ogts.findOneAndUpdate(
-          { _id: ObjectId(userid) },
+          { _id: new ObjectId(userid) },
           { mcid, confirmed: true }
         ).exec();
       }
@@ -294,8 +294,8 @@ exports.checkOgtsMcid = async (req, res) => {
 
     if (checkUser._id) {
       const checkReward1 = await Earning.findOne({
-        owner: ObjectId(checkUser._id),
-        customer: ObjectId(checkUser._id),
+        owner: new ObjectId(checkUser._id),
+        customer: new ObjectId(checkUser._id),
         productName: "Registration Bonus",
         amount: 100,
         commission: 100,
@@ -307,8 +307,8 @@ exports.checkOgtsMcid = async (req, res) => {
         });
       } else {
         await new Earning({
-          owner: ObjectId(checkUser._id),
-          customer: ObjectId(checkUser._id),
+          owner: new ObjectId(checkUser._id),
+          customer: new ObjectId(checkUser._id),
           productName: "Registration Bonus",
           amount: 100,
           commission: 100,
@@ -316,16 +316,16 @@ exports.checkOgtsMcid = async (req, res) => {
         }).save();
 
         const checkReward2 = await Earning.findOne({
-          owner: ObjectId(checkUser.refid),
-          customer: ObjectId(checkUser._id),
+          owner: new ObjectId(checkUser.refid),
+          customer: new ObjectId(checkUser._id),
           productName: "Recruitment Reward",
           amount: 1,
           commission: 1,
         }).exec();
         if (!checkReward2) {
           await new Earning({
-            owner: ObjectId(checkUser.refid),
-            customer: ObjectId(checkUser._id),
+            owner: new ObjectId(checkUser.refid),
+            customer: new ObjectId(checkUser._id),
             productName: "Recruitment Reward",
             amount: 1,
             commission: 1,
@@ -342,7 +342,7 @@ exports.checkOgtsMcid = async (req, res) => {
 exports.getMyPrograms = async (req, res) => {
   const { userid } = req.params;
   try {
-    const myPrograms = await Program.find({ owner: ObjectId(userid) });
+    const myPrograms = await Program.find({ owner: new ObjectId(userid) });
     res.json(myPrograms);
   } catch (error) {
     res.json({ err: "Fetching programs failed." });
@@ -353,7 +353,7 @@ exports.updateProgram = async (req, res) => {
   const progid = req.params.progid;
   try {
     const updated = await Program.findOneAndUpdate(
-      { _id: ObjectId(progid) },
+      { _id: new ObjectId(progid) },
       req.body,
       { new: true }
     );

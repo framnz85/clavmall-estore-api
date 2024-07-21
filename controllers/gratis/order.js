@@ -17,7 +17,7 @@ exports.userOrder = async (req, res) => {
     const user = await User.findOne({ email }).exec();
     if (user) {
       const order = await Order.findOne({
-        _id: ObjectId(orderid),
+        _id: new ObjectId(orderid),
         orderedBy: user._id,
         estoreid: Object(estoreid),
       })
@@ -44,7 +44,7 @@ exports.adminOrder = async (req, res) => {
 
   try {
     const order = await Order.findOne({
-      _id: ObjectId(orderid),
+      _id: new ObjectId(orderid),
       estoreid: Object(estoreid),
     })
       .populate("products.product")
@@ -77,10 +77,10 @@ exports.userOrders = async (req, res) => {
               { orderCode: searchQuery },
               { $text: { $search: searchQuery } },
             ],
-            estoreid: ObjectId(estoreid),
+            estoreid: new ObjectId(estoreid),
             orderedBy: user._id,
           }
-        : { estoreid: ObjectId(estoreid), orderedBy: user._id };
+        : { estoreid: new ObjectId(estoreid), orderedBy: user._id };
 
       const orders = await Order.find(searchObj)
         .skip((currentPage - 1) * pageSize)
@@ -121,10 +121,10 @@ exports.adminOrders = async (req, res) => {
               { orderCode: searchQuery },
               { $text: { $search: searchQuery } },
             ],
-            estoreid: ObjectId(estoreid),
+            estoreid: new ObjectId(estoreid),
             createdBy: user._id,
           }
-        : { estoreid: ObjectId(estoreid), createdBy: user._id };
+        : { estoreid: new ObjectId(estoreid), createdBy: user._id };
       orders = await Order.find(searchObj)
         .skip((currentPage - 1) * pageSize)
         .sort({ [sortkey]: sort })
@@ -140,9 +140,9 @@ exports.adminOrders = async (req, res) => {
               { orderCode: searchQuery },
               { $text: { $search: searchQuery } },
             ],
-            estoreid: ObjectId(estoreid),
+            estoreid: new ObjectId(estoreid),
           }
-        : { estoreid: ObjectId(estoreid) };
+        : { estoreid: new ObjectId(estoreid) };
       orders = await Order.find(searchObj)
         .skip((currentPage - 1) * pageSize)
         .sort({ [sortkey]: sort })
@@ -227,7 +227,7 @@ exports.updateCart = async (req, res) => {
     if (user) {
       await Cart.deleteMany({
         orderedBy: user._id,
-        estoreid: ObjectId(estoreid),
+        estoreid: new ObjectId(estoreid),
       }).exec();
       let excessQuantity = 0;
       let remainingQuantity = 0;
@@ -239,8 +239,8 @@ exports.updateCart = async (req, res) => {
         object.count = cart[i].count;
 
         const productFromDb = await Product.findOne({
-          _id: ObjectId(cart[i]._id),
-          estoreid: ObjectId(estoreid),
+          _id: new ObjectId(cart[i]._id),
+          estoreid: new ObjectId(estoreid),
         })
           .select("title supplierPrice price wprice wcount quantity segregate")
           .exec();
@@ -282,7 +282,7 @@ exports.updateCart = async (req, res) => {
         }
 
         Cart.collection.insertOne({
-          estoreid: ObjectId(estoreid),
+          estoreid: new ObjectId(estoreid),
           products,
           cartTotal,
           orderedBy: user._id,
@@ -331,19 +331,19 @@ exports.saveCartOrder = async (req, res) => {
       if (customerPhone) {
         checkUser = await User.findOne({
           phone: customerPhone,
-          estoreid: ObjectId(estoreid),
+          estoreid: new ObjectId(estoreid),
         });
       }
       if (customerEmail) {
         checkUser = await User.findOne({
           email: customerEmail,
-          estoreid: ObjectId(estoreid),
+          estoreid: new ObjectId(estoreid),
         });
       }
       if (orderedBy) {
         checkUser = await User.findOne({
-          _id: ObjectId(orderedBy),
-          estoreid: ObjectId(estoreid),
+          _id: new ObjectId(orderedBy),
+          estoreid: new ObjectId(estoreid),
         });
       }
       if (!checkUser && (customerPhone || customerEmail)) {
@@ -354,7 +354,7 @@ exports.saveCartOrder = async (req, res) => {
           password: md5("Grocery@2000"),
           showPass: "Grocery@2000",
           role: "customer",
-          estoreid: ObjectId(estoreid),
+          estoreid: new ObjectId(estoreid),
         });
         checkUser = await newUser.save();
       }
@@ -369,7 +369,7 @@ exports.saveCartOrder = async (req, res) => {
       orderCode: cart._id.toString().slice(-12),
       orderType,
       products: cart.products,
-      paymentOption: ObjectId(paymentOption),
+      paymentOption: new ObjectId(paymentOption),
       orderStatus: orderType === "pos" ? "Completed" : "Not Processed",
       cartTotal: cart.cartTotal,
       delfee,
@@ -379,7 +379,7 @@ exports.saveCartOrder = async (req, res) => {
       createdBy: user._id,
       orderedBy: checkUser && checkUser._id ? checkUser._id : user._id,
       orderedName: customerName || user.name,
-      estoreid: ObjectId(estoreid),
+      estoreid: new ObjectId(estoreid),
       delAddress,
       orderNotes,
     });
@@ -396,7 +396,7 @@ exports.saveCartOrder = async (req, res) => {
         order.products.forEach(async (prod) => {
           const result = await Product.findOneAndUpdate(
             {
-              _id: ObjectId(prod.product),
+              _id: new ObjectId(prod.product),
               estoreid: Object(estoreid),
             },
             { $inc: { quantity: -prod.count, sold: prod.count } },
@@ -418,7 +418,7 @@ exports.saveCartOrder = async (req, res) => {
 
             await Product.findOneAndUpdate(
               {
-                _id: ObjectId(prod.product),
+                _id: new ObjectId(prod.product),
                 estoreid: Object(estoreid),
               },
               {
@@ -433,7 +433,7 @@ exports.saveCartOrder = async (req, res) => {
         });
 
         const estore = await Estore.findOne({
-          _id: ObjectId(estoreid),
+          _id: new ObjectId(estoreid),
         }).exec();
 
         const date1 = new Date(estore.raffleDate);
@@ -475,8 +475,8 @@ exports.updateOrderStatus = async (req, res) => {
     if (user) {
       const order = await Order.findOneAndUpdate(
         {
-          _id: ObjectId(orderid),
-          orderedBy: ObjectId(orderedBy),
+          _id: new ObjectId(orderid),
+          orderedBy: new ObjectId(orderedBy),
           estoreid: Object(estoreid),
         },
         {
@@ -490,7 +490,7 @@ exports.updateOrderStatus = async (req, res) => {
           order.products.forEach(async (prod) => {
             const result = await Product.findOneAndUpdate(
               {
-                _id: ObjectId(prod.product),
+                _id: new ObjectId(prod.product),
                 estoreid: Object(estoreid),
               },
               { $inc: { quantity: -prod.count, sold: prod.count } },
@@ -512,7 +512,7 @@ exports.updateOrderStatus = async (req, res) => {
 
               await Product.findOneAndUpdate(
                 {
-                  _id: ObjectId(prod.product),
+                  _id: new ObjectId(prod.product),
                   estoreid: Object(estoreid),
                 },
                 {
@@ -528,7 +528,7 @@ exports.updateOrderStatus = async (req, res) => {
         }
         if (orderType === "web" && order.orderStatus === "Completed") {
           const estore = await Estore.findOne({
-            _id: ObjectId(estoreid),
+            _id: new ObjectId(estoreid),
           }).exec();
 
           const date1 = new Date(estore.raffleDate);
@@ -557,7 +557,7 @@ exports.updateOrderStatus = async (req, res) => {
           order.products.forEach(async (prod) => {
             await Product.findOneAndUpdate(
               {
-                _id: ObjectId(prod.product),
+                _id: new ObjectId(prod.product),
                 estoreid: Object(estoreid),
               },
               { $inc: { quantity: prod.count, sold: -prod.count } },
@@ -590,7 +590,7 @@ exports.voidProducts = async (req, res) => {
       const newOrder = new Order({
         orderType: "void",
         products: products.map((prod) => ({
-          product: ObjectId(prod._id),
+          product: new ObjectId(prod._id),
           count: prod.quantity,
           supplierPrice: prod.supplierPrice,
           price: prod.price,
@@ -600,7 +600,7 @@ exports.voidProducts = async (req, res) => {
         createdBy: user._id,
         orderedBy: customer && customer._id ? customer._id : user._id,
         orderedName: customer.name || voidName || user.name,
-        estoreid: ObjectId(estoreid),
+        estoreid: new ObjectId(estoreid),
       });
 
       const order = await newOrder.save();
@@ -613,8 +613,8 @@ exports.voidProducts = async (req, res) => {
         for (let i = 0; i < products.length; i++) {
           await Product.findOneAndUpdate(
             {
-              _id: ObjectId(products[i]._id),
-              estoreid: ObjectId(estoreid),
+              _id: new ObjectId(products[i]._id),
+              estoreid: new ObjectId(estoreid),
             },
             {
               $inc: {
@@ -639,7 +639,7 @@ exports.deleteAdminOrder = async (req, res) => {
 
   try {
     const order = await Order.findOneAndDelete({
-      _id: ObjectId(orderid),
+      _id: new ObjectId(orderid),
       estoreid: Object(estoreid),
     });
     if (
@@ -651,7 +651,7 @@ exports.deleteAdminOrder = async (req, res) => {
         if (order.orderType === "void") {
           await Product.findOneAndUpdate(
             {
-              _id: ObjectId(prod.product),
+              _id: new ObjectId(prod.product),
               estoreid: Object(estoreid),
             },
             { $inc: { quantity: -prod.count, sold: prod.count } },
@@ -660,7 +660,7 @@ exports.deleteAdminOrder = async (req, res) => {
         } else {
           await Product.findOneAndUpdate(
             {
-              _id: ObjectId(prod.product),
+              _id: new ObjectId(prod.product),
               estoreid: Object(estoreid),
             },
             { $inc: { quantity: prod.count, sold: -prod.count } },
@@ -684,7 +684,7 @@ exports.deleteOrder = async (req, res) => {
     const user = await User.findOne({ email }).exec();
     if (user) {
       const order = await Order.findOneAndDelete({
-        _id: ObjectId(orderid),
+        _id: new ObjectId(orderid),
         orderedBy: user._id,
         estoreid: Object(estoreid),
       });

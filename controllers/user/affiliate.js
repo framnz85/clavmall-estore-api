@@ -54,7 +54,7 @@ exports.create = async (req, res) => {
   try {
     const { user, product, values } = req.body;
     const newAffiliate = await Affiliate(estoreid).collection.insertOne({
-      userid: ObjectId(user._id),
+      userid: new ObjectId(user._id),
       name: user.name,
       product,
       amount: values.withdrawAmount,
@@ -131,7 +131,7 @@ exports.prospectList = async (req, res) => {
     const { sortkey, sort, currentPage, pageSize } = req.body;
     const curPage = currentPage || 1;
 
-    const prospects = await Ogts.find({ refid: ObjectId(estoreid) })
+    const prospects = await Ogts.find({ refid: new ObjectId(estoreid) })
       .skip((curPage - 1) * pageSize)
       .sort({ [sortkey]: sort })
       .limit(pageSize)
