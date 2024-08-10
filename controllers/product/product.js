@@ -9,9 +9,9 @@ exports.create = async (req, res) => {
   try {
     req.body.slug = slugify(req.body.title.toString().toLowerCase());
     req.body.price = parseInt(req.body.price);
-    req.body.category = ObjectId(req.body.category);
+    req.body.category = new ObjectId(req.body.category);
     req.body.subcats = req.body.subcats.map((subcat) => ObjectId(subcat));
-    req.body.parent = ObjectId(req.body.parent);
+    req.body.parent = new ObjectId(req.body.parent);
     req.body.variants = req.body.variants.map((variant) => {
       return { ...variant, _id: new ObjectId() };
     });

@@ -191,9 +191,9 @@ exports.updatePassword = async (req, res) => {
 };
 
 exports.createEarning = async (req, res) => {
-  const owner = ObjectId(req.body.owner);
-  const customer = ObjectId(req.body.customer);
-  const product = ObjectId(req.body.product);
+  const owner = new ObjectId(req.body.owner);
+  const customer = new ObjectId(req.body.customer);
+  const product = new ObjectId(req.body.product);
   const productName = req.body.productName;
 
   try {

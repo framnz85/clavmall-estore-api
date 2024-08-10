@@ -65,8 +65,8 @@ exports.userCart = async (req, res) => {
 
   let cartTotal = 0;
   for (let i = 0; i < products.length; i++) {
-    products[i].product = ObjectId(products[i].product);
-    products[i].variant = ObjectId(products[i].variant);
+    products[i].product = new ObjectId(products[i].product);
+    products[i].variant = new ObjectId(products[i].variant);
     cartTotal = cartTotal + products[i].price * products[i].count;
   }
 

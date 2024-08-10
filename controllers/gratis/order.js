@@ -277,7 +277,7 @@ exports.updateCart = async (req, res) => {
       if (excessQuantity === 0 && remainingQuantity > 0) {
         let cartTotal = 0;
         for (let i = 0; i < products.length; i++) {
-          products[i].product = ObjectId(products[i].product);
+          products[i].product = new ObjectId(products[i].product);
           cartTotal = cartTotal + products[i].price * products[i].count;
         }
 

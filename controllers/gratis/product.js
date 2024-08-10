@@ -101,7 +101,7 @@ exports.itemsByBarcode = async (req, res) => {
 
 exports.loadInitProducts = async (req, res) => {
   const estoreidFrom = Object("613216389261e003d696cc65");
-  const estoreid = ObjectId(req.headers.estoreid);
+  const estoreid = new ObjectId(req.headers.estoreid);
   const count = req.params.count;
   const email = req.user.email;
 
@@ -163,7 +163,7 @@ exports.loadInitProducts = async (req, res) => {
 };
 
 exports.getWaitingProducts = async (req, res) => {
-  const estoreid = ObjectId(req.headers.estoreid);
+  const estoreid = new ObjectId(req.headers.estoreid);
   const email = req.user.email;
 
   try {
