@@ -1,0 +1,5 @@
+node_modules
+.env.env
+config/fbServiceAccountKey.json.json
+controllers/gratis/user.js
+.env
